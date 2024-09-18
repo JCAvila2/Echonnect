@@ -1,5 +1,14 @@
-<script setup lang="ts">
-import Navbar from './components/NavbarComponent.vue'
+<script lang="ts">
+import { defineComponent } from 'vue';
+import Navbar from './components/NavbarComponent.vue';
+import { RouterView } from 'vue-router';
+
+export default defineComponent({
+  components: {
+    Navbar,
+    RouterView,
+  },
+});
 </script>
 
 <template>

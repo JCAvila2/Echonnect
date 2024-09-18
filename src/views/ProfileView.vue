@@ -1,21 +1,24 @@
 <template>
   <div>
     <h1>TODO: Profile Component</h1>
-
-    <h1>Lista de Usuarios</h1>
-    <ul>
-      <li v-for="user in users" :key="user.id">{{ user.title }}</li>
-    </ul>
   </div>
+
+  <button @click="logout">Logout</button>
+
 </template>
 
 <script lang="ts">
-import { defineComponent, ref, onMounted } from 'vue';
+import { defineComponent, onMounted, ref } from 'vue';
 import { collection, getDocs, QuerySnapshot, DocumentData, orderBy, query } from 'firebase/firestore';
 import { db } from '../firebase';
+import { getAuth, signOut } from 'firebase/auth';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   setup() {
+    const auth = getAuth();
+    const router = useRouter();
+    const user = ref(null);
     const users = ref<DocumentData[]>([]);
 
     // Fetch users from Firestore
@@ -27,11 +30,22 @@ export default defineComponent({
       });
     };
 
+    const logout = () => {
+      signOut(auth)
+        .then(() => {
+          router.push('/login');
+          console.log('User signed out successfully');
+        })
+        .catch(error => {
+          console.log('Error signing out: ', error);
+        });
+    };
+
     onMounted(() => {
       fetchUsers();
     });
 
-    return { users };
+    return { users, user, logout };
   },
 });
 </script>
