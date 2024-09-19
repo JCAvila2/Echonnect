@@ -19,10 +19,7 @@ const router = createRouter({
     {
       path: '/search',
       name: 'search',
-      component: SearchView,
-      meta: {
-        requiresAuth: false
-      }
+      component: SearchView
     },
     {
       path: '/profile',
@@ -64,10 +61,17 @@ router.beforeEach((to, from, next) => {
   const authStore = useAuthStore();
 
   if (to.meta.requiresAuth && !authStore.user) {
-    next('/login'); // Redirect to login if not authenticated
+    // Redirect to login if not authenticated
+    next({
+      path: '/login',
+      query: { redirect: to.fullPath }, // Save the destination in the query
+    });
+  } else if ((to.path === '/login' || to.path === '/register') && authStore.user) {
+    next('/profile'); // Redirect to profile if authenticated
   } else {
     next(); // Proceed to the route
   }
+
 });
 
 export default router

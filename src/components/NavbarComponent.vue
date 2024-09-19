@@ -20,7 +20,8 @@
 
 <style>
 :root {
-  --header-height: 80px; /* Adjust according to the header height */
+  --header-height: 80px;
+  /* Adjust according to the header height */
 }
 
 header {
@@ -38,7 +39,6 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* max-width: 1200px; */ /* Adjust according to the header width */
   height: 100%;
 }
 
@@ -75,7 +75,8 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0px 50px; /* Adjust padding to control the clickable area */
+  padding: 0px 50px;
+  /* Adjust padding to control the clickable area */
   color: white;
   text-decoration: none;
   font-size: 18px;
@@ -88,10 +89,9 @@ header {
   background-color: gray;
 }
 
-
-/* Margin to the top of the page content to avoid overlapping */
-body {
-  margin-top: var(--header-height);
+/* Active link style */
+.navbar-links a.router-link-active {
+  color: black;
+  background-color: gray;
 }
-
 </style>

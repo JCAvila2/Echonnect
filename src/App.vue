@@ -8,6 +8,9 @@ export default defineComponent({
     Navbar,
     RouterView,
   },
+  setup() {
+    document.title = 'Echonnect';
+  },
 });
 </script>
 
@@ -18,3 +21,31 @@ export default defineComponent({
 
   <RouterView />
 </template>
+
+<style>
+:root {
+  --navbar-height: 80px;
+  /* add around +10px */
+  --color-text: #333;
+  --color-background: #181818;
+}
+
+#app {
+  margin: 0 0;
+  width: 100%;
+  height: calc(100vh - calc(var(--navbar-height) + 10px));
+  /* Margin to the top of the page content to avoid overlapping */
+}
+
+body {
+  background-color: var(--color-background);
+  margin-top: var(--header-height);
+  color: var(--color-text);
+  font-family: Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  text-rendering: optimizeLegibility;
+}
+
+a {
+  text-decoration: none;
+}
+</style>
