@@ -10,13 +10,28 @@
     <div class="navbar-links">
       <ul>
         <li> <router-link to="/search"> Search </router-link> </li>
-        <li> <router-link to="/profile"> Profile </router-link> </li>
-        <li> <router-link to="/upload"> Upload </router-link> </li>
-        <li> <router-link to="/settings"> Settings </router-link> </li>
+        <li v-if="uid"> <router-link to="/profile"> Profile </router-link> </li>
+        <li v-if="uid"> <router-link to="/upload"> Upload </router-link> </li>
+        <li v-if="uid"> <router-link to="/settings"> Settings </router-link> </li>
+        <li v-if="!uid"> <router-link to="/login"> Log In </router-link> </li>
+        <li v-if="!uid"> <router-link to="/register"> Register </router-link> </li>
       </ul>
     </div>
   </nav>
 </template>
+
+<script>
+import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+export default {
+  setup() {
+    const authStore = useAuthStore();
+    const uid = computed(() => authStore.user?.uid);
+    return { uid };
+  },
+};
+</script>
 
 <style>
 :root {

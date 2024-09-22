@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>TODO: Implement my user profile</h1>
+    <h1>TODO: Implement other users profile</h1>
     <div v-if="user">
       <h2>{{ user.username }}</h2>
       <p>{{ user.description }}</p>
@@ -8,26 +8,22 @@
 
   </div>
 
-  <button @click="logout"> Logout </button>
+  <button @click="follow">Follow</button>
 
 </template>
 
 <script lang="ts">
-import { computed, defineComponent } from 'vue';
+import { defineComponent } from 'vue';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { db } from '../firebase';
-import { getAuth, signOut } from 'firebase/auth';
-import { useAuthStore } from '../stores/auth';
+import { getAuth } from 'firebase/auth';
 
 export default defineComponent({
-  setup() {
-    document.title = 'Profile';
-    const authStore = useAuthStore();
-    const uid = computed(() => authStore.user?.uid);
-
-    return { 
-      uid,
-    };
+  props: {
+    uid: {
+      type: String,
+      required: true,
+    },
   },
   mounted() {
     this.fetchUser();
@@ -38,24 +34,19 @@ export default defineComponent({
     };
   },
   methods: {
-    logout() {
+    follow() {
       const auth = getAuth();
-      signOut(auth)
-        .then(() => {
-          this.$router.push('/login');
-          console.log('User signed out successfully');
-        })
-        .catch(error => {
-          console.log('Error signing out: ', error);
-        });
+      console.log('Following user...', auth);
+      // TODO: Implement follow functionality
     },
-    async fetchUser() {    
+    async fetchUser() {
       const userDoc = doc(collection(db, 'users'), this.uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
         this.user = { id: docSnapshot.id, ...docSnapshot.data() };
+        document.title = this.user.username ?? 'Profiles';
       } else {
-        console.log('User not found'); 
+        console.log('User not found');
         // TODO: Redirect to 404 page
       }
     },

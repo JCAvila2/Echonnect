@@ -24,51 +24,43 @@
 </template>
 
 <script lang="ts">
-import { ref } from 'vue';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
-import { useRouter } from 'vue-router';
 
 export default {
   setup() {
     document.title = 'Register';
-    const router = useRouter();
-    const username = ref('');
-    const email = ref('');
-    const password = ref('');
-    const errorMessage = ref('');
-
-    const register = () => {
+  },
+  data() {
+    return {
+      username: '',
+      email: '',
+      password: '',
+      errorMessage: '',
+    };
+  },
+  methods: {
+    register() {
       const auth = getAuth();
-      console.log(email.value);
-      createUserWithEmailAndPassword(auth, email.value, password.value)
+      createUserWithEmailAndPassword(auth, this.email, this.password)
         .then(() => {
-          router.push('/profile');
+          this.$router.push('/profile');
         })
         .catch(error => {
           console.log(error.code);
           switch (error.code) {
             case 'auth/email-already-in-use':
-              errorMessage.value = 'Email already in use';
+              this.errorMessage = 'Email already in use';
               break;
             case 'auth/weak-password':
-              errorMessage.value = 'Weak password';
+              this.errorMessage = 'Weak password';
               break;
             default:
-              errorMessage.value = 'Invalid Email or Password';
+              this.errorMessage = 'Invalid Email or Password';
               break;
           }
         });
-    };
-
-    return {
-      username,
-      email,
-      password,
-      Message: errorMessage,
-      MessageColor: 'red',
-      register,
-    };
-  },
+    },
+  }
 };
 </script>
 

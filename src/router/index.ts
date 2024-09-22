@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory } from 'vue-router';
 import HomeView from '@/views/HomeView.vue';
 import SearchView from '@/views/SearchView.vue';
 import ProfileView from '@/views/ProfileView.vue';
+import watchProfileView from '@/views/WatchProfileView.vue';
 import UploadView from '@/views/UploadView.vue';
 import SettingsView from '@/views/SettingsView.vue';
 import LoginView from '@/views/LoginView.vue';
@@ -20,6 +21,19 @@ const router = createRouter({
       path: '/search',
       name: 'search',
       component: SearchView
+    },
+    {
+      path: '/profile/:uid',
+      name: 'watchProfile',
+      component: watchProfileView,
+      props: true,
+      beforeEnter: (to, from, next) => {
+        if (to.params.uid === useAuthStore().user?.uid) {
+          next({ name: 'profile' });
+        } else {
+          next();
+        }
+      }
     },
     {
       path: '/profile',
