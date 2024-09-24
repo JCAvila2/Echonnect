@@ -2,67 +2,66 @@
   <div class="login_form">
     <h1>Log in to your Account</h1>
     <p v-if="errorMessage" style="color: red; text-align: center;">{{ errorMessage }}</p>
-    <div class="input_area">
-      <div class="txt_field">
-        <input v-model="email" required />
-        <label> Email </label>
+    <form @submit.prevent="login">
+      <div class="input_area">
+        <div class="txt_field">
+          <input v-model="email" required />
+          <label> Email </label>
+        </div>
+        <div class="txt_field">
+          <input v-model="password" type="password" required />
+          <label> Password </label>
+        </div>
+        <button type="submit" class="login_button"> Log In </button>
       </div>
-      <div class="txt_field">
-        <input v-model="password" type="password" required />
-        <label> Password </label>
-      </div>
-      <button class="login_button" @click="login()"> Log In </button>
-      <div class="register">
-        Did you forget the password? <div @click="changePassword" class="changePassword"> Change Password </div>
-      </div>
-      <div class="register">
-        Don't have an account? <router-link to="/register"> Register </router-link>
-      </div>
+    </form>
+    <div class="register">
+      Did you forget the password? <div @click="changePassword" class="changePassword"> Change Password </div>
+    </div>
+    <div class="register">
+      Don't have an account? <router-link to="/register"> Register </router-link>
     </div>
   </div>
 </template>
 
+
 <script lang="ts">
-import { ref } from 'vue';
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
-import { useRouter } from 'vue-router';
 
 export default {
   setup() {
     document.title = 'Login';
-    const router = useRouter();
-    const email = ref('');
-    const password = ref('');
-    const errorMessage = ref('');
-
-    const login = () => {
+  },
+  data() {
+    return {
+      email: '',
+      password: '',
+      errorMessage: '',
+    };
+  },
+  methods: {
+    login() {
       const auth = getAuth();
-
-      signInWithEmailAndPassword(auth, email.value, password.value)
+      signInWithEmailAndPassword(auth, this.email, this.password)
         .then(() => {
-          // Redirect to the saved route or /search
-          const redirectTo = Array.isArray(router.currentRoute.value.query.redirect)
-            ? router.currentRoute.value.query.redirect[0]
-            : router.currentRoute.value.query.redirect || '/search';
-          router.push(redirectTo);
+          this.$router.push('/profile');
         })
         .catch(error => {
           console.log(error.code);
           switch (error.code) {
             case 'auth/user-not-found':
-              errorMessage.value = 'Incorrect Email';
+              this.errorMessage = 'Incorrect Email';
               break;
             case 'auth/wrong-password':
-              errorMessage.value = 'Incorrect Password';
+              this.errorMessage = 'Incorrect Password';
               break;
             default:
-              errorMessage.value = 'Invalid Email or Password';
+              this.errorMessage = 'Invalid Email or Password';
               break;
           }
         });
-    };
-
-    const changePassword = () => {
+    },
+    changePassword() {
       const label = 'Enter your email';
       const response = 'An email has been sent to change your password, change it and try again';
 
@@ -77,16 +76,8 @@ export default {
             console.log(error);
           });
       }
-    };
-
-    return {
-      email,
-      password,
-      login,
-      changePassword,
-      errorMessage,
-    };
-  },
+    },
+  }
 };
 </script>
 

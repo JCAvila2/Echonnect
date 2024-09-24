@@ -1,27 +1,30 @@
 <template>
   <div class="login_form">
     <h1>Register</h1>
-    <p v-if="Message" style="color: red; text-align: center">{{ Message }}</p>
-    <div class="input_area">
-      <div class="txt_field">
-        <input v-model="username" required />
-        <label> Username </label>
+    <p v-if="errorMessage" style="color: red; text-align: center" v-html="errorMessage"></p>
+    <form @submit.prevent="register">
+      <div class="input_area">
+        <div class="txt_field">
+          <input v-model="username" required />
+          <label> Username </label>
+        </div>
+        <div class="txt_field">
+          <input v-model="email" required @keyup="validateEmail" />
+          <label> Email </label>
+        </div>
+        <div class="txt_field">
+          <input v-model="password" type="password" required @keyup="validatePassword" />
+          <label> Password </label>
+        </div>
+        <button type="submit" class="login_button"> Register </button>
       </div>
-      <div class="txt_field">
-        <input v-model="email" required />
-        <label> Email </label>
-      </div>
-      <div class="txt_field">
-        <input v-model="password" type="password" required />
-        <label> Password </label>
-      </div>
-      <button class="login_button" @click="register()"> Request </button>
-      <div class="register">
-        Already have an account? <router-link to="/login"> Log In </router-link>
-      </div>
+    </form>
+    <div class="register">
+      Already have an account? <router-link to="/login"> Log In </router-link>
     </div>
   </div>
 </template>
+
 
 <script lang="ts">
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
@@ -39,6 +42,48 @@ export default {
     };
   },
   methods: {
+    validateEmail() {
+      const regex = /\S+@\S+\.\S+/;
+      const isValid = regex.test(this.email);
+      if (!isValid) {
+        this.errorMessage = 'Invalid Email';
+      } else {
+        this.errorMessage = '';
+      }
+    },
+    validatePassword() {
+      if (this.password.length === 0) {
+        this.errorMessage = '';
+        return;
+      }
+
+      const minLength = 8;
+      const hasLowercase = /[a-z]/.test(this.password);
+      const hasUppercase = /[A-Z]/.test(this.password);
+      const hasDigit = /\d/.test(this.password);
+      const isLongEnough = this.password.length >= minLength;
+
+      let errorMessages = [];
+
+      if (!isLongEnough) {
+        errorMessages.push(`- At least ${minLength} characters long`);
+      }
+      if (!hasLowercase) {
+        errorMessages.push(`- At least 1 lowercase letter`);
+      }
+      if (!hasUppercase) {
+        errorMessages.push(`- At least 1 uppercase letter`);
+      }
+      if (!hasDigit) {
+        errorMessages.push(`- At least 1 number`);
+      }
+
+      if (errorMessages.length > 0) {
+        this.errorMessage = `Weak password, must have:<br>` + errorMessages.join('<br>');
+      } else {
+        this.errorMessage = '';
+      }
+    },
     register() {
       const auth = getAuth();
       createUserWithEmailAndPassword(auth, this.email, this.password)
