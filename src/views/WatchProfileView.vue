@@ -15,7 +15,7 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '@/firebase';
 import { getAuth } from 'firebase/auth';
 
 export default defineComponent({

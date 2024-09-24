@@ -15,9 +15,9 @@
 <script lang="ts">
 import { computed, defineComponent } from 'vue';
 import { collection, doc, getDoc } from 'firebase/firestore';
-import { db } from '../firebase';
+import { db } from '@/firebase';
 import { getAuth, signOut } from 'firebase/auth';
-import { useAuthStore } from '../stores/auth';
+import { useAuthStore } from '@/stores/auth';
 
 export default defineComponent({
   setup() {
