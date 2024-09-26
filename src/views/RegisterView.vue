@@ -28,6 +28,7 @@
 
 <script lang="ts">
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
+import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 
 export default {
   setup() {
@@ -54,7 +55,7 @@ export default {
     validatePassword() {
       if (this.password.length === 0) {
         this.errorMessage = '';
-        return;
+        return false;
       }
 
       const minLength = 8;
@@ -80,14 +81,31 @@ export default {
 
       if (errorMessages.length > 0) {
         this.errorMessage = `Weak password, must have:<br>` + errorMessages.join('<br>');
+        return false;
       } else {
         this.errorMessage = '';
+        return true;
       }
     },
     register() {
+      if (!this.validatePassword()) {
+        return;
+      }
       const auth = getAuth();
+      const db = getFirestore();
+
       createUserWithEmailAndPassword(auth, this.email, this.password)
-        .then(() => {
+        .then(async (userCredential) => {
+          const user = userCredential.user;
+
+          await setDoc(doc(db, "users", user.uid), {
+            email: this.email,
+            username: this.username,
+            biography: '',
+            profilePicture: null,
+            createdAt: serverTimestamp()
+          });
+
           this.$router.push('/profile');
         })
         .catch(error => {
