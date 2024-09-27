@@ -27,7 +27,7 @@
 <script lang="ts">
 import { computed, defineComponent, ref } from 'vue';
 import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
-import { db } from '@/firebase';
+import { db } from '@/firebase/';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthStore } from '@/stores/auth';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
