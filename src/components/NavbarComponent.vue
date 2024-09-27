@@ -10,17 +10,33 @@
     <div class="navbar-links">
       <ul>
         <li> <router-link to="/search"> Search </router-link> </li>
-        <li> <router-link to="/profile"> Profile </router-link> </li>
-        <li> <router-link to="/upload"> Upload </router-link> </li>
-        <li> <router-link to="/settings"> Settings </router-link> </li>
+        <li v-if="uid"> <router-link to="/profile"> Profile </router-link> </li>
+        <li v-if="uid"> <router-link to="/upload"> Upload </router-link> </li>
+        <li v-if="uid"> <router-link to="/settings"> Settings </router-link> </li>
+        <li v-if="!uid"> <router-link to="/login"> Log In </router-link> </li>
+        <li v-if="!uid"> <router-link to="/register"> Register </router-link> </li>
       </ul>
     </div>
   </nav>
 </template>
 
+<script>
+import { computed } from 'vue';
+import { useAuthStore } from '@/stores/auth';
+
+export default {
+  setup() {
+    const authStore = useAuthStore();
+    const uid = computed(() => authStore.user?.uid);
+    return { uid };
+  },
+};
+</script>
+
 <style>
 :root {
-  --header-height: 80px; /* Adjust according to the header height */
+  --header-height: 80px;
+  /* Adjust according to the header height */
 }
 
 header {
@@ -38,7 +54,6 @@ header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* max-width: 1200px; */ /* Adjust according to the header width */
   height: 100%;
 }
 
@@ -75,7 +90,8 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0px 50px; /* Adjust padding to control the clickable area */
+  padding: 0px 50px;
+  /* Adjust padding to control the clickable area */
   color: white;
   text-decoration: none;
   font-size: 18px;
@@ -88,10 +104,9 @@ header {
   background-color: gray;
 }
 
-
-/* Margin to the top of the page content to avoid overlapping */
-body {
-  margin-top: var(--header-height);
+/* Active link style */
+.navbar-links a.router-link-active {
+  color: black;
+  background-color: gray;
 }
-
 </style>
