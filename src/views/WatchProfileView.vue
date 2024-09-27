@@ -1,15 +1,21 @@
 <template>
-  <div>
-    <h1>TODO: Implement other users profile</h1>
+  <div class="profile-container">
     <div v-if="user">
-      <h2>{{ user.username }}</h2>
-      <p>{{ user.description }}</p>
+      <div class="profile-header">
+        
+        <!-- Profile Picture -->
+        <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+      
+        <h2>{{ user.username }}</h2>
+        <p>{{ user.biography }}</p>
+      </div>
+      <div class="user-details">
+        <p><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+      </div>
     </div>
 
+    <button @click="follow" class="follow-button">Follow</button>
   </div>
-
-  <button @click="follow">Follow</button>
-
 </template>
 
 <script lang="ts">
@@ -50,6 +56,57 @@ export default defineComponent({
         // TODO: Redirect to 404 page
       }
     },
-  }
+    formatDate(timestamp) {
+      if (timestamp) {
+        const date = timestamp.toDate();
+        return date.toLocaleDateString();
+      }
+      return '';
+    },
+  },
 });
 </script>
+
+<style scoped>
+.profile-container {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+.profile-header {
+  margin-bottom: 20px;
+  position: relative;
+}
+
+.profile-picture-container {
+  position: relative;
+  display: inline-block;
+}
+
+.profile-picture {
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+  object-fit: cover;
+  cursor: pointer;
+}
+
+.user-details {
+  margin: 20px 0;
+}
+
+.follow-button {
+  padding: 10px 20px;
+  background-color: gray;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.follow-button:hover {
+  background-color: blue;
+}
+</style>
