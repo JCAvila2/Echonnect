@@ -1,6 +1,143 @@
 <template>
-  <h1>Upload component</h1>
+  <div class="upload-container">
+    <h1>Upload Audio</h1>
+
+    <input type="file" @change="handleAudioFileChange" accept="audio/*" />
+    <label for="file">Choose an audio</label>
+
+    <input type="file" @change="handleImageFileChange" accept="image/*" />
+    <label for="file">Choose an image</label>
+    
+    <input v-model="title" type="text" placeholder="Title" />
+    <textarea v-model="description" placeholder="Description"></textarea>
+    <input v-model="tagsInput" type="text" placeholder="Tags (comma-separated)" @blur="handleTags" />
+
+    <button :disabled="!audioFile || isUploading" @click="uploadAudio">Upload Audio</button>
+
+    <div v-if="isUploading">Uploading...</div>
+    <div v-if="uploadSuccess">Upload successful!</div>
+    <div v-if="uploadError">{{ uploadError }}</div>
+  </div>
 </template>
 
-<script setup lang="ts">
+<script lang="ts">
+import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { db } from '@/firebase';
+
+export default {
+  setup() {
+    document.title = 'Upload Audio';
+  },
+  data() {
+    return {
+      title: '',
+      description: '',
+      tags: [],
+      tagsInput: '',
+      audioFile: null,
+      imageFile: null,
+      isUploading: false,
+      uploadSuccess: false,
+      uploadError: null,
+    };
+  },
+  methods: {
+    async uploadAudio() {
+      if (!this.audioFile || !this.title || !this.description) {
+        alert('Please provide a file, title, and description.');
+        return;
+      }
+
+      this.isUploading = true;
+      this.uploadSuccess = false;
+      this.uploadError = null;
+
+      try {
+        const audioDoc = await addDoc(collection(db, 'audios'), {
+          title: this.title,
+          description: this.description,
+          tags: this.tags,
+          createdAt: new Date(),
+          ratings: [],
+          averageRating: 0,
+          url: '',
+          reproductions: 0,
+        });
+        const generatedId = audioDoc.id;
+
+        // Upload audio file to firebase storage
+        const audioStorage = getStorage();
+        const audioStoragePath = `audios/${generatedId}`;
+        const fileRef = storageRef(audioStorage, audioStoragePath);
+        const audioBytes = await uploadBytes(fileRef, this.audioFile);
+        const audioDownloadURL = await getDownloadURL(audioBytes.ref);
+
+        // Upload image to firebase storage
+        const imageStoragePath = `images/${generatedId}`;
+        const imageRef = storageRef(audioStorage, imageStoragePath);
+        const imageBytes = await uploadBytes(imageRef, this.imageFile);
+        const imageDownloadURL = await getDownloadURL(imageBytes.ref);
+        
+        await updateDoc(doc(db, 'audios', generatedId), {
+          audioUrl: audioDownloadURL,
+          imageUrl: imageDownloadURL,
+        });
+        this.uploadSuccess = true;
+      } catch (error) {
+        console.error('Error uploading audio:', error);
+        this.uploadError = 'Failed to upload audio.';
+      } finally {
+        this.isUploading = false;
+      }
+    },
+
+    handleTags() {
+      this.tags = this.tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
+    },
+
+    handleAudioFileChange(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.audioFile = target.files[0];
+      }
+    },
+
+    handleImageFileChange(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.imageFile = target.files[0];
+      }
+    },
+  }
+};
 </script>
+
+<style scoped>
+.upload-container {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
+
+input, textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+button {
+  padding: 10px 20px;
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+button:disabled {
+  background-color: #ccc;
+  cursor: not-allowed;
+}
+</style>
