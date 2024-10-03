@@ -1,4 +1,4 @@
-# edu-echo
+# Echonnect
 
 This template should help get you started developing with Vue 3 in Vite.
 
@@ -24,6 +24,10 @@ npm install
 
 ```sh
 npm run dev
+```
+or
+```sh
+npm run sd
 ```
 
 ### Type-Check, Compile and Minify for Production
