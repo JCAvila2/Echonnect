@@ -2,13 +2,17 @@
   <div class="upload-container">
     <h1>Upload Audio</h1>
 
-    <input type="file" @change="handleFileChange" accept="audio/*" />
+    <input type="file" @change="handleAudioFileChange" accept="audio/*" />
+    <label for="file">Choose an audio</label>
+
+    <input type="file" @change="handleImageFileChange" accept="image/*" />
+    <label for="file">Choose an image</label>
     
     <input v-model="title" type="text" placeholder="Title" />
     <textarea v-model="description" placeholder="Description"></textarea>
     <input v-model="tagsInput" type="text" placeholder="Tags (comma-separated)" @blur="handleTags" />
 
-    <button :disabled="!file || isUploading" @click="uploadAudio">Upload Audio</button>
+    <button :disabled="!audioFile || isUploading" @click="uploadAudio">Upload Audio</button>
 
     <div v-if="isUploading">Uploading...</div>
     <div v-if="uploadSuccess">Upload successful!</div>
@@ -27,11 +31,12 @@ export default {
   },
   data() {
     return {
-      file: null,
       title: '',
       description: '',
       tags: [],
       tagsInput: '',
+      audioFile: null,
+      imageFile: null,
       isUploading: false,
       uploadSuccess: false,
       uploadError: null,
@@ -39,7 +44,7 @@ export default {
   },
   methods: {
     async uploadAudio() {
-      if (!this.file || !this.title || !this.description) {
+      if (!this.audioFile || !this.title || !this.description) {
         alert('Please provide a file, title, and description.');
         return;
       }
@@ -56,17 +61,27 @@ export default {
           createdAt: new Date(),
           ratings: [],
           averageRating: 0,
-          url: ''
+          url: '',
+          reproductions: 0,
         });
         const generatedId = audioDoc.id;
-        const storage = getStorage();
-        const storagePath = `audios/${generatedId}`;
-        const fileRef = storageRef(storage, storagePath);
-        const snapshot = await uploadBytes(fileRef, this.file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
 
+        // Upload audio file to firebase storage
+        const audioStorage = getStorage();
+        const audioStoragePath = `audios/${generatedId}`;
+        const fileRef = storageRef(audioStorage, audioStoragePath);
+        const audioBytes = await uploadBytes(fileRef, this.audioFile);
+        const audioDownloadURL = await getDownloadURL(audioBytes.ref);
+
+        // Upload image to firebase storage
+        const imageStoragePath = `images/${generatedId}`;
+        const imageRef = storageRef(audioStorage, imageStoragePath);
+        const imageBytes = await uploadBytes(imageRef, this.imageFile);
+        const imageDownloadURL = await getDownloadURL(imageBytes.ref);
+        
         await updateDoc(doc(db, 'audios', generatedId), {
-          url: downloadURL,
+          audioUrl: audioDownloadURL,
+          imageUrl: imageDownloadURL,
         });
         this.uploadSuccess = true;
       } catch (error) {
@@ -81,10 +96,17 @@ export default {
       this.tags = this.tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
     },
 
-    handleFileChange(event: Event) {
+    handleAudioFileChange(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
-        this.file = target.files[0];
+        this.audioFile = target.files[0];
+      }
+    },
+
+    handleImageFileChange(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.imageFile = target.files[0];
       }
     },
   }

@@ -8,6 +8,7 @@ import SettingsView from '@/views/SettingsView.vue';
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '@/views/RegisterView.vue';
 import { useAuthStore } from '@/stores/auth';
+import AudioView from '@/views/AudioView.vue';
 
 const router = createRouter({
   history: createWebHistory(),
@@ -50,6 +51,12 @@ const router = createRouter({
       meta: {
         requiresAuth: true
       }
+    },
+    {
+      path: '/audio/:id',
+      name: 'audio',
+      component: AudioView,
+      props: true,
     },
     {
       path: '/settings',
