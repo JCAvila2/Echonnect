@@ -61,7 +61,6 @@ export default {
           createdAt: new Date(),
           ratings: [],
           averageRating: 0,
-          url: '',
           reproductions: 0,
         });
         const generatedId = audioDoc.id;
