@@ -13,7 +13,7 @@
           <img v-else src="" alt="Default Image" class="audio-image" /> <!-- TODO: add default image -->
         </td>
         <td>{{ item.title }}</td>
-        <td>{{ item.author }}</td> <!-- TODO: get author connected with firebase -->
+        <td><span @click.stop="watchProfile(item.uid)" class="author-item"> {{ item.author }} </span></td>
         <td>{{ item.reproductions }}</td>
         <td>{{ item.tags }}</td>
       </tr>
@@ -81,17 +81,24 @@ export default {
 
 <style scoped>
 .custom-table {
-  background-color: gray; /* background color of the table */
+  background-color: transparent; /* background color of the table */
+  color: white; /* color of the text in the table */
 }
 
 .custom-item {
-  background-color: orange; /* background color of the rows */
+
 }
 .custom-item:hover {
-  background-color: blue; /* background color of the rows when hovered */
+  background-color: gray;
   cursor: pointer;
 }
 
+.author-item {
+  color: red;
+}
+.author-item:hover {
+  color: green;
+}
 
 .audio-image {
   width: 50px;
