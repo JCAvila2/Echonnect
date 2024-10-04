@@ -22,8 +22,9 @@
 
 <script lang="ts">
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { collection, addDoc, doc, updateDoc } from 'firebase/firestore';
+import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
+import { useAuthStore } from '@/stores/auth';
 
 export default {
   setup() {
@@ -53,14 +54,20 @@ export default {
       this.uploadSuccess = false;
       this.uploadError = null;
 
+      // Get author info
+      const authStore = useAuthStore();
+      const userDoc = await getDoc(doc(db, 'users', authStore.user.uid));
+      const userData = userDoc.data();
+
       try {
         const audioDoc = await addDoc(collection(db, 'audios'), {
+          uid: authStore.user.uid,
+          author: userData.username,
           title: this.title,
           description: this.description,
           tags: this.tags,
           createdAt: new Date(),
           ratings: [],
-          averageRating: 0,
           reproductions: 0,
         });
         const generatedId = audioDoc.id;

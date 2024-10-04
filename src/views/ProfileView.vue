@@ -31,6 +31,7 @@ import { db } from '@/firebase/';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthStore } from '@/stores/auth';
 import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
 
@@ -47,6 +48,7 @@ export default defineComponent({
       defaultProfilePicture,
       file,
       isUploading,
+      formatDate,
     };
   },
   mounted() {
@@ -78,13 +80,13 @@ export default defineComponent({
         // TODO: Redirect to 404 page
       }
     },
-    formatDate(timestamp) {
-      if (timestamp) {
-        const date = timestamp.toDate();
-        return date.toLocaleDateString();
-      }
-      return '';
-    },
+    // formatDate(timestamp) {
+    //   if (timestamp) {
+    //     const date = timestamp.toDate();
+    //     return date.toLocaleDateString();
+    //   }
+    //   return '';
+    // },
 
     handleFileChange(event: Event) {
       const target = event.target as HTMLInputElement;
