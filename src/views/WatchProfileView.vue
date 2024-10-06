@@ -16,6 +16,9 @@
 
     <button @click="follow" class="follow-button">Follow</button>
   </div>
+
+  <UserAudiosTable :uid="uid"/>
+
 </template>
 
 <script lang="ts">
@@ -23,6 +26,9 @@ import { defineComponent } from 'vue';
 import { collection, doc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase/';
 import { getAuth } from 'firebase/auth';
+import UserAudiosTable from '@/components/UserAudiosTable.vue';
+// @ts-ignore
+import defaultProfilePicture from '@/assets/default-profile.png';
 
 export default defineComponent({
   props: {
@@ -31,12 +37,16 @@ export default defineComponent({
       required: true,
     },
   },
+  components: {
+    UserAudiosTable,
+  },
   mounted() {
     this.fetchUser();
   },
   data() {
     return {
       user: null,
+      defaultProfilePicture,
     };
   },
   methods: {

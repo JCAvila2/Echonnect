@@ -1,16 +1,10 @@
 <template>
   <div class="search-container">
-    <v-text-field v-model="search" label="What do you want to hear?" prepend-inner-icon="mdi-magnify" single-line
+    <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" single-line
       hide-details class="mb-4" theme="dark"></v-text-field>
 
-    <v-data-table 
-      :headers="headers" 
-      :items="listOfAudios" 
-      :search="search" 
-      :items-per-page="5" 
-      class="custom-table"
-      theme="dark"
-      >
+    <v-data-table :headers="headers" :items="listOfAudios" :search="search" :items-per-page="5" class="custom-table"
+      theme="dark">
 
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -18,7 +12,7 @@
         <font-awesome-icon icon="far fa-clock" class="icons" />
       </template>
       <!-- eslint-disable-next-line vue/valid-v-slot -->
-      <template v-slot:header.createdAt> 
+      <template v-slot:header.createdAt>
         <font-awesome-icon icon="far fa-calendar" class="icons" />
       </template>
 
@@ -31,9 +25,6 @@
             </v-avatar>
           </td>
           <td>{{ item.title }}</td>
-          <td>
-            <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }} </span>
-          </td>
           <td>{{ formatDuration(item.duration) }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
           <td>{{ calculateScore(item.ratings) }}</td>
@@ -46,7 +37,7 @@
 </template>
 
 <script lang="ts">
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { calculateScore } from '@/utils/calculateScore';
@@ -54,9 +45,14 @@ import { formatDate } from '@/utils/formatDate';
 import { formatDuration } from '@/utils/formatDuration';
 
 export default {
+  props: {
+    uid: {
+      type: String,
+      required: true,
+    },
+  },
   setup() {
     const router = useRouter();
-    document.title = 'Search';
 
     return {
       router,
@@ -69,7 +65,6 @@ export default {
     const headers = [
       { title: '', value: 'imageUrl', sortable: false, width: '50px' },
       { title: 'Title', value: 'title', sortable: true },
-      { title: 'Author', value: 'author', sortable: true },
       { value: 'duration', sortable: true }, // Custom slot
       { value: 'createdAt', sortable: true }, // Custom slot
       { title: 'Score', value: 'score' },
@@ -94,7 +89,9 @@ export default {
   },
   methods: {
     async getAudios() {
-      const audios = await getDocs(collection(db, 'audios'));
+      // Get all audios from an specific user
+      const audiosQuery = query(collection(db, 'audios'), where('uid', '==', this.uid));
+      const audios = await getDocs(audiosQuery);
       const audioPromises = [];
 
       audios.forEach((audio) => {
@@ -122,10 +119,6 @@ export default {
       });
     },
 
-    // Redirect functions
-    watchProfile(uid: string) {
-      this.router.push(`/profile/${uid}`);
-    },
     HearAudio(audioId: string) {
       this.router.push(`/audio/${audioId}`);
     },
