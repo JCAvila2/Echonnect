@@ -25,7 +25,7 @@
 						</v-avatar>
 					</td>
 					<td>{{ item.title }}</td>
-					<td>{{ formatDuration(item.duration) }}</td>
+					<td>{{ item.duration ?? '-:--' }}</td>
 					<td>{{ formatDate(item.createdAt) }}</td>
 					<td>{{ calculateScore(item.ratings) }}</td>
 					<td>{{ item.reproductions }}</td>
@@ -54,7 +54,6 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { calculateScore } from '@/utils/calculateScore';
 import { formatDate } from '@/utils/formatDate';
-import { formatDuration } from '@/utils/formatDuration';
 import { deleteObject, getStorage, ref as storageRef } from 'firebase/storage';
 
 export default {
@@ -71,7 +70,6 @@ export default {
 			router,
 			calculateScore,
 			formatDate,
-			formatDuration,
 		};
 	},
 	data() {
@@ -111,18 +109,12 @@ export default {
 			audios.forEach((audio) => {
 				const audioData = {
 					id: audio.id,
-					duration: 0,
-					audioUrl: audio.data().audioUrl,
 					...audio.data(),
 				};
-
-				audioPromises.push(this.getAudioDuration(audioData.audioUrl).then((duration) => {
-					audioData.duration = duration;
-					return audioData;
-				}));
+				audioPromises.push(audioData);
 			});
 
-			this.listOfAudios = await Promise.all(audioPromises);
+			this.listOfAudios = audioPromises;
 		},
 		editAudio(audioId: string) {
 			// TODO: Implement edit audio
@@ -147,17 +139,6 @@ export default {
 			
 			console.log(audioId, 'deleted successfully');
 		},
-
-
-		getAudioDuration(url) {
-			return new Promise((resolve) => {
-				const audio = new Audio(url);
-				audio.onloadedmetadata = () => {
-					resolve(audio.duration);
-				};
-			});
-		},
-
 		HearAudio(audioId: string) {
 			this.router.push(`/audio/${audioId}`);
 		},
@@ -214,6 +195,7 @@ export default {
 .actions-icons-edit {
 	margin-right: 30px;
 }
+
 .actions-icons-edit {
 	margin-top: auto;
 	margin-bottom: auto;
@@ -226,5 +208,4 @@ export default {
 .actions-icons-delete:hover {
 	color: #f44336;
 }
-
 </style>

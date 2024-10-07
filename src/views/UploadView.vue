@@ -12,7 +12,7 @@
     <textarea v-model="description" placeholder="Description"></textarea>
     <input v-model="tagsInput" type="text" placeholder="Tags (comma-separated)" @blur="handleTags" />
 
-    <button :disabled="!audioFile || isUploading" @click="uploadAudio">Upload Audio</button>
+    <button :disabled="!audioFile || isUploading || !imageFile" @click="uploadAudio">Upload Audio</button>
 
     <div v-if="isUploading">Uploading...</div>
     <div v-if="uploadSuccess">Upload successful!</div>
@@ -41,12 +41,13 @@ export default {
       isUploading: false,
       uploadSuccess: false,
       uploadError: null,
+      audioDuration: '',
     };
   },
   methods: {
     async uploadAudio() {
-      if (!this.audioFile || !this.title || !this.description) {
-        alert('Please provide a file, title, and description.');
+      if (!this.audioFile || !this.imageFile || !this.title || !this.description) {
+        alert('Please provide an audio file, audio image, title, and description.');
         return;
       }
 
@@ -54,41 +55,46 @@ export default {
       this.uploadSuccess = false;
       this.uploadError = null;
 
-      // Get author info
-      const authStore = useAuthStore();
-      const userDoc = await getDoc(doc(db, 'users', authStore.user.uid));
-      const userData = userDoc.data();
-
       try {
+        // Get author info
+        const authStore = useAuthStore();
+        const userDoc = await getDoc(doc(db, 'users', authStore.user.uid));
+        const userData = userDoc.data();
+
+        // Add audio metadata to Firestore
         const audioDoc = await addDoc(collection(db, 'audios'), {
           uid: authStore.user.uid,
           author: userData.username,
           title: this.title,
           description: this.description,
           tags: this.tags,
+          duration: this.audioDuration,
           createdAt: new Date(),
           ratings: [],
           reproductions: 0,
         });
+
         const generatedId = audioDoc.id;
 
-        // Upload audio file to firebase storage
+        // Upload audio file to Firebase Storage
         const audioStorage = getStorage();
         const audioStoragePath = `audios/${generatedId}`;
         const fileRef = storageRef(audioStorage, audioStoragePath);
         const audioBytes = await uploadBytes(fileRef, this.audioFile);
         const audioDownloadURL = await getDownloadURL(audioBytes.ref);
 
-        // Upload image to firebase storage
+        // Upload image to Firebase Storage
         const imageStoragePath = `images/${generatedId}`;
         const imageRef = storageRef(audioStorage, imageStoragePath);
         const imageBytes = await uploadBytes(imageRef, this.imageFile);
         const imageDownloadURL = await getDownloadURL(imageBytes.ref);
         
+        // Update Firestore with the URLs
         await updateDoc(doc(db, 'audios', generatedId), {
           audioUrl: audioDownloadURL,
           imageUrl: imageDownloadURL,
         });
+
         this.uploadSuccess = true;
       } catch (error) {
         console.error('Error uploading audio:', error);
@@ -101,18 +107,27 @@ export default {
     handleTags() {
       this.tags = this.tagsInput.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0);
     },
-
-    handleAudioFileChange(event: Event) {
-      const target = event.target as HTMLInputElement;
-      if (target.files && target.files[0]) {
-        this.audioFile = target.files[0];
-      }
-    },
-
     handleImageFileChange(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
         this.imageFile = target.files[0];
+      }
+    },
+    formatDuration(seconds: number) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = Math.floor(seconds % 60);
+      return `${minutes}:${remainingSeconds < 10 ? '0' : ''}${remainingSeconds}`;
+    },
+    handleAudioFileChange(event: Event) {
+      const target = event.target as HTMLInputElement;
+      if (target.files && target.files[0]) {
+        this.audioFile = target.files[0];
+        const audioUrl = URL.createObjectURL(this.audioFile);
+        const audio = new Audio(audioUrl);
+        audio.onloadedmetadata = () => {
+          const durationInSeconds = audio.duration;
+          this.audioDuration = this.formatDuration(durationInSeconds);
+        };
       }
     },
   }

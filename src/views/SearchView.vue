@@ -34,7 +34,7 @@
           <td>
             <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }} </span>
           </td>
-          <td>{{ formatDuration(item.duration) }}</td>
+          <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
           <td>{{ calculateScore(item.ratings) }}</td>
           <td>{{ item.reproductions }}</td>
@@ -51,7 +51,6 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { calculateScore } from '@/utils/calculateScore';
 import { formatDate } from '@/utils/formatDate';
-import { formatDuration } from '@/utils/formatDuration';
 
 export default {
   setup() {
@@ -62,7 +61,6 @@ export default {
       router,
       calculateScore,
       formatDate,
-      formatDuration,
     };
   },
   data() {
@@ -96,30 +94,14 @@ export default {
     async getAudios() {
       const audios = await getDocs(collection(db, 'audios'));
       const audioPromises = [];
-
       audios.forEach((audio) => {
         const audioData = {
           id: audio.id,
-          duration: 0,
-          audioUrl: audio.data().audioUrl,
           ...audio.data(),
         };
-
-        audioPromises.push(this.getAudioDuration(audioData.audioUrl).then((duration) => {
-          audioData.duration = duration;
-          return audioData;
-        }));
+        audioPromises.push(audioData);
       });
-
-      this.listOfAudios = await Promise.all(audioPromises);
-    },
-    getAudioDuration(url) {
-      return new Promise((resolve) => {
-        const audio = new Audio(url);
-        audio.onloadedmetadata = () => {
-          resolve(audio.duration);
-        };
-      });
+      this.listOfAudios = audioPromises;
     },
 
     // Redirect functions
