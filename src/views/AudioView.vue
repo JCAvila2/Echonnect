@@ -6,7 +6,7 @@
       </div>
       <div class="title-section">
         <h1>{{ audio.title }}</h1>
-        <div class="user-info">
+        <div class="user-info" @click="watchUserProfile(audio.uid)">
           <img :src="author.profilePicture" alt="User avatar" class="avatar" />
           <span>{{ author.username }}</span>
         </div>
@@ -51,7 +51,7 @@
             <img :src="comment.userProfilePicture" alt="User avatar" class="avatar" />
             <div class="comment-content">
               <div class="comment-header">
-                <span class="comment-username">{{ comment.username }}</span>
+                <span class="comment-username" @click="watchUserProfile(comment.uid)">{{ comment.username }}</span>
                 <span class="comment-date"> {{ formatDate(comment.timestamp) }}</span>
               </div>
               <p>{{ comment.content }}</p>
@@ -77,6 +77,7 @@ import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
 import { calculateScore } from '@/utils/calculateScore';
 import { useAuthStore } from '@/stores/auth';
+import { useRouter } from 'vue-router';
 
 export default defineComponent({
   props: {
@@ -89,17 +90,18 @@ export default defineComponent({
     this.fetchAudio();
   },
   data() {
+    const router = useRouter();
     const { user } = useAuthStore();
     return {
       audio: null,
       author: null,
       comments: [],
-      totalComments: 0, // To track total number of comments
-      currentLimit: 5,  // Initial number of comments to load
-      showMoreButton: false, // To determine if "More comments" should be shown
+      totalComments: 0,
+      currentLimit: 5,
+      showMoreButton: false,
       formatDate,
       calculateScore,
-
+      router,
       newComment: '',
       user,
     };
@@ -126,7 +128,7 @@ export default defineComponent({
         console.log('Audio not found');
       }
     },
-    async fetchAuthor(uid) {
+    async fetchAuthor(uid: string) {
       const userDoc = doc(collection(db, 'users'), uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
@@ -142,7 +144,7 @@ export default defineComponent({
       // Check if we need to show the "More comments" button
       this.showMoreButton = newComments.length === this.currentLimit;
     },
-    async fetchComments(audioId, parentId = null, limitCount = 5) {
+    async fetchComments(audioId: string, parentId = null, limitCount = 5) {
       const commentsRef = collection(db, 'comments');
       const q = query(
         commentsRef,
@@ -195,6 +197,10 @@ export default defineComponent({
       await addDoc(collection(db, 'comments'), commentData);
       this.loadComments();
     },
+
+    watchUserProfile(uid: string) {
+      this.router.push(`/profile/${uid}`);
+    }
   }
 });
 </script>
@@ -228,6 +234,10 @@ export default defineComponent({
   display: flex;
   align-items: center;
   margin-bottom: 10px;
+}
+.user-info:hover {
+  cursor: pointer;
+  color: green;
 }
 
 .avatar {
@@ -319,6 +329,10 @@ export default defineComponent({
 }
 .comment-username {
   font-weight: bold;
+}
+.comment-username:hover {
+  cursor: pointer;
+  color: green;
 }
 .comment-date {
   color: #999;
