@@ -46,7 +46,8 @@
         </div>
 
         <div class="comments-list">
-          <h3 style="margin-bottom: 20px;">Comments ({{ totalComments }})</h3>
+          <!-- <h3 style="margin-bottom: 20px;">Comments ({{ totalComments }})</h3> -->
+          <h3 style="margin-bottom: 20px;">Comments ({{ displayedComments }}/{{ totalComments }})</h3>
           <div v-for="comment in comments" :key="comment.id" class="comment">
             <img :src="comment.userProfilePicture" alt="User avatar" class="avatar" />
             <div class="comment-content">
@@ -55,6 +56,25 @@
                 <span class="comment-date"> {{ formatDate(comment.timestamp) }}</span>
               </div>
               <p>{{ comment.content }}</p>
+              <div class="comment-actions">
+                <button @click="toggleReplyForm(comment.id)" class="reply-button">Reply</button>
+              </div>
+              <div v-if="replyingTo === comment.id" class="reply-form">
+                <input v-model="replyContent" type="text" placeholder="Write a reply..." class="reply-input" />
+                <button @click="addReply(comment.id)" class="send-button">Send</button>
+              </div>
+              <div v-if="comment.replies && comment.replies.length > 0" class="replies">
+                <div v-for="reply in comment.replies" :key="reply.id" class="reply">
+                  <img :src="reply.userProfilePicture" alt="User avatar" class="avatar small" />
+                  <div class="reply-content">
+                    <div class="comment-header">
+                      <span class="comment-username" @click="watchUserProfile(reply.uid)">{{ reply.username }}</span>
+                      <span class="comment-date"> {{ formatDate(reply.timestamp) }}</span>
+                    </div>
+                    <p>{{ reply.content }}</p>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
           <button v-if="showMoreButton" @click="loadMoreComments" class="more-comments">
@@ -72,7 +92,7 @@
 
 <script lang="ts">
 import { db } from '@/firebase';
-import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc } from 'firebase/firestore';
+import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer } from 'firebase/firestore';
 import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
 import { calculateScore } from '@/utils/calculateScore';
@@ -97,13 +117,16 @@ export default defineComponent({
       author: null,
       comments: [],
       totalComments: 0,
-      currentLimit: 5,
+      displayedComments: 0,
+      currentLimit: 5, // Initial limit of comments to load
       showMoreButton: false,
       formatDate,
       calculateScore,
       router,
       newComment: '',
       user,
+      replyingTo: null,
+      replyContent: '',
     };
   },
   methods: {
@@ -114,17 +137,13 @@ export default defineComponent({
         this.audio = { id: docSnapshot.id, ...docSnapshot.data() };
         document.title = this.audio?.title ?? 'Audio';
 
-        // Fetch the author of the audio
         await this.fetchAuthor(this.audio.uid);
-
-        // Fetch the comments of the audio
+        await this.fetchTotalComments()
         await this.loadComments();
 
-        // Increment the audio reproductions count in the database
         const incrementValue = increment(1);
         await updateDoc(audioDoc, { reproductions: incrementValue });
       } else {
-        // TODO: Redirect to 404 page
         console.log('Audio not found');
       }
     },
@@ -135,14 +154,22 @@ export default defineComponent({
         this.author = docSnapshot.data();
       }
     },
+    async fetchTotalComments() {
+      const commentsRef = collection(db, 'comments');
+      const q = query(commentsRef, where('audioId', '==', this.id));
+      const snapshot = await getCountFromServer(q);
+      this.totalComments = snapshot.data().count;
+    },
     async loadComments() {
-      // Fetch initial comments with the current limit
       const newComments = await this.fetchComments(this.id, null, this.currentLimit);
-      this.comments = newComments;
-      this.totalComments = this.comments.length;
+      
+      for (let comment of newComments) {
+        comment.replies = await this.fetchComments(this.id, comment.id);
+      }
 
-      // Check if we need to show the "More comments" button
-      this.showMoreButton = newComments.length === this.currentLimit;
+      this.comments = newComments;
+      this.displayedComments = this.comments.reduce((total, comment) => total + 1 + (comment.replies?.length || 0), 0);
+      this.showMoreButton = this.displayedComments < this.totalComments;
     },
     async fetchComments(audioId: string, parentId = null, limitCount = 5) {
       const commentsRef = collection(db, 'comments');
@@ -161,20 +188,12 @@ export default defineComponent({
       }));
     },
     async loadMoreComments() {
-      this.currentLimit += 5;      
-      const newComments = await this.fetchComments(this.id, null, this.currentLimit);
-      this.comments = newComments;
-      this.totalComments = this.comments.length;
-
-      // Update the visibility of "More comments" button
-      this.showMoreButton = newComments.length === this.currentLimit;
+      this.currentLimit += 5; // Load X more comments
+      await this.loadComments();
     },
-
-
     async addComment() {
       if (!this.newComment.trim()) return;
 
-      // Fetch the user information
       const userDoc = doc(collection(db, 'users'), this.user?.uid);
       const docSnapshot = await getDoc(userDoc);
       if (!docSnapshot.exists()) {
@@ -182,7 +201,6 @@ export default defineComponent({
         return;
       }
 
-      // Create the comment data
       const commentData = {
         parentId: null,
         audioId: this.id,
@@ -193,14 +211,44 @@ export default defineComponent({
         uid: this.user?.uid,
       };
       
-      // Add the comment to the database
       await addDoc(collection(db, 'comments'), commentData);
+      this.newComment = '';
+      this.totalComments++;
       this.loadComments();
     },
+    async addReply(parentId: string) {
+      if (!this.replyContent.trim()) return;
 
+      const userDoc = doc(collection(db, 'users'), this.user?.uid);
+      const docSnapshot = await getDoc(userDoc);
+      if (!docSnapshot.exists()) {
+        console.log('User not found');
+        return;
+      }
+
+      const replyData = {
+        parentId: parentId,
+        audioId: this.id,
+        content: this.replyContent,
+        timestamp: new Date(),
+        userProfilePicture: docSnapshot.data().profilePicture,
+        username: docSnapshot.data().username,
+        uid: this.user?.uid,
+      };
+      
+      await addDoc(collection(db, 'comments'), replyData);
+      this.replyingTo = null;
+      this.replyContent = '';
+      this.totalComments++;
+      this.loadComments();
+    },
+    toggleReplyForm(commentId: string) {
+      this.replyingTo = this.replyingTo === commentId ? null : commentId;
+      this.replyContent = '';
+    },
     watchUserProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
-    }
+    },
   }
 });
 </script>
@@ -223,7 +271,7 @@ export default defineComponent({
   margin-right: 20px;
 }
 .icon img {
-	max-width: 200px;
+  max-width: 200px;
 }
 
 .title-section h1 {
@@ -345,7 +393,6 @@ export default defineComponent({
   margin-left: 10px;
 }
 
-
 .more-comments {
   background-color: #4a90e2;
   color: white;
@@ -354,5 +401,58 @@ export default defineComponent({
   border-radius: 5px;
   cursor: pointer;
   margin-top: 10px;
+}
+.more-comments:hover {
+  background-color: blue;
+}
+
+.comment-actions {
+  margin-top: 5px;
+}
+
+.reply-button {
+  background: none;
+  border: none;
+  color: #4a90e2;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+.reply-button:hover {
+  background-color: rgb(0, 102, 255);
+  border-radius: 20px;
+}
+
+.reply-form {
+  margin-top: 10px;
+  display: flex;
+}
+
+.reply-input {
+  flex-grow: 1;
+  padding: 5px;
+  border: 1px solid #3a4a5a;
+  border-radius: 3px;
+  background-color: #2a3a4a;
+  color: white;
+}
+
+.replies {
+  margin-left: 20px;
+  margin-top: 10px;
+}
+
+.reply {
+  display: flex;
+  margin-bottom: 10px;
+}
+
+.reply-content {
+  margin-left: 10px;
+}
+
+.avatar.small {
+  width: 30px;
+  height: 30px;
 }
 </style>
