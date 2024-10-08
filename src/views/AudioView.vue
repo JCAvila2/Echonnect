@@ -41,18 +41,18 @@
         </audio>
 
         <div class="comment-section">
-          <input type="text" placeholder="Comment..." class="comment-input" />
-          <button class="send-button">➤</button>
+          <input v-model="newComment" type="text" placeholder="Comment..." class="comment-input" />
+          <button @click="addComment" class="send-button">➤</button>
         </div>
 
         <div class="comments-list">
-          <h3>Comments ({{ totalComments }})</h3>
+          <h3 style="margin-bottom: 20px;">Comments ({{ totalComments }})</h3>
           <div v-for="comment in comments" :key="comment.id" class="comment">
             <img :src="comment.userProfilePicture" alt="User avatar" class="avatar" />
             <div class="comment-content">
               <div class="comment-header">
-                <span class="username">{{ comment.username }}</span>
-                <span class="comment-date">{{ formatDate(comment.createdAt) }}</span>
+                <span class="comment-username">{{ comment.username }}</span>
+                <span class="comment-date"> {{ formatDate(comment.timestamp) }}</span>
               </div>
               <p>{{ comment.content }}</p>
             </div>
@@ -72,10 +72,11 @@
 
 <script lang="ts">
 import { db } from '@/firebase';
-import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
+import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc } from 'firebase/firestore';
 import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
 import { calculateScore } from '@/utils/calculateScore';
+import { useAuthStore } from '@/stores/auth';
 
 export default defineComponent({
   props: {
@@ -88,6 +89,7 @@ export default defineComponent({
     this.fetchAudio();
   },
   data() {
+    const { user } = useAuthStore();
     return {
       audio: null,
       author: null,
@@ -97,6 +99,9 @@ export default defineComponent({
       showMoreButton: false, // To determine if "More comments" should be shown
       formatDate,
       calculateScore,
+
+      newComment: '',
+      user,
     };
   },
   methods: {
@@ -162,6 +167,34 @@ export default defineComponent({
       // Update the visibility of "More comments" button
       this.showMoreButton = newComments.length === this.currentLimit;
     },
+
+
+    async addComment() {
+      if (!this.newComment.trim()) return;
+
+      // Fetch the user information
+      const userDoc = doc(collection(db, 'users'), this.user?.uid);
+      const docSnapshot = await getDoc(userDoc);
+      if (!docSnapshot.exists()) {
+        console.log('User not found');
+        return;
+      }
+
+      // Create the comment data
+      const commentData = {
+        parentId: null,
+        audioId: this.id,
+        content: this.newComment,
+        timestamp: new Date(),
+        userProfilePicture: docSnapshot.data().profilePicture,
+        username: docSnapshot.data().username,
+        uid: this.user?.uid,
+      };
+      
+      // Add the comment to the database
+      await addDoc(collection(db, 'comments'), commentData);
+      this.loadComments();
+    },
   }
 });
 </script>
@@ -198,10 +231,11 @@ export default defineComponent({
 }
 
 .avatar {
-  width: 30px;
-  height: 30px;
+  width: 50px;
+  height: 50px;
   border-radius: 50%;
   margin-right: 10px;
+  object-fit: cover;
 }
 
 .description {
@@ -278,16 +312,25 @@ export default defineComponent({
   display: flex;
   margin-bottom: 15px;
 }
-
-.comment-content {
-  margin-left: 10px;
-}
-
 .comment-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 5px;
 }
+.comment-username {
+  font-weight: bold;
+}
+.comment-date {
+  color: #999;
+  font-size: 0.8em;
+  margin-left: 5px;
+  display: flex;
+  align-items: center;
+}
+.comment-content {
+  margin-left: 10px;
+}
+
 
 .more-comments {
   background-color: #4a90e2;
