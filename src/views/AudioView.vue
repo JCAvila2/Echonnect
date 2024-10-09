@@ -2,7 +2,7 @@
   <div class="audio-player" v-if="audio && author">
     <div class="header">
       <div class="icon">
-        <img :src="audio.imageUrl" :alt="audio.title"/>
+        <img :src="audio.imageUrl" :alt="audio.title" />
       </div>
       <div class="title-section">
         <h1>{{ audio.title }}</h1>
@@ -46,40 +46,52 @@
         </div>
 
         <div class="comments-list">
-          <!-- <h3 style="margin-bottom: 20px;">Comments ({{ totalComments }})</h3> -->
-          <h3 style="margin-bottom: 20px;">Comments ({{ displayedComments }}/{{ totalComments }})</h3>
-          <div v-for="comment in comments" :key="comment.id" class="comment">
-            <img :src="comment.userProfilePicture" alt="User avatar" class="avatar" />
-            <div class="comment-content">
-              <div class="comment-header">
-                <span class="comment-username" @click="watchUserProfile(comment.uid)">{{ comment.username }}</span>
-                <span class="comment-date"> {{ formatDate(comment.timestamp) }}</span>
-              </div>
-              <p>{{ comment.content }}</p>
-              <div class="comment-actions">
-                <button @click="toggleReplyForm(comment.id)" class="reply-button">Reply</button>
-              </div>
-              <div v-if="replyingTo === comment.id" class="reply-form">
-                <input v-model="replyContent" type="text" placeholder="Write a reply..." class="reply-input" />
-                <button @click="addReply(comment.id)" class="send-button">Send</button>
-              </div>
-              <div v-if="comment.replies && comment.replies.length > 0" class="replies">
-                <div v-for="reply in comment.replies" :key="reply.id" class="reply">
-                  <img :src="reply.userProfilePicture" alt="User avatar" class="avatar small" />
-                  <div class="reply-content">
-                    <div class="comment-header">
-                      <span class="comment-username" @click="watchUserProfile(reply.uid)">{{ reply.username }}</span>
-                      <span class="comment-date"> {{ formatDate(reply.timestamp) }}</span>
+          <div class="comments-header">
+            <h3 style="margin-bottom: 20px;">
+              Comments ({{ displayedComments }}/{{ totalComments }})
+              <button @click="toggleSortOrder" class="sort-button">
+                <font-awesome-icon :icon="sortOrder === 'desc' ? faSortDown : faSortUp" />
+              </button>
+            </h3>
+          </div>
+
+          <div v-if="comments">
+            <div v-for="comment in comments" :key="comment.id" class="comment">
+              <img :src="comment.userProfilePicture" alt="User avatar" class="avatar" />
+              <div class="comment-content">
+                <div class="comment-header">
+                  <span class="comment-username" @click="watchUserProfile(comment.uid)">{{ comment.username }}</span>
+                  <span class="comment-date"> {{ formatDate(comment.timestamp) }}</span>
+                </div>
+                <p>{{ comment.content }}</p>
+                <div class="comment-actions">
+                  <button @click="toggleReplyForm(comment.id)" class="reply-button">Reply</button>
+                </div>
+                <div v-if="replyingTo === comment.id" class="reply-form">
+                  <input v-model="replyContent" type="text" placeholder="Write a reply..." class="reply-input" />
+                  <button @click="addReply(comment.id)" class="send-button">Send</button>
+                </div>
+                <div v-if="comment.replies && comment.replies.length > 0" class="replies">
+                  <div v-for="reply in comment.replies" :key="reply.id" class="reply">
+                    <img :src="reply.userProfilePicture" alt="User avatar" class="avatar small" />
+                    <div class="reply-content">
+                      <div class="comment-header">
+                        <span class="comment-username" @click="watchUserProfile(reply.uid)">{{ reply.username }}</span>
+                        <span class="comment-date"> {{ formatDate(reply.timestamp) }}</span>
+                      </div>
+                      <p>{{ reply.content }}</p>
                     </div>
-                    <p>{{ reply.content }}</p>
                   </div>
                 </div>
               </div>
             </div>
+            <button v-if="showMoreButton" @click="loadMoreComments" class="more-comments">
+              More comments
+            </button>
           </div>
-          <button v-if="showMoreButton" @click="loadMoreComments" class="more-comments">
-            More comments
-          </button>
+          <div v-else>
+            <p>Loading comments...</p>
+          </div>
         </div>
 
       </div>
@@ -98,6 +110,8 @@ import { formatDate } from '@/utils/formatDate';
 import { calculateScore } from '@/utils/calculateScore';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 
 export default defineComponent({
   props: {
@@ -105,6 +119,12 @@ export default defineComponent({
       type: String,
       required: true,
     },
+  },
+  components: {
+    FontAwesomeIcon,
+  },
+  setup() {
+    return { faSortUp, faSortDown };
   },
   mounted() {
     this.fetchAudio();
@@ -127,6 +147,7 @@ export default defineComponent({
       user,
       replyingTo: null,
       replyContent: '',
+      sortOrder: 'desc', // Default order by newest first
     };
   },
   methods: {
@@ -138,7 +159,7 @@ export default defineComponent({
         document.title = this.audio?.title ?? 'Audio';
 
         await this.fetchAuthor(this.audio.uid);
-        await this.fetchTotalComments()
+        await this.fetchTotalComments();
         await this.loadComments();
 
         const incrementValue = increment(1);
@@ -162,7 +183,7 @@ export default defineComponent({
     },
     async loadComments() {
       const newComments = await this.fetchComments(this.id, null, this.currentLimit);
-      
+
       for (let comment of newComments) {
         comment.replies = await this.fetchComments(this.id, comment.id);
       }
@@ -177,7 +198,7 @@ export default defineComponent({
         commentsRef,
         where('audioId', '==', audioId),
         where('parentId', '==', parentId),
-        orderBy('timestamp', 'desc'),
+        orderBy('timestamp', this.sortOrder),
         limit(limitCount)
       );
 
@@ -210,7 +231,7 @@ export default defineComponent({
         username: docSnapshot.data().username,
         uid: this.user?.uid,
       };
-      
+
       await addDoc(collection(db, 'comments'), commentData);
       this.newComment = '';
       this.totalComments++;
@@ -235,7 +256,7 @@ export default defineComponent({
         username: docSnapshot.data().username,
         uid: this.user?.uid,
       };
-      
+
       await addDoc(collection(db, 'comments'), replyData);
       this.replyingTo = null;
       this.replyContent = '';
@@ -244,7 +265,11 @@ export default defineComponent({
     },
     toggleReplyForm(commentId: string) {
       this.replyingTo = this.replyingTo === commentId ? null : commentId;
-      this.replyContent = '';
+    },
+    toggleSortOrder() {
+      this.comments = null;
+      this.sortOrder = this.sortOrder === 'desc' ? 'asc' : 'desc';
+      this.loadComments();
     },
     watchUserProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
@@ -270,6 +295,7 @@ export default defineComponent({
 .icon {
   margin-right: 20px;
 }
+
 .icon img {
   max-width: 200px;
 }
@@ -283,6 +309,7 @@ export default defineComponent({
   align-items: center;
   margin-bottom: 10px;
 }
+
 .user-info:hover {
   cursor: pointer;
   color: green;
@@ -342,6 +369,14 @@ export default defineComponent({
   margin-bottom: 20px;
 }
 
+.sort-button {
+  background: none;
+  border: none;
+  color: #4a90e2;
+  cursor: pointer;
+  font-size: 0.9em;
+}
+
 .comment-input {
   flex-grow: 1;
   padding: 10px;
@@ -370,18 +405,22 @@ export default defineComponent({
   display: flex;
   margin-bottom: 15px;
 }
+
 .comment-header {
   display: flex;
   justify-content: space-between;
   margin-bottom: 5px;
 }
+
 .comment-username {
   font-weight: bold;
 }
+
 .comment-username:hover {
   cursor: pointer;
   color: green;
 }
+
 .comment-date {
   color: #999;
   font-size: 0.8em;
@@ -389,6 +428,7 @@ export default defineComponent({
   display: flex;
   align-items: center;
 }
+
 .comment-content {
   margin-left: 10px;
 }
@@ -402,6 +442,7 @@ export default defineComponent({
   cursor: pointer;
   margin-top: 10px;
 }
+
 .more-comments:hover {
   background-color: blue;
 }
@@ -418,6 +459,7 @@ export default defineComponent({
   cursor: pointer;
   font-size: 0.9em;
 }
+
 .reply-button:hover {
   background-color: rgb(0, 102, 255);
   border-radius: 20px;
