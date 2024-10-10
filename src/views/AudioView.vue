@@ -35,10 +35,7 @@
       </div>
 
       <div class="player-section">
-        <audio controls class="audio-player">
-          <source :src="audio.audioUrl" type="audio/mpeg">
-          Your browser does not support the audio element.
-        </audio>
+        <AudioPlayer :audioSrc="audio.audioUrl"/>
 
         <div class="comment-section">
           <input v-model="newComment" type="text" placeholder="Comment..." class="comment-input" />
@@ -112,6 +109,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
+import AudioPlayer from '@/components/AudioPlayer.vue';
 
 export default defineComponent({
   props: {
@@ -122,6 +120,7 @@ export default defineComponent({
   },
   components: {
     FontAwesomeIcon,
+    AudioPlayer,
   },
   setup() {
     return { faSortUp, faSortDown };
