@@ -4,15 +4,27 @@
 			<source :src="audioSrc" type="audio/wav">
 			Your browser does not support the audio element.
 		</audio>
-		<button @click="playAudio">Play</button>
-		<button @click="pauseAudio">Pause</button>
-		<div class="progress-bar" @click="seekAudio">
-			<div class="progress" :style="{ width: progress + '%' }"></div>
+
+		<div class="container">
+			<!-- play/pause buttons -->
+			<div class="status-controller">
+				<button v-if="!isPlaying" @click="playAudio"><font-awesome-icon icon="play" /></button>
+				<button v-else @click="pauseAudio"><font-awesome-icon icon="pause" /></button>
+			</div>
+
+			<!-- Progress bar -->
+			<div class="progress-bar" @click="seekAudio">
+				<div class="progress" :style="{ width: progress + '%' }"></div>
+			</div>
+			<div class="time"> {{ formatTime($refs?.audio ? $refs?.audio?.currentTime : 0) }} / {{
+				formatTime($refs?.audio?.duration) }}</div>
+
+			<!-- Volume -->
+			<font-awesome-icon :icon="getVolumeIcon" class="volume-icon" @click="muteVolume" />
+			<input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume"
+				:style="{ background: `linear-gradient(to right, ${isHover ? 'darkblue' : '#007bff'} 0%, ${isHover ? 'darkblue' : '#007bff'} ${volume * 100}%, #e0e0e0 ${volume * 100}%, #e0e0e0 100%)` }"
+				@mouseover="isHover = true" @mouseleave="isHover = false" />
 		</div>
-		<input type="range" min="0" max="1" step="0.01" @input="changeVolume" />
-
-		<p>Current time: {{ formatTime($refs.audio ? $refs.audio.currentTime : 0) }}</p>
-
 	</div>
 </template>
 
@@ -32,26 +44,47 @@ export default {
 			required: true
 		}
 	},
+	mounted() {
+		const audio = this.$refs.audio;
+		if (audio) {
+			audio.volume = this.volume;
+		}
+	},
 	data() {
 		return {
-			progress: 0
+			progress: 0,
+			isPlaying: false,
+			volume: 0.2, // Default volume
+			previousVolume: 0.2,
+			isHover: false,
 		};
+	},
+	computed: {
+		getVolumeIcon() {
+			if (this.volume > 0.5) {
+				return 'volume-up';
+			} else if (this.volume > 0) {
+				return 'volume-low';
+			} else {
+				return 'volume-mute';
+			}
+		}
 	},
 	methods: {
 		playAudio() {
-			console.log('Play button clicked');
 			const audio = this.$refs.audio;
 			if (audio) {
 				audio.play().catch(error => console.error('Error playing audio:', error));
+				this.isPlaying = true;
 			} else {
 				console.error('Audio element not found');
 			}
 		},
 		pauseAudio() {
-			console.log('Pause button clicked');
 			const audio = this.$refs.audio;
 			if (audio) {
 				audio.pause();
+				this.isPlaying = false;
 			} else {
 				console.error('Audio element not found');
 			}
@@ -69,45 +102,134 @@ export default {
 			const newTime = clickPosition * audio.duration;
 			audio.currentTime = newTime;
 			this.updateProgress();
-			console.log('Seeked to:', formatTime(newTime));
 		},
 		changeVolume(event) {
 			const audio = this.$refs.audio;
 			audio.volume = event.target.value;
-			console.log('Volume changed to:', audio.volume);
+			this.volume = audio.volume;
+		},
+		muteVolume() {
+			const audio = this.$refs.audio;
+			if (audio.volume > 0) {
+				this.previousVolume = audio.volume;
+				audio.volume = 0;
+				this.volume = 0;
+			} else {
+				audio.volume = this.previousVolume;
+				this.volume = this.previousVolume;
+			}
 		}
+
 	}
 };
 </script>
 
 <style scoped>
-.custom-audio-player {
+.container {
 	display: flex;
-	flex-direction: column;
 	align-items: center;
-}
-
-button {
-	margin: 5px;
-}
-
-.progress-bar {
+	justify-content: space-between;
 	width: 100%;
-	height: 10px;
-	background-color: #e0e0e0;
-	border-radius: 5px;
-	overflow: hidden;
-	margin-top: 10px;
+	margin: 20px auto;
+}
+
+
+/* Play/Pause button */
+.status-controller {
+	display: flex;
+	align-items: center;
+	margin-right: 10px;
+}
+.status-controller button {
+	background-color: #007bff;
+	color: white;
+	border: none;
+	padding: 10px;
+	border-radius: 50%;
 	cursor: pointer;
+	transition: background-color 0.3s ease;
+	width: 50px;
+	height: 50px;
+}
+.status-controller button:hover {
+	background-color: #0056b3;
+}
+
+
+/* Progress % and time */
+.progress-bar {
+	flex-grow: 2;
+	height: 15px;
+	background-color: #e0e0e0;
+	border-radius: 50px;
+	position: relative;
+	margin: 0 10px;
+	cursor: pointer;
+}
+
+.progress-bar:hover {
+	height: 20px;
+	transition: width 0.2s ease;
+	border-radius: 5px;
+}
+
+.progress-bar:hover .progress {
+	background-color: darkblue;
+	height: 20px;
+	border-radius: 5px;
 }
 
 .progress {
 	height: 100%;
-	background-color: #3b82f6;
-	transition: width 0.1s;
+	background-color: #007bff;
+	border-radius: 50px;
+	transition: width 0.2s ease;
+}
+
+.time {
+	margin-right: 10px;
+	color: white;
+	white-space: nowrap;
+}
+
+
+/* Volume */
+.volume-icon {
+	height: 20px;
+	width: 20px;
+	margin-right: 10px;
 }
 
 input[type="range"] {
-	margin-top: 10px;
+	width: 100px;
+	-webkit-appearance: none;
+	appearance: none;
+	height: 5px;
+	background: #e0e0e0;
+	border-radius: 5px;
+	outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+	-webkit-appearance: none;
+	appearance: none;
+	width: 10px;
+	height: 10px;
+	background: #007bff;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+	width: 10px;
+	height: 10px;
+	background: #007bff;
+	border-radius: 50%;
+	cursor: pointer;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+	transform: scale(1.5);
+	background: darkblue;
 }
 </style>
