@@ -36,7 +36,7 @@
           </td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>{{ calculateScore(item.ratings) }}</td>
+          <td>{{ item?.averageRating ? item.averageRating + ' ⭐' : 'No ratings yet' }}</td>
           <td>{{ item.reproductions }}</td>
         </tr>
       </template>
@@ -49,7 +49,6 @@
 import { collection, getDocs } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
-import { calculateScore } from '@/utils/calculateScore';
 import { formatDate } from '@/utils/formatDate';
 
 export default {
@@ -59,7 +58,6 @@ export default {
 
     return {
       router,
-      calculateScore,
       formatDate,
     };
   },

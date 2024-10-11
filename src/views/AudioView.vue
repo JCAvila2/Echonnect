@@ -26,7 +26,7 @@
         </div>
         <div class="stat-item">
           <span class="stat-label">Score</span>
-          <span class="stat-value">{{ calculateScore(audio.ratings) }}</span>
+          <span class="stat-value">{{ audio.averageRating ? audio.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</span>
         </div>
         <div class="stat-item">
           <span class="stat-label">Comments</span>
@@ -35,10 +35,21 @@
       </div>
 
       <div class="player-section">
-        <AudioPlayer :audioSrc="audio.audioUrl"/>
+        <AudioPlayer :audioSrc="audio.audioUrl" />
+
+        <div class="rating-section">
+          <span class="rating-label">{{ userRating ? 'Rated:' : 'Rate this audio:' }}</span>
+          <div class="star-rating">
+            <span v-for="star in 5" :key="star" @click="rateAudio(star)" @mouseover="setHover(star)"
+              @mouseleave="clearHover"
+              :class="['star', { 'active': star <= userRating, 'hover': star <= hoverRating }]">
+              ★
+            </span>
+          </div>
+        </div>
 
         <div class="comment-section">
-          <input v-model="newComment" type="text" placeholder="Comment..." class="comment-input" />
+          <input v-model="newComment" type="text" placeholder="Comment..." class="comment-input" @keyup.enter="addComment"/>
           <button @click="addComment" class="send-button">➤</button>
         </div>
 
@@ -101,10 +112,9 @@
 
 <script lang="ts">
 import { db } from '@/firebase';
-import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer } from 'firebase/firestore';
+import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc } from 'firebase/firestore';
 import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
-import { calculateScore } from '@/utils/calculateScore';
 import { useAuthStore } from '@/stores/auth';
 import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
@@ -140,13 +150,14 @@ export default defineComponent({
       currentLimit: 5, // Initial limit of comments to load
       showMoreButton: false,
       formatDate,
-      calculateScore,
       router,
       newComment: '',
       user,
       replyingTo: null,
       replyContent: '',
       sortOrder: 'desc', // Default order by newest first
+      userRating: 0,
+      hoverRating: null,
     };
   },
   methods: {
@@ -160,9 +171,11 @@ export default defineComponent({
         await this.fetchAuthor(this.audio.uid);
         await this.fetchTotalComments();
         await this.loadComments();
+        await this.fetchUserRating();
 
         const incrementValue = increment(1);
         await updateDoc(audioDoc, { reproductions: incrementValue });
+        this.audio.reproductions++;
       } else {
         console.log('Audio not found');
       }
@@ -212,6 +225,10 @@ export default defineComponent({
       await this.loadComments();
     },
     async addComment() {
+      if (!this.user) {
+        alert('Please log in comment.'); // TODO: redirect to login page
+        return;
+      }
       if (!this.newComment.trim()) return;
 
       const userDoc = doc(collection(db, 'users'), this.user?.uid);
@@ -237,6 +254,10 @@ export default defineComponent({
       this.loadComments();
     },
     async addReply(parentId: string) {
+      if (!this.user) {
+        alert('Please log in comment.'); // TODO: redirect to login page
+        return;
+      }
       if (!this.replyContent.trim()) return;
 
       const userDoc = doc(collection(db, 'users'), this.user?.uid);
@@ -273,6 +294,60 @@ export default defineComponent({
     watchUserProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
     },
+    async fetchUserRating() {
+      if (this.user) {
+        const ratingDoc = doc(collection(db, 'ratings'), `${this.id}_${this.user.uid}`);
+        const ratingSnapshot = await getDoc(ratingDoc);
+        if (ratingSnapshot.exists()) {
+          this.userRating = ratingSnapshot.data().rating;
+        }
+      }
+    },
+    async rateAudio(rating: number) {
+      if (!this.user) {
+        alert('Please log in to rate this audio.'); // TODO: redirect to login page
+        return;
+      }
+      this.userRating = rating;
+      const ratingRef = doc(collection(db, 'ratings'), `${this.id}_${this.user.uid}`);
+      const ratingSnapshot = await getDoc(ratingRef);
+
+      const audioRef = doc(collection(db, 'audios'), this.id);
+      const audioSnapshot = await getDoc(audioRef);
+      const audioData = audioSnapshot.data();
+
+      if (ratingSnapshot.exists()) {
+        const oldRating = ratingSnapshot.data().rating;
+        await setDoc(ratingRef, { rating, timestamp: new Date() }, { merge: true });
+        await updateDoc(audioRef, {
+          sumRatings: increment(rating - oldRating),
+          averageRating: (audioData.sumRatings - oldRating + rating) / audioData.totalRatings
+        });
+
+        this.audio.averageRating = (audioData.sumRatings - oldRating + rating) / audioData.totalRatings;
+      } else {
+        await setDoc(ratingRef, {
+          audioId: this.id,
+          userId: this.user.uid,
+          rating,
+          timestamp: new Date()
+        });
+        await updateDoc(audioRef, {
+          totalRatings: increment(1),
+          sumRatings: increment(rating),
+          averageRating: (audioData.sumRatings + rating) / (audioData.totalRatings + 1)
+        });
+
+        this.audio.averageRating = (audioData.sumRatings + rating) / (audioData.totalRatings + 1);
+      }
+      //this.userRating = rating;
+    },
+    setHover(star) {
+      this.hoverRating = star;
+    },
+    clearHover() {
+      this.hoverRating = null;
+    }
   }
 });
 </script>
@@ -495,5 +570,37 @@ export default defineComponent({
 .avatar.small {
   width: 30px;
   height: 30px;
+}
+
+.rating-section {
+  margin-top: 15px;
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.rating-label {
+  display: flex;
+  align-items: center;
+  margin-top: 3px;
+}
+
+.star-rating {
+  display: inline-block;
+  margin-left: 10px;
+}
+
+.star {
+  font-size: 24px;
+  color: #ccc;
+  cursor: pointer;
+}
+
+.star.active {
+  color: #ffd700;
+}
+
+.star.hover {
+  color: #0056b3;
 }
 </style>
