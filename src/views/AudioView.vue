@@ -7,7 +7,7 @@
       <div class="title-section">
         <h1>{{ audio.title }}</h1>
         <div class="user-info" @click="watchUserProfile(audio.uid)">
-          <img :src="author.profilePicture" alt="User avatar" class="avatar" />
+          <img :src="author.profilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
           <span>{{ author.username }}</span>
         </div>
         <p class="description">{{ audio.description }}</p>
@@ -65,7 +65,7 @@
 
           <div v-if="comments">
             <div v-for="comment in comments" :key="comment.id" class="comment">
-              <img :src="comment.userProfilePicture" alt="User avatar" class="avatar" />
+              <img :src="comment.userProfilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
               <div class="comment-content">
                 <div class="comment-header">
                   <span class="comment-username" @click="watchUserProfile(comment.uid)">{{ comment.username }}</span>
@@ -76,12 +76,12 @@
                   <button @click="toggleReplyForm(comment.id)" class="reply-button">Reply</button>
                 </div>
                 <div v-if="replyingTo === comment.id" class="reply-form">
-                  <input v-model="replyContent" type="text" placeholder="Write a reply..." class="reply-input" />
-                  <button @click="addReply(comment.id)" class="send-button">Send</button>
+                  <input v-model="replyContent" type="text" placeholder="Write a reply..." class="reply-input" @keyup.enter="addReply(comment.id)" />
+                  <button @click="addReply(comment.id)" class="send-button">➤</button>
                 </div>
                 <div v-if="comment.replies && comment.replies.length > 0" class="replies">
                   <div v-for="reply in comment.replies" :key="reply.id" class="reply">
-                    <img :src="reply.userProfilePicture" alt="User avatar" class="avatar small" />
+                    <img :src="reply.userProfilePicture || defaultProfilePicture" alt="User avatar" class="avatar small" />
                     <div class="reply-content">
                       <div class="comment-header">
                         <span class="comment-username" @click="watchUserProfile(reply.uid)">{{ reply.username }}</span>
@@ -120,6 +120,8 @@ import { useRouter } from 'vue-router';
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import AudioPlayer from '@/components/AudioPlayer.vue';
+// @ts-ignore
+import defaultProfilePicture from '@/assets/default-profile.png';
 
 export default defineComponent({
   props: {
@@ -133,7 +135,11 @@ export default defineComponent({
     AudioPlayer,
   },
   setup() {
-    return { faSortUp, faSortDown };
+    return { 
+      faSortUp, 
+      faSortDown, 
+      defaultProfilePicture
+    };
   },
   mounted() {
     this.fetchAudio();
@@ -210,7 +216,7 @@ export default defineComponent({
         commentsRef,
         where('audioId', '==', audioId),
         where('parentId', '==', parentId),
-        orderBy('timestamp', this.sortOrder),
+        orderBy('timestamp', parentId ? 'asc' : this.sortOrder),
         limit(limitCount)
       );
 
