@@ -98,8 +98,10 @@ export default {
           tags: this.tags,
           duration: this.audioDuration,
           createdAt: new Date(),
-          ratings: [],
           reproductions: 0,
+          sumRatings: 0,
+          totalRatings: 0,
+          averageRating: 0,
         });
 
         const generatedId = audioDoc.id;

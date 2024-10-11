@@ -27,7 +27,7 @@
 					<td>{{ item.title }}</td>
 					<td>{{ item.duration ?? '-:--' }}</td>
 					<td>{{ formatDate(item.createdAt) }}</td>
-					<td>{{ calculateScore(item.ratings) }}</td>
+					<td>{{ item?.averageRating ? item.averageRating + ' ⭐' : 'No ratings yet' }}</td>
 					<td>{{ item.reproductions }}</td>
 
 					<td>
@@ -52,7 +52,6 @@
 import { collection, deleteDoc, doc, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
-import { calculateScore } from '@/utils/calculateScore';
 import { formatDate } from '@/utils/formatDate';
 import { deleteObject, getStorage, ref as storageRef } from 'firebase/storage';
 
@@ -68,7 +67,6 @@ export default {
 
 		return {
 			router,
-			calculateScore,
 			formatDate,
 		};
 	},
@@ -134,9 +132,23 @@ export default {
 			// Delete audio document from firestore
 			await deleteDoc(doc(db, 'audios', audioId));
 
+			// Delete comments from firestore
+			const commentsQuery = query(collection(db, 'comments'), where('audioId', '==', audioId));
+			const comments = await getDocs(commentsQuery);
+			comments.forEach(async (comment) => {
+				await deleteDoc(doc(db, 'comments', comment.id));
+			});
+
+			// Delete ratings from firestore
+			const ratingsQuery = query(collection(db, 'ratings'), where('audioId', '==', audioId));
+			const ratings = await getDocs(ratingsQuery);
+			ratings.forEach(async (rating) => {
+				await deleteDoc(doc(db, 'ratings', rating.id));
+			});
+
 			// Update the list of audios
 			this.listOfAudios = this.listOfAudios.filter((audio) => audio.id !== audioId);
-			
+
 			console.log(audioId, 'deleted successfully');
 		},
 		HearAudio(audioId: string) {
