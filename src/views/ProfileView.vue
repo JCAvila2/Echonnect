@@ -17,7 +17,20 @@
         <div class="user-info">
           <h2 class="username">{{ user.username }}</h2>
           <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
-          <p class="user-bio" v-if="user.biography != ''">{{ user.biography }}</p>
+          <div class="user-bio-container">
+            <p v-if="!editingBio" class="user-bio">
+              {{ user.biography || 'No bio yet. Click edit to add one!' }}
+              <font-awesome-icon icon="pen" class="edit-bio-icon" @click="startEditingBio" />
+            </p>
+            <div v-else class="edit-bio-form">
+              <textarea v-model="newBio" class="bio-textarea" :maxlength="bioMaxLength"></textarea>
+              <div class="bio-actions">
+                <span class="bio-char-count">{{ newBio.length }}/{{ bioMaxLength }}</span>
+                <button @click="saveBio" class="save-bio-button">Save</button>
+                <button @click="cancelEditingBio" class="cancel-bio-button">Cancel</button>
+              </div>
+            </div>
+          </div>
           <button @click="logout" class="logout-button">Logout</button>
         </div>
       </div>
@@ -48,15 +61,14 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { collection, doc, getAggregateFromServer, getCountFromServer, getDoc, query, sum, updateDoc, where } from 'firebase/firestore';
-import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage';
+import { getDownloadURL, ref as storageRef, uploadBytes, getStorage, deleteObject } from 'firebase/storage';
 import { db } from '@/firebase/';
 import UserAudiosTable from '@/components/UserAudiosTable.vue';
+import { getAuth, signOut } from 'firebase/auth';
 import { useAuthStore } from '@/stores/auth';
 import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
-import { getStorage, deleteObject } from 'firebase/storage';
-import { getAuth, signOut } from 'firebase/auth';
 
 export default defineComponent({
   components: {
@@ -79,19 +91,22 @@ export default defineComponent({
       playsCount: 0,
       averageRating: null,
       followerCount: 0,
+      editingBio: false,
+      newBio: '',
+      bioMaxLength: 150,
     };
   },
   methods: {
     logout() {
-			const auth = getAuth();
-			signOut(auth)
-				.then(() => {
-					this.$router.push('/login');
-				})
-				.catch(error => {
-					console.log('Error signing out: ', error);
-				});
-		},
+      const auth = getAuth();
+      signOut(auth)
+        .then(() => {
+          this.$router.push('/login');
+        })
+        .catch(error => {
+          console.log('Error signing out: ', error);
+        });
+    },
     async fetchUser() {
       const userDoc = doc(collection(db, 'users'), this.uid);
       const docSnapshot = await getDoc(userDoc);
@@ -192,6 +207,34 @@ export default defineComponent({
         console.error('Error removing profile picture:', error);
       }
     },
+    startEditingBio() {
+      this.editingBio = true;
+      this.newBio = this.user.biography || '';
+    },
+    cancelEditingBio() {
+      this.editingBio = false;
+      this.newBio = '';
+    },
+    async saveBio() {
+      if (!this.uid) {
+        console.error('User ID is missing');
+        return;
+      }
+
+      try {
+        const userDoc = doc(collection(db, 'users'), this.uid);
+        await updateDoc(userDoc, {
+          biography: this.newBio
+        });
+
+        this.user.biography = this.newBio;
+        this.editingBio = false;
+      } catch (error) {
+        console.error('Error updating bio:', error);
+        alert('An error occurred while saving the bio. Please try again.');
+        // TODO: Handle the error appropriately (e.g., show an error message to the user)
+      }
+    },
   },
 });
 </script>
@@ -200,7 +243,6 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  background-color: #1c2732;
   color: white;
   font-family: Arial, sans-serif;
 }
@@ -292,6 +334,79 @@ export default defineComponent({
   margin: 5px 0;
 }
 
+.user-bio-container {
+  position: relative;
+  margin: 10px 0;
+}
+
+.edit-bio-icon {
+  margin-left: 10px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.edit-bio-icon:hover {
+  opacity: 1;
+}
+
+.edit-bio-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.bio-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #2c3e50;
+  color: white;
+  border: 1px solid #34495e;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+.bio-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.bio-char-count {
+  margin-right: 10px;
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.save-bio-button,
+.cancel-bio-button {
+  padding: 5px 15px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-bio-button {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.save-bio-button:hover {
+  background-color: #27ae60;
+}
+
+.cancel-bio-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.cancel-bio-button:hover {
+  background-color: #c0392b;
+}
+
 .logout-button {
   margin-top: 20px;
   padding: 10px 20px;
@@ -309,19 +424,19 @@ export default defineComponent({
 .stats-and-audios {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px;
   margin-top: 20px;
 }
 
 .stats {
-  width: 200px;
+  width: 250px;
   padding-top: 20px;
   padding-right: 20px;
   border-right: 2px solid #333;
 }
 
 .stats h3 {
-  font-size: 18px;
+  font-size: 28px;
   margin-bottom: 10px;
 }
 
