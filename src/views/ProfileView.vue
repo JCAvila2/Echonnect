@@ -1,82 +1,94 @@
 <template>
   <div class="profile-container">
-    <div v-if="user">
+    <div v-if="user" class="profile-content">
       <div class="profile-header">
-        
-        <!-- Profile Picture -->
-        <label for="file-input" class="profile-picture-container">
-          <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
-          <font-awesome-icon icon="pen" class="profile-picture-icon" />
-        </label>
-        <font-awesome-icon icon="trash" class="delete-picture-icon" v-if="user.profilePicture" @click="removeProfilePicture" />
-        <input id="file-input" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
-        
-        <h2>{{ user.username }}</h2>
-        <p>{{ user.biography }}</p>
+        <div class="profile-picture-container">
+          <label for="file-input" class="profile-picture-label">
+            <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+            <font-awesome-icon icon="pen" class="profile-picture-icon" />
+            <input id="file-input" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
+          </label>
+          <div class="icon-actions">
+            <font-awesome-icon icon="trash" class="delete-picture-icon" v-if="user.profilePicture"
+              @click.stop="removeProfilePicture" />
+          </div>
+        </div>
+
+        <div class="user-info">
+          <h2 class="username">{{ user.username }}</h2>
+          <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+          <p class="user-bio" v-if="user.biography != ''">{{ user.biography }}</p>
+          <button @click="logout" class="logout-button">Logout</button>
+        </div>
       </div>
-      <div class="user-details">
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+
+      <div class="stats-and-audios">
+        <div class="stats">
+          <h3>Stats</h3>
+          <ul>
+            <li><strong>Followers:</strong> {{ followerCount }}</li>
+            <li><strong>Audios:</strong> {{ audiosCount }}</li>
+            <li><strong>Plays:</strong> {{ playsCount }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="audios-table">
+          <UserAudiosTable :uid="uid" />
+        </div>
       </div>
     </div>
-
-    <button @click="logout" class="logout-button">Logout</button>
   </div>
-
-  <ManageAudioTable :uid="uid"/>
-
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
-import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { defineComponent } from 'vue';
+import { collection, doc, getAggregateFromServer, getCountFromServer, getDoc, query, sum, updateDoc, where } from 'firebase/firestore';
+import { getDownloadURL, ref as storageRef, uploadBytes } from 'firebase/storage';
 import { db } from '@/firebase/';
-import { getAuth, signOut } from 'firebase/auth';
+import UserAudiosTable from '@/components/UserAudiosTable.vue';
 import { useAuthStore } from '@/stores/auth';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { formatDate } from '@/utils/formatDate';
-import ManageAudioTable from '@/components/ManageAudioTable.vue';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
+import { getStorage, deleteObject } from 'firebase/storage';
+import { getAuth, signOut } from 'firebase/auth';
 
 export default defineComponent({
   components: {
-    ManageAudioTable,
+    UserAudiosTable,
   },
   setup() {
-    document.title = 'Profile';
-    const authStore = useAuthStore();
-    const uid = computed(() => authStore.user?.uid);
-    const file = ref<File | null>(null);
-    const isUploading = ref(false);
-
-    return {
-      uid,
-      defaultProfilePicture,
-      file,
-      isUploading,
-      formatDate,
-    };
+    const uid = useAuthStore().user.uid;
+    return { uid };
   },
   mounted() {
     this.fetchUser();
+    this.fetchUserStats();
   },
   data() {
     return {
       user: null,
+      defaultProfilePicture,
+      formatDate,
+      audiosCount: 0,
+      playsCount: 0,
+      averageRating: null,
+      followerCount: 0,
     };
   },
   methods: {
     logout() {
-      const auth = getAuth();
-      signOut(auth)
-        .then(() => {
-          this.$router.push('/login');
-        })
-        .catch(error => {
-          console.log('Error signing out: ', error);
-        });
-    },
+			const auth = getAuth();
+			signOut(auth)
+				.then(() => {
+					this.$router.push('/login');
+				})
+				.catch(error => {
+					console.log('Error signing out: ', error);
+				});
+		},
     async fetchUser() {
       const userDoc = doc(collection(db, 'users'), this.uid);
       const docSnapshot = await getDoc(userDoc);
@@ -87,6 +99,27 @@ export default defineComponent({
         // TODO: Redirect to 404 page
       }
     },
+    async fetchUserStats() {
+      const coll = collection(db, "audios");
+      const q = query(coll, where("uid", "==", this.uid));
+      const count = await getCountFromServer(q);
+      const snapshot = await getAggregateFromServer(q, {
+        totalPlays: sum('reproductions'),
+        totalRating: sum('averageRating'),
+      });
+      await this.fetchFollowersCount();
+
+      this.audiosCount = count.data().count;
+      this.playsCount = snapshot.data().totalPlays;
+      this.averageRating = snapshot.data().totalRating / count.data().count;
+    },
+    async fetchFollowersCount() {
+      const followsCollection = collection(db, 'follows');
+      const followQuery = query(followsCollection, where('followedId', '==', this.uid));
+      const count = await getCountFromServer(followQuery);
+      this.followerCount = count.data().count;
+    },
+
     handleFileChange(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
@@ -159,21 +192,28 @@ export default defineComponent({
         console.error('Error removing profile picture:', error);
       }
     },
-  }
+  },
 });
 </script>
 
 <style scoped>
 .profile-container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  text-align: center;
+  height: 100%;
+  padding: 50px;
+  background-color: #1c2732;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-header {
+  display: flex;
+  align-items: center;
   margin-bottom: 20px;
-  position: relative;
 }
 
 .profile-picture-container {
@@ -182,14 +222,13 @@ export default defineComponent({
 }
 
 .profile-picture {
-  width: 150px;
-  height: 150px;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
 }
 
-/* icon hidden initially */
 .profile-picture-icon {
   position: absolute;
   top: 50%;
@@ -199,19 +238,32 @@ export default defineComponent({
   color: white;
   opacity: 0;
   transition: opacity 0.3s ease;
+
+  pointer-events: none;
 }
 
-.profile-picture-icon:hover {
-  cursor: pointer;
-}
-
-/* show icon on hover */
-.profile-picture-container:hover .profile-picture-icon {
+.profile-picture:hover+.profile-picture-icon {
   opacity: 1;
 }
 
-.profile-picture-container:hover .profile-picture {
+.profile-picture:hover {
   opacity: 0.3;
+}
+
+.icon-actions {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.delete-picture-icon {
+  position: relative;
+  bottom: 0px;
+  font-size: 24px;
+  color: white;
+  transition: opacity 0.3s ease;
 }
 
 .delete-picture-icon:hover {
@@ -219,14 +271,47 @@ export default defineComponent({
   cursor: pointer;
 }
 
+.user-info {
+  flex-grow: 1;
+  margin-left: 30px;
+}
 
-.user-details {
-  margin: 20px 0;
+.username {
+  font-size: 44px;
+  margin: 0;
+}
+
+.user-creation {
+  font-size: 22px;
+  color: #a0a0a0;
+}
+
+.user-bio {
+  font-size: 24px;
+  color: #a0a0a0;
+  margin: 5px 0;
+}
+
+.btn {
+  margin-top: 20px;
+}
+
+.btn-follow {
+  padding: 10px 20px;
+  background-color: blue;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.btn-follow:hover {
+  background-color: #333;
 }
 
 .logout-button {
   padding: 10px 20px;
-  background-color: #f44336;
+  background-color: red;
   color: white;
   border: none;
   border-radius: 5px;
@@ -234,6 +319,37 @@ export default defineComponent({
 }
 
 .logout-button:hover {
-  background-color: #d32f2f;
+  background-color: #333;
+}
+
+.stats-and-audios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.stats {
+  width: 200px;
+  padding-top: 20px;
+  padding-right: 20px;
+}
+
+.stats h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.stats ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.stats li {
+  margin-bottom: 5px;
+}
+
+.audios-table {
+  flex-grow: 1;
 }
 </style>
