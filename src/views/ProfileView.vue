@@ -24,7 +24,10 @@
 
       <div class="stats-and-audios">
         <div class="stats">
-          <h3>Stats</h3>
+          <h3>
+            Stats
+            <font-awesome-icon icon="chart-line" />
+          </h3>
           <ul>
             <li><strong>Followers:</strong> {{ followerCount }}</li>
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
@@ -151,15 +154,14 @@ export default defineComponent({
         const snapshot = await uploadBytes(fileRef, this.file);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
+        // Update local user object
+        this.user.profilePicture = downloadURL;
+
         // Update user document in Firestore
         const userDoc = doc(collection(db, 'users'), this.uid);
         await updateDoc(userDoc, {
           profilePicture: downloadURL
         });
-
-        // Update local user object
-        this.user.profilePicture = downloadURL;
-
       } catch (error) {
         console.error('Error uploading profile picture:', error);
         // Handle the error appropriately (e.g., show an error message to the user)
@@ -174,6 +176,8 @@ export default defineComponent({
       }
 
       try {
+        this.user.profilePicture = null;
+
         // Delete profile picture from storage
         const storage = getStorage();
         const fileRef = storageRef(storage, `profile-pictures/${this.uid}`);
@@ -184,10 +188,6 @@ export default defineComponent({
         await updateDoc(userDoc, {
           profilePicture: null
         });
-
-        // Update local user object
-        this.user.profilePicture = null;
-
       } catch (error) {
         console.error('Error removing profile picture:', error);
       }
@@ -238,7 +238,6 @@ export default defineComponent({
   color: white;
   opacity: 0;
   transition: opacity 0.3s ease;
-
   pointer-events: none;
 }
 
@@ -277,8 +276,9 @@ export default defineComponent({
 }
 
 .username {
-  font-size: 44px;
+  font-size: 81px;
   margin: 0;
+  font-weight: black;
 }
 
 .user-creation {
@@ -292,24 +292,8 @@ export default defineComponent({
   margin: 5px 0;
 }
 
-.btn {
-  margin-top: 20px;
-}
-
-.btn-follow {
-  padding: 10px 20px;
-  background-color: blue;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-}
-
-.btn-follow:hover {
-  background-color: #333;
-}
-
 .logout-button {
+  margin-top: 20px;
   padding: 10px 20px;
   background-color: red;
   color: white;
@@ -333,6 +317,7 @@ export default defineComponent({
   width: 200px;
   padding-top: 20px;
   padding-right: 20px;
+  border-right: 2px solid #333;
 }
 
 .stats h3 {
