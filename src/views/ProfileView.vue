@@ -1,69 +1,99 @@
 <template>
   <div class="profile-container">
-    <div v-if="user">
+    <div v-if="user" class="profile-content">
       <div class="profile-header">
-        
-        <!-- Profile Picture -->
-        <label for="file-input" class="profile-picture-container">
-          <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
-          <font-awesome-icon icon="pen" class="profile-picture-icon" />
-        </label>
-        <font-awesome-icon icon="trash" class="delete-picture-icon" v-if="user.profilePicture" @click="removeProfilePicture" />
-        <input id="file-input" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
-        
-        <h2>{{ user.username }}</h2>
-        <p>{{ user.biography }}</p>
+        <div class="profile-picture-container">
+          <label for="file-input" class="profile-picture-label">
+            <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+            <font-awesome-icon icon="pen" class="profile-picture-icon" />
+            <input id="file-input" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
+          </label>
+          <div class="icon-actions">
+            <font-awesome-icon icon="trash" class="delete-picture-icon" v-if="user.profilePicture"
+              @click.stop="removeProfilePicture" />
+          </div>
+        </div>
+
+        <div class="user-info">
+          <h2 class="username">{{ user.username }}</h2>
+          <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+          <div class="user-bio-container">
+            <p v-if="!editingBio" class="user-bio">
+              {{ user.biography || 'No bio yet. Click edit to add one!' }}
+              <font-awesome-icon icon="pen" class="edit-bio-icon" @click="startEditingBio" />
+            </p>
+            <div v-else class="edit-bio-form">
+              <textarea v-model="newBio" class="bio-textarea" :maxlength="bioMaxLength"></textarea>
+              <div class="bio-actions">
+                <span class="bio-char-count">{{ newBio.length }}/{{ bioMaxLength }}</span>
+                <button @click="saveBio" class="save-bio-button">Save</button>
+                <button @click="cancelEditingBio" class="cancel-bio-button">Cancel</button>
+              </div>
+            </div>
+          </div>
+          <button @click="logout" class="logout-button">Logout</button>
+        </div>
       </div>
-      <div class="user-details">
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+
+      <div class="stats-and-audios">
+        <div class="stats">
+          <h3>
+            Stats
+            <font-awesome-icon icon="chart-line" />
+          </h3>
+          <ul>
+            <li><strong>Followers:</strong> {{ followerCount }}</li>
+            <li><strong>Audios:</strong> {{ audiosCount }}</li>
+            <li><strong>Plays:</strong> {{ playsCount }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
+            </li>
+          </ul>
+        </div>
+
+        <div class="audios-table">
+          <UserAudiosTable :uid="uid" />
+        </div>
       </div>
     </div>
-
-    <button @click="logout" class="logout-button">Logout</button>
   </div>
-
-  <ManageAudioTable :uid="uid"/>
-
 </template>
 
 <script lang="ts">
-import { computed, defineComponent, ref } from 'vue';
-import { collection, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { defineComponent } from 'vue';
+import { collection, doc, getAggregateFromServer, getCountFromServer, getDoc, query, sum, updateDoc, where } from 'firebase/firestore';
+import { getDownloadURL, ref as storageRef, uploadBytes, getStorage, deleteObject } from 'firebase/storage';
 import { db } from '@/firebase/';
+import UserAudiosTable from '@/components/UserAudiosTable.vue';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthStore } from '@/stores/auth';
-import { getStorage, ref as storageRef, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { formatDate } from '@/utils/formatDate';
-import ManageAudioTable from '@/components/ManageAudioTable.vue';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
 
 export default defineComponent({
   components: {
-    ManageAudioTable,
+    UserAudiosTable,
   },
   setup() {
-    document.title = 'Profile';
-    const authStore = useAuthStore();
-    const uid = computed(() => authStore.user?.uid);
-    const file = ref<File | null>(null);
-    const isUploading = ref(false);
-
-    return {
-      uid,
-      defaultProfilePicture,
-      file,
-      isUploading,
-      formatDate,
-    };
+    const uid = useAuthStore().user.uid;
+    return { uid };
   },
   mounted() {
     this.fetchUser();
+    this.fetchUserStats();
   },
   data() {
     return {
       user: null,
+      defaultProfilePicture,
+      formatDate,
+      audiosCount: 0,
+      playsCount: 0,
+      averageRating: null,
+      followerCount: 0,
+      editingBio: false,
+      newBio: '',
+      bioMaxLength: 150,
     };
   },
   methods: {
@@ -87,6 +117,27 @@ export default defineComponent({
         // TODO: Redirect to 404 page
       }
     },
+    async fetchUserStats() {
+      const coll = collection(db, "audios");
+      const q = query(coll, where("uid", "==", this.uid));
+      const count = await getCountFromServer(q);
+      const snapshot = await getAggregateFromServer(q, {
+        totalPlays: sum('reproductions'),
+        totalRating: sum('averageRating'),
+      });
+      await this.fetchFollowersCount();
+
+      this.audiosCount = count.data().count;
+      this.playsCount = snapshot.data().totalPlays;
+      this.averageRating = snapshot.data().totalRating / count.data().count;
+    },
+    async fetchFollowersCount() {
+      const followsCollection = collection(db, 'follows');
+      const followQuery = query(followsCollection, where('followedId', '==', this.uid));
+      const count = await getCountFromServer(followQuery);
+      this.followerCount = count.data().count;
+    },
+
     handleFileChange(event: Event) {
       const target = event.target as HTMLInputElement;
       if (target.files && target.files[0]) {
@@ -118,15 +169,14 @@ export default defineComponent({
         const snapshot = await uploadBytes(fileRef, this.file);
         const downloadURL = await getDownloadURL(snapshot.ref);
 
+        // Update local user object
+        this.user.profilePicture = downloadURL;
+
         // Update user document in Firestore
         const userDoc = doc(collection(db, 'users'), this.uid);
         await updateDoc(userDoc, {
           profilePicture: downloadURL
         });
-
-        // Update local user object
-        this.user.profilePicture = downloadURL;
-
       } catch (error) {
         console.error('Error uploading profile picture:', error);
         // Handle the error appropriately (e.g., show an error message to the user)
@@ -141,6 +191,8 @@ export default defineComponent({
       }
 
       try {
+        this.user.profilePicture = null;
+
         // Delete profile picture from storage
         const storage = getStorage();
         const fileRef = storageRef(storage, `profile-pictures/${this.uid}`);
@@ -151,29 +203,59 @@ export default defineComponent({
         await updateDoc(userDoc, {
           profilePicture: null
         });
-
-        // Update local user object
-        this.user.profilePicture = null;
-
       } catch (error) {
         console.error('Error removing profile picture:', error);
       }
     },
-  }
+    startEditingBio() {
+      this.editingBio = true;
+      this.newBio = this.user.biography || '';
+    },
+    cancelEditingBio() {
+      this.editingBio = false;
+      this.newBio = '';
+    },
+    async saveBio() {
+      if (!this.uid) {
+        console.error('User ID is missing');
+        return;
+      }
+
+      try {
+        const userDoc = doc(collection(db, 'users'), this.uid);
+        await updateDoc(userDoc, {
+          biography: this.newBio
+        });
+
+        this.user.biography = this.newBio;
+        this.editingBio = false;
+      } catch (error) {
+        console.error('Error updating bio:', error);
+        alert('An error occurred while saving the bio. Please try again.');
+        // TODO: Handle the error appropriately (e.g., show an error message to the user)
+      }
+    },
+  },
 });
 </script>
 
 <style scoped>
 .profile-container {
-  max-width: 600px;
-  margin: auto;
-  padding: 20px;
-  text-align: center;
+  height: 100%;
+  padding: 50px;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+.profile-content {
+  display: flex;
+  flex-direction: column;
 }
 
 .profile-header {
+  display: flex;
+  align-items: center;
   margin-bottom: 20px;
-  position: relative;
 }
 
 .profile-picture-container {
@@ -182,14 +264,13 @@ export default defineComponent({
 }
 
 .profile-picture {
-  width: 150px;
-  height: 150px;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
   object-fit: cover;
   cursor: pointer;
 }
 
-/* icon hidden initially */
 .profile-picture-icon {
   position: absolute;
   top: 50%;
@@ -199,19 +280,31 @@ export default defineComponent({
   color: white;
   opacity: 0;
   transition: opacity 0.3s ease;
+  pointer-events: none;
 }
 
-.profile-picture-icon:hover {
-  cursor: pointer;
-}
-
-/* show icon on hover */
-.profile-picture-container:hover .profile-picture-icon {
+.profile-picture:hover+.profile-picture-icon {
   opacity: 1;
 }
 
-.profile-picture-container:hover .profile-picture {
+.profile-picture:hover {
   opacity: 0.3;
+}
+
+.icon-actions {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: flex;
+  gap: 10px;
+}
+
+.delete-picture-icon {
+  position: relative;
+  bottom: 0px;
+  font-size: 24px;
+  color: white;
+  transition: opacity 0.3s ease;
 }
 
 .delete-picture-icon:hover {
@@ -219,14 +312,105 @@ export default defineComponent({
   cursor: pointer;
 }
 
+.user-info {
+  flex-grow: 1;
+  margin-left: 30px;
+}
 
-.user-details {
-  margin: 20px 0;
+.username {
+  font-size: 81px;
+  margin: 0;
+  font-weight: black;
+}
+
+.user-creation {
+  font-size: 22px;
+  color: #a0a0a0;
+}
+
+.user-bio {
+  font-size: 24px;
+  color: #a0a0a0;
+  margin: 5px 0;
+}
+
+.user-bio-container {
+  position: relative;
+  margin: 10px 0;
+}
+
+.edit-bio-icon {
+  margin-left: 10px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 0.3s ease;
+}
+
+.edit-bio-icon:hover {
+  opacity: 1;
+}
+
+.edit-bio-form {
+  display: flex;
+  flex-direction: column;
+}
+
+.bio-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #2c3e50;
+  color: white;
+  border: 1px solid #34495e;
+  border-radius: 5px;
+  resize: vertical;
+}
+
+.bio-actions {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.bio-char-count {
+  margin-right: 10px;
+  font-size: 14px;
+  color: #a0a0a0;
+}
+
+.save-bio-button,
+.cancel-bio-button {
+  padding: 5px 15px;
+  margin-left: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.save-bio-button {
+  background-color: #2ecc71;
+  color: white;
+}
+
+.save-bio-button:hover {
+  background-color: #27ae60;
+}
+
+.cancel-bio-button {
+  background-color: #e74c3c;
+  color: white;
+}
+
+.cancel-bio-button:hover {
+  background-color: #c0392b;
 }
 
 .logout-button {
+  margin-top: 20px;
   padding: 10px 20px;
-  background-color: #f44336;
+  background-color: red;
   color: white;
   border: none;
   border-radius: 5px;
@@ -234,6 +418,38 @@ export default defineComponent({
 }
 
 .logout-button:hover {
-  background-color: #d32f2f;
+  background-color: #333;
+}
+
+.stats-and-audios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.stats {
+  width: 250px;
+  padding-top: 20px;
+  padding-right: 20px;
+  border-right: 2px solid #333;
+}
+
+.stats h3 {
+  font-size: 28px;
+  margin-bottom: 10px;
+}
+
+.stats ul {
+  list-style-type: none;
+  padding: 0;
+}
+
+.stats li {
+  margin-bottom: 5px;
+}
+
+.audios-table {
+  flex-grow: 1;
 }
 </style>

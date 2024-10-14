@@ -110,7 +110,6 @@ export default {
 
 <style>
 .search-container {
-  padding: 20px;
   color: white;
 }
 
