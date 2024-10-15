@@ -2,7 +2,7 @@
   <nav class="navbar">
     <router-link to="/">
       <div class="brand-title">
-        <img src="@/assets/logo.svg">
+        <img src="@/assets/blue-icon.svg">
         <h1>Echonnect</h1>
       </div>
     </router-link>
