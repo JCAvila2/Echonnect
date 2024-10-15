@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import HomeView from '@/views/HomeView.vue';
 import SearchView from '@/views/SearchView.vue';
 import ProfileView from '@/views/ProfileView.vue';
 import watchProfileView from '@/views/WatchProfileView.vue';
@@ -15,8 +14,7 @@ const router = createRouter({
   routes: [
     {
       path: '/',
-      name: 'home',
-      component: HomeView
+      redirect: '/search',
     },
     {
       path: '/search',
