@@ -60,16 +60,16 @@ export default {
   },
   data() {
     return {
-      title: '',
-      description: '',
-      tags: [],
-      currentTag: '',
-      audioFile: null,
-      imageFile: null,
-      isUploading: false,
-      uploadSuccess: false,
-      uploadError: null,
-      audioDuration: '',
+      title: '' as string,
+      description: '' as string,
+      tags: [] as string[],
+      currentTag: '' as string,
+      audioFile: null as File | null,
+      imageFile: null as File | null,
+      isUploading: false as boolean,
+      uploadSuccess: false as boolean,
+      uploadError: null as string | null,
+      audioDuration: '' as string,
     };
   },
   methods: {
@@ -86,13 +86,18 @@ export default {
       try {
         // Get author info
         const authStore = useAuthStore();
-        const userDoc = await getDoc(doc(db, 'users', authStore.user.uid));
+        const userId = authStore.user?.uid;
+        if (!userId) {
+          throw new Error('User not authenticated.');
+        }
+
+        const userDoc = await getDoc(doc(db, 'users', userId));
         const userData = userDoc.data();
 
         // Add audio metadata to Firestore
         const audioDoc = await addDoc(collection(db, 'audios'), {
-          uid: authStore.user.uid,
-          author: userData.username,
+          uid: userId,
+          author: userData?.username,
           title: this.title,
           description: this.description,
           tags: this.tags,
@@ -159,7 +164,7 @@ export default {
         this.currentTag = '';
       }
     },
-    removeTag(index) {
+    removeTag(index: number) {
       this.tags.splice(index, 1);
     },
     restartFields() {

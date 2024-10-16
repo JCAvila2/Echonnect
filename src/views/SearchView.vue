@@ -50,6 +50,7 @@ import { collection, getDocs } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 
 export default {
   setup() {
@@ -62,7 +63,7 @@ export default {
     };
   },
   data() {
-    const headers = [
+    const headers: TableHeader[] = [
       { title: '', value: 'imageUrl', sortable: false, width: '50px' },
       { title: 'Title', value: 'title', sortable: true },
       { title: 'Author', value: 'author', sortable: true },
@@ -75,14 +76,14 @@ export default {
     return {
       search: '',
       headers,
-      listOfAudios: [],
+      listOfAudios: [] as AudioItem[],
     };
   },
   mounted() {
     this.getAudios();
   },
   computed: {
-    filteredAudios() {
+    filteredAudios(): AudioItem[] {
       return this.listOfAudios.filter((audio) =>
         audio.title.toLowerCase().includes(this.search.toLowerCase())
       );
@@ -91,11 +92,11 @@ export default {
   methods: {
     async getAudios() {
       const audios = await getDocs(collection(db, 'audios'));
-      const audioPromises = [];
+      const audioPromises: AudioItem[] = []; // Usar el tipo AudioItem
       audios.forEach((audio) => {
-        const audioData = {
+        const audioData: AudioItem = {
           id: audio.id,
-          ...audio.data(),
+          ...audio.data() as Omit<AudioItem, 'id'>, // Asegúrate de que audio.data() contenga las propiedades correctas
         };
         audioPromises.push(audioData);
       });
@@ -110,7 +111,6 @@ export default {
       this.router.push(`/audio/${audioId}`);
     },
   }
-
 };
 </script>
 

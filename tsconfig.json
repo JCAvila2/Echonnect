@@ -9,9 +9,13 @@
     }
   ],
   "compilerOptions": {
+    "esModuleInterop": true,
+    "module": "esnext",
+    "target": "esnext",
+    "moduleResolution": "node",
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]
-    },
-  },
+    }
+  }
 }

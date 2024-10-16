@@ -42,7 +42,7 @@
           <div class="star-rating">
             <span v-for="star in 5" :key="star" @click="rateAudio(star)" @mouseover="setHover(star)"
               @mouseleave="clearHover"
-              :class="['star', { 'active': star <= userRating, 'hover': star <= hoverRating }]">
+              :class="['star', { 'active': star <= userRating, 'hover': star <= (hoverRating || 0) }]">
               ★
             </span>
           </div>
@@ -112,7 +112,7 @@
 
 <script lang="ts">
 import { db } from '@/firebase';
-import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc } from 'firebase/firestore';
+import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc, OrderByDirection } from 'firebase/firestore';
 import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
 import { useAuthStore } from '@/stores/auth';
@@ -122,6 +122,9 @@ import { faSortUp, faSortDown } from '@fortawesome/free-solid-svg-icons';
 import AudioPlayer from '@/components/AudioPlayer.vue';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
+import { AudioItem } from '@/types/views/searchView';
+import { User } from '@/types/views/profileView';
+import { Comment } from '@/types/views/audioView';
 
 export default defineComponent({
   props: {
@@ -148,22 +151,22 @@ export default defineComponent({
     const router = useRouter();
     const { user } = useAuthStore();
     return {
-      audio: null,
-      author: null,
-      comments: [],
-      totalComments: 0,
-      displayedComments: 0,
-      currentLimit: 5, // Initial limit of comments to load
-      showMoreButton: false,
       formatDate,
       router,
-      newComment: '',
       user,
-      replyingTo: null,
-      replyContent: '',
-      sortOrder: 'desc', // Default order by newest first
-      userRating: 0,
-      hoverRating: null,
+      audio: null as AudioItem | null,
+      author: null as User | null,
+      comments: [] as Comment[] | null,
+      totalComments: 0 as number,
+      displayedComments: 0 as number,
+      currentLimit: 5 as number, // Initial limit of comments to load
+      showMoreButton: false as boolean,
+      newComment: '' as string,
+      replyingTo: null as string | null | undefined,
+      replyContent: '' as string,
+      sortOrder: 'desc' as OrderByDirection, // Default order by newest first
+      userRating: 0 as number,
+      hoverRating: 0 as number | null, // null
     };
   },
   methods: {
@@ -171,10 +174,10 @@ export default defineComponent({
       const audioDoc = doc(collection(db, 'audios'), this.id);
       const docSnapshot = await getDoc(audioDoc);
       if (docSnapshot.exists()) {
-        this.audio = { id: docSnapshot.id, ...docSnapshot.data() };
+        this.audio = { id: docSnapshot.id, ...docSnapshot.data() } as AudioItem;
         document.title = this.audio?.title ?? 'Audio';
 
-        await this.fetchAuthor(this.audio.uid);
+        await this.fetchAuthor(this.audio?.uid);
         await this.fetchTotalComments();
         await this.loadComments();
         await this.fetchUserRating();
@@ -190,7 +193,7 @@ export default defineComponent({
       const userDoc = doc(collection(db, 'users'), uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
-        this.author = docSnapshot.data();
+        this.author = docSnapshot.data() as User;
       }
     },
     async fetchTotalComments() {
@@ -210,7 +213,7 @@ export default defineComponent({
       this.displayedComments = this.comments.reduce((total, comment) => total + 1 + (comment.replies?.length || 0), 0);
       this.showMoreButton = this.displayedComments < this.totalComments;
     },
-    async fetchComments(audioId: string, parentId = null, limitCount = 5) {
+    async fetchComments(audioId: string, parentId: string | null = null, limitCount = 5): Promise<Comment[]> {
       const commentsRef = collection(db, 'comments');
       const q = query(
         commentsRef,
@@ -224,7 +227,7 @@ export default defineComponent({
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data(),
-      }));
+      } as Comment));
     },
     async loadMoreComments() {
       this.currentLimit += 5; // Load X more comments
@@ -259,7 +262,7 @@ export default defineComponent({
       this.totalComments++;
       this.loadComments();
     },
-    async addReply(parentId: string) {
+    async addReply(parentId: string | undefined) {
       if (!this.user) {
         alert('Please log in comment.'); // TODO: redirect to login page
         return;
@@ -289,7 +292,7 @@ export default defineComponent({
       this.totalComments++;
       this.loadComments();
     },
-    toggleReplyForm(commentId: string) {
+    toggleReplyForm(commentId: string | undefined) {
       this.replyingTo = this.replyingTo === commentId ? null : commentId;
     },
     toggleSortOrder() {
@@ -327,10 +330,12 @@ export default defineComponent({
         await setDoc(ratingRef, { rating, timestamp: new Date() }, { merge: true });
         await updateDoc(audioRef, {
           sumRatings: increment(rating - oldRating),
-          averageRating: (audioData.sumRatings - oldRating + rating) / audioData.totalRatings
+          averageRating: (audioData?.sumRatings - oldRating + rating) / audioData?.totalRatings
         });
 
-        this.audio.averageRating = (audioData.sumRatings - oldRating + rating) / audioData.totalRatings;
+        if (this.audio) {
+          this.audio.averageRating = (audioData?.sumRatings - oldRating + rating) / audioData?.totalRatings;
+        }
       } else {
         await setDoc(ratingRef, {
           audioId: this.id,
@@ -341,14 +346,16 @@ export default defineComponent({
         await updateDoc(audioRef, {
           totalRatings: increment(1),
           sumRatings: increment(rating),
-          averageRating: (audioData.sumRatings + rating) / (audioData.totalRatings + 1)
+          averageRating: (audioData?.sumRatings + rating) / (audioData?.totalRatings + 1)
         });
 
-        this.audio.averageRating = (audioData.sumRatings + rating) / (audioData.totalRatings + 1);
+        if (this.audio && audioData) {
+          this.audio.averageRating = (audioData.sumRatings + rating) / (audioData.totalRatings + 1);
+        }
       }
       //this.userRating = rating;
     },
-    setHover(star) {
+    setHover(star: number) {
       this.hoverRating = star;
     },
     clearHover() {
