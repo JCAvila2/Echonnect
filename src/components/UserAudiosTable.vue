@@ -41,6 +41,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 
 export default {
   props: {
@@ -69,8 +70,8 @@ export default {
 
     return {
       search: '',
-      headers,
-      listOfAudios: [],
+      headers: headers as TableHeader[],
+      listOfAudios: [] as AudioItem[],
     };
   },
   mounted() {
@@ -88,13 +89,13 @@ export default {
       // Get all audios from an specific user
       const audiosQuery = query(collection(db, 'audios'), where('uid', '==', this.uid));
       const audios = await getDocs(audiosQuery);
-      const audioPromises = [];
+      const audioPromises: AudioItem[] = [];
 
       audios.forEach((audio) => {
         const audioData = {
           id: audio.id,
           ...audio.data(),
-        };
+        } as AudioItem;
         audioPromises.push(audioData);
       });
 

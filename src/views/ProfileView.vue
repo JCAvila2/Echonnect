@@ -4,7 +4,7 @@
       <div class="profile-header">
         <div class="profile-picture-container">
           <label for="file-input" class="profile-picture-label">
-            <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+            <img :src="user?.profilePicture ?? defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
             <font-awesome-icon icon="pen" class="profile-picture-icon" />
             <input id="file-input" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
           </label>
@@ -51,7 +51,7 @@
         </div>
 
         <div class="audios-table">
-          <UserAudiosTable :uid="uid" />
+          <UserAudiosTable :uid="uid || ''" />
         </div>
       </div>
     </div>
@@ -69,13 +69,14 @@ import { useAuthStore } from '@/stores/auth';
 import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
+import { User } from '@/types/views/profileView';
 
 export default defineComponent({
   components: {
     UserAudiosTable,
   },
   setup() {
-    const uid = useAuthStore().user.uid;
+    const uid = useAuthStore().user?.uid;
     return { uid };
   },
   mounted() {
@@ -84,16 +85,19 @@ export default defineComponent({
   },
   data() {
     return {
-      user: null,
-      defaultProfilePicture,
+      user: null as User | null,
       formatDate,
-      audiosCount: 0,
-      playsCount: 0,
-      averageRating: null,
-      followerCount: 0,
-      editingBio: false,
-      newBio: '',
-      bioMaxLength: 150,
+      defaultProfilePicture: defaultProfilePicture as string,
+      audiosCount: 0 as number,
+      playsCount: 0 as number,
+      averageRating: null as number | null,
+      followerCount: 0 as number,
+      editingBio: false as boolean,
+      newBio: '' as string,
+      bioMaxLength: 150 as number,
+
+      file: null as File | null,
+      isUploading: false as boolean,
     };
   },
   methods: {
@@ -111,7 +115,7 @@ export default defineComponent({
       const userDoc = doc(collection(db, 'users'), this.uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
-        this.user = { id: docSnapshot.id, ...docSnapshot.data() };
+        this.user = { id: docSnapshot.id, ...docSnapshot.data() } as User;
       } else {
         console.log('User not found');
         // TODO: Redirect to 404 page
@@ -170,7 +174,9 @@ export default defineComponent({
         const downloadURL = await getDownloadURL(snapshot.ref);
 
         // Update local user object
-        this.user.profilePicture = downloadURL;
+        if (this.user) {
+          this.user.profilePicture = downloadURL;
+        }
 
         // Update user document in Firestore
         const userDoc = doc(collection(db, 'users'), this.uid);
@@ -191,7 +197,9 @@ export default defineComponent({
       }
 
       try {
-        this.user.profilePicture = null;
+        if (this.user) {
+          this.user.profilePicture = null;
+        }
 
         // Delete profile picture from storage
         const storage = getStorage();
@@ -209,7 +217,9 @@ export default defineComponent({
     },
     startEditingBio() {
       this.editingBio = true;
-      this.newBio = this.user.biography || '';
+      if (this.user) {
+        this.newBio = this.user.biography || '';
+      }
     },
     cancelEditingBio() {
       this.editingBio = false;
@@ -227,7 +237,9 @@ export default defineComponent({
           biography: this.newBio
         });
 
-        this.user.biography = this.newBio;
+        if (this.user) {
+          this.user.biography = this.newBio;
+        }
         this.editingBio = false;
       } catch (error) {
         console.error('Error updating bio:', error);

@@ -16,8 +16,11 @@
 			<div class="progress-bar" @click="seekAudio">
 				<div class="progress" :style="{ width: progress + '%' }"></div>
 			</div>
-			<div class="time"> {{ formatTime($refs?.audio ? $refs?.audio?.currentTime : 0) }} / {{
-				formatTime($refs?.audio?.duration) }}</div>
+
+			<!-- Time -->
+			<div class="time">
+				{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ formatTime(($refs.audio as HTMLAudioElement)?.duration || 0) }}
+			</div>
 
 			<!-- Volume -->
 			<font-awesome-icon :icon="getVolumeIcon" class="volume-icon" @click="muteVolume" />
@@ -45,18 +48,18 @@ export default {
 		}
 	},
 	mounted() {
-		const audio = this.$refs.audio;
+		const audio = this.$refs.audio as HTMLAudioElement | null;
 		if (audio) {
 			audio.volume = this.volume;
 		}
 	},
 	data() {
 		return {
-			progress: 0,
-			isPlaying: false,
-			volume: 0.2, // Default volume
-			previousVolume: 0.2,
-			isHover: false,
+			progress: 0 as number,
+			isPlaying: false as boolean,
+			volume: 0.2 as number, // Default volume
+			previousVolume: 0.2 as number,
+			isHover: false as boolean,
 		};
 	},
 	computed: {
@@ -68,20 +71,20 @@ export default {
 			} else {
 				return 'volume-mute';
 			}
-		}
+		},
 	},
 	methods: {
 		playAudio() {
-			const audio = this.$refs.audio;
+			const audio = this.$refs.audio as HTMLAudioElement | null;
 			if (audio) {
-				audio.play().catch(error => console.error('Error playing audio:', error));
+				audio.play().catch((error: any) => console.error('Error playing audio:', error));
 				this.isPlaying = true;
 			} else {
 				console.error('Audio element not found');
 			}
 		},
 		pauseAudio() {
-			const audio = this.$refs.audio;
+			const audio = this.$refs.audio as HTMLAudioElement | null;
 			if (audio) {
 				audio.pause();
 				this.isPlaying = false;
@@ -90,26 +93,31 @@ export default {
 			}
 		},
 		updateProgress() {
-			const audio = this.$refs.audio;
+			const audio = this.$refs.audio as HTMLAudioElement | null;
 			if (audio) {
 				this.progress = (audio.currentTime / audio.duration) * 100;
 			}
 		},
-		seekAudio(event) {
-			const audio = this.$refs.audio;
-			const progressBar = event.currentTarget;
+		seekAudio(event: MouseEvent) {
+			const audio = this.$refs.audio as HTMLAudioElement;
+			const progressBar = event.currentTarget as HTMLElement;
 			const clickPosition = event.offsetX / progressBar.offsetWidth;
-			const newTime = clickPosition * audio.duration;
-			audio.currentTime = newTime;
-			this.updateProgress();
+			if (audio.duration) {
+				const newTime = clickPosition * audio.duration;
+				audio.currentTime = newTime;
+				this.updateProgress();
+			}
 		},
-		changeVolume(event) {
-			const audio = this.$refs.audio;
-			audio.volume = event.target.value;
-			this.volume = audio.volume;
+		changeVolume(event: Event) {
+			const audio = this.$refs.audio as HTMLAudioElement;
+			if (audio) {
+				const target = event.target as HTMLInputElement;
+				audio.volume = target.valueAsNumber;
+				this.volume = audio.volume;
+			}
 		},
 		muteVolume() {
-			const audio = this.$refs.audio;
+			const audio = this.$refs.audio as HTMLAudioElement;
 			if (audio.volume > 0) {
 				this.previousVolume = audio.volume;
 				audio.volume = 0;

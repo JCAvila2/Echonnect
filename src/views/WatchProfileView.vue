@@ -2,7 +2,7 @@
   <div class="profile-container">
     <div v-if="user" class="profile-content">
       <div class="profile-header">
-        <img :src="user.profilePicture || defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+        <img :src="user?.profilePicture ?? defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
         <div class="user-info">
           <h2 class="username">{{ user.username }}</h2>
           <p class="user-creation"> <strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
@@ -25,7 +25,7 @@
         </div>
 
         <div class="audios-table">
-          <UserAudiosTable :uid="uid" />
+          <UserAudiosTable :uid="uid || ''" />
         </div>
       </div>
     </div>
@@ -41,6 +41,7 @@ import { useAuthStore } from '@/stores/auth';
 import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
+import { User } from '@/types/views/profileView';
 
 export default defineComponent({
   props: {
@@ -63,14 +64,15 @@ export default defineComponent({
   },
   data() {
     return {
-      user: null,
-      defaultProfilePicture,
+      user: null as User | null,
       formatDate,
-      audiosCount: 0,
-      playsCount: 0,
-      averageRating: 0,
-      followerCount: 0,
-      isFollowing: false,
+
+      defaultProfilePicture: defaultProfilePicture as string,
+      audiosCount: 0 as number,
+      playsCount: 0 as number,
+      averageRating: 0 as number,
+      followerCount: 0 as number,
+      isFollowing: false as boolean,
     };
   },
   methods: {
@@ -78,7 +80,7 @@ export default defineComponent({
       const userDoc = doc(collection(db, 'users'), this.uid);
       const docSnapshot = await getDoc(userDoc);
       if (docSnapshot.exists()) {
-        this.user = { id: docSnapshot.id, ...docSnapshot.data() };
+        this.user = { id: docSnapshot.id, ...docSnapshot.data() } as User;
         document.title = this.user.username ?? 'Profile';
       } else {
         console.log('User not found');
@@ -106,7 +108,7 @@ export default defineComponent({
       this.followerCount = count.data().count;
     },
     async toggleFollow() {
-      if (!this.userAuthStore.uid) {
+      if (!this.userAuthStore?.uid) {
         alert('Please log in to rate this audio.'); // TODO: redirect to login page
         return;
       }
@@ -114,7 +116,7 @@ export default defineComponent({
       const followsCollection = collection(db, 'follows');
       const followQuery = query(
         followsCollection, 
-        where('followerId', '==', this.userAuthStore.uid),
+        where('followerId', '==', this.userAuthStore?.uid),
         where('followedId', '==', this.uid)
       );
 
@@ -131,18 +133,18 @@ export default defineComponent({
         this.isFollowing = true;
         this.followerCount++;
         await addDoc(followsCollection, {
-          followerId: this.userAuthStore.uid,
+          followerId: this.userAuthStore?.uid,
           followedId: this.uid,
           timestamp: new Date()
         });
       }
     },
     async checkFollowStatus() {
-      if (!this.userAuthStore.uid) return;
+      if (!this.userAuthStore?.uid) return;
       const followsCollection = collection(db, 'follows');
       const followQuery = query(
         followsCollection, 
-        where('followerId', '==', this.userAuthStore.uid),
+        where('followerId', '==', this.userAuthStore?.uid),
         where('followedId', '==', this.uid)
       );
       const snapshot = await getDocs(followQuery);
