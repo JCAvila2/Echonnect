@@ -12,7 +12,14 @@
           <span>{{ author.username }}</span>
         </div>
         
-        <div class="description">{{ audio.description }}</div>
+        <div class="description"> 
+          <span v-if="!isExpanded">{{ shortenedDescription }}</span>
+          <span v-if="isExpanded">{{ audio.description }}</span>
+          <button v-if="audio && audio.description && audio.description.length > shortDescriptionLength" @click="toggleDescription" style="padding-left: 5px;">
+            <strong>{{ isExpanded ? 'See less' : 'See more' }}</strong>
+          </button>
+        </div>
+
         <div class="tags">
           <span v-for="tag in audio.tags" :key="tag" class="tag">{{ tag }}</span>
         </div>
@@ -169,8 +176,17 @@ export default defineComponent({
       replyContent: '' as string,
       sortOrder: 'desc' as OrderByDirection, // Default order by newest first
       userRating: 0 as number,
-      hoverRating: 0 as number | null, // null
+      hoverRating: 0 as number | null,
+      isExpanded: false as boolean,
+      shortDescriptionLength: 100 as number,
     };
+  },
+  computed: {
+    shortenedDescription(): string {
+      return this.audio?.description && this.audio.description.length > this.shortDescriptionLength
+        ? this.audio.description.substring(0, this.shortDescriptionLength) + '...'
+        : this.audio?.description ?? '';
+    },
   },
   methods: {
     async fetchAudio() {
@@ -198,6 +214,9 @@ export default defineComponent({
       if (docSnapshot.exists()) {
         this.author = docSnapshot.data() as User;
       }
+    },
+    toggleDescription() {
+      this.isExpanded = !this.isExpanded;
     },
     async fetchTotalComments() {
       const commentsRef = collection(db, 'comments');
