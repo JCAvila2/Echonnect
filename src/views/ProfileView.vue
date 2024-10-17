@@ -442,7 +442,6 @@ export default defineComponent({
 
 .stats {
   width: 250px;
-  padding-top: 20px;
   padding-right: 20px;
   border-right: 2px solid #333;
 }
