@@ -677,6 +677,7 @@ export default defineComponent({
 
   .stats {
     width: 100%;
+    padding-right: 0px;
     margin-right: 0;
     margin-bottom: 20px;
     border-right: none;
