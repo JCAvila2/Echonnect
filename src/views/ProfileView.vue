@@ -1,6 +1,9 @@
 <template>
   <div class="profile-container">
-    <div v-if="user" class="profile-content">
+
+    <!-- Desktop view -->
+    <div v-if="user && !isMobile" class="profile-content">
+
       <div class="profile-header">
         <div class="profile-picture-container">
           <label for="file-input" class="profile-picture-label">
@@ -51,10 +54,70 @@
         </div>
 
         <div class="audios-table">
-          <UserAudiosTable :uid="uid || ''" />
+          <ManageAudioTable :uid="uid || ''"/>
         </div>
       </div>
+      
     </div>
+
+    <!-- Mobile view -->
+    <div v-else-if="user && isMobile" class="profile-content">
+
+      <div class="profile-picture-container">
+        <label for="file-input" class="profile-picture-label">
+          <img :src="user?.profilePicture ?? defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+          <font-awesome-icon icon="pen" class="profile-picture-icon" />
+          <input id="file-input" type="file" @change="handleFileChange" accept="image/*" style="display: none;" />
+        </label>
+        <div class="icon-actions">
+          <font-awesome-icon icon="trash" class="delete-picture-icon" v-if="user.profilePicture"
+            @click.stop="removeProfilePicture" />
+        </div>
+      </div>
+
+      <div class="user-info">
+        <h2 class="username">{{ user.username }}</h2>      
+        <div class="user-bio-container">
+          <div v-if="!editingBio" class="user-bio">
+            <span>{{ user.biography || 'No bio yet. Click edit to add one!'  }}</span>
+            <font-awesome-icon icon="pen" class="edit-bio-icon" @click="startEditingBio" />
+          </div>
+          <div v-else class="edit-bio-form">
+            <textarea v-model="newBio" class="bio-textarea" :maxlength="bioMaxLength"></textarea>
+            <div class="bio-actions">
+              <span class="bio-char-count">{{ newBio.length }}/{{ bioMaxLength }}</span>
+              <button @click="saveBio" class="save-bio-button">Save</button>
+              <button @click="cancelEditingBio" class="cancel-bio-button">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+        <button @click="logout" class="logout-button">Logout</button>
+      </div>
+
+      <div class="stats">
+        <h3>
+          Stats
+          <font-awesome-icon icon="chart-line" />
+        </h3>
+        <ul>
+          <li><strong>Followers:</strong> {{ followerCount }}</li>
+          <li><strong>Audios:</strong> {{ audiosCount }}</li>
+          <li><strong>Plays:</strong> {{ playsCount }}</li>
+          <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
+          </li>
+        </ul>
+      </div>
+
+      <div class="audios-table">
+        <ManageAudioTable :uid="uid || ''"/>
+      </div>
+    </div>
+
+    <div v-else>
+      <h2>Loading...</h2>
+    </div>
+
   </div>
 </template>
 
@@ -63,7 +126,7 @@ import { defineComponent } from 'vue';
 import { collection, doc, getAggregateFromServer, getCountFromServer, getDoc, query, sum, updateDoc, where } from 'firebase/firestore';
 import { getDownloadURL, ref as storageRef, uploadBytes, getStorage, deleteObject } from 'firebase/storage';
 import { db } from '@/firebase/';
-import UserAudiosTable from '@/components/UserAudiosTable.vue';
+import ManageAudioTable from '@/components/ManageAudioTable.vue';
 import { getAuth, signOut } from 'firebase/auth';
 import { useAuthStore } from '@/stores/auth';
 import { formatDate } from '@/utils/formatDate';
@@ -73,7 +136,7 @@ import { User } from '@/types/views/profileView';
 
 export default defineComponent({
   components: {
-    UserAudiosTable,
+    ManageAudioTable,
   },
   setup() {
     const uid = useAuthStore().user?.uid;
@@ -82,6 +145,11 @@ export default defineComponent({
   mounted() {
     this.fetchUser();
     this.fetchUserStats();
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkMobile);
   },
   data() {
     return {
@@ -98,6 +166,7 @@ export default defineComponent({
 
       file: null as File | null,
       isUploading: false as boolean,
+      isMobile: false as boolean,
     };
   },
   methods: {
@@ -247,6 +316,9 @@ export default defineComponent({
         // TODO: Handle the error appropriately (e.g., show an error message to the user)
       }
     },
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
   },
 });
 </script>
@@ -342,7 +414,7 @@ export default defineComponent({
 
 .user-bio {
   font-size: 24px;
-  color: #a0a0a0;
+  color: white;
   margin: 5px 0;
 }
 
@@ -463,4 +535,38 @@ export default defineComponent({
 .audios-table {
   flex-grow: 1;
 }
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 20px;
+  }
+
+  .profile-picture-container {
+    width: 250px;
+    height: 250px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .user-info {
+    margin-left: 0px;
+    margin-bottom: 20px;
+  }
+
+  .logout-button {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .stats {
+    width: 100%;
+    border-right: none;
+    padding-right: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+}
+
 </style>
