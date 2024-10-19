@@ -82,18 +82,10 @@ export default {
 		const audio = this.$refs.audio as HTMLAudioElement | null;
 		if (audio) {
 			audio.volume = this.volume;
-			//audio.addEventListener('volumechange', this.updateVolume);
 		}
 		this.checkMobile();
 		window.addEventListener('resize', this.checkMobile);
 	},
-	// beforeUnmount() {
-	// 	const audio = this.$refs.audio as HTMLAudioElement | null;
-  //   if (audio) {
-  //       audio.removeEventListener('volumechange', this.updateVolume);
-  //   }
-	// 	window.removeEventListener('resize', this.checkMobile);
-	// },
 	data() {
 		return {
 			progress: 0 as number,
@@ -169,11 +161,6 @@ export default {
 				this.volume = this.previousVolume;
 			}
 		},
-		// updateVolume() {
-    //     const audio = this.$refs.audio as HTMLAudioElement;
-    //     this.volume = audio.volume; // Update the volume state
-		// 		console.log('Volume changed:', this.volume);
-    // },
 		checkMobile() {
 			this.isMobile = window.innerWidth < 768;
 		},
