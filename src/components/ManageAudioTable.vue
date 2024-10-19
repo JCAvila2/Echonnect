@@ -202,10 +202,10 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .search-container {
-	padding: 20px;
 	color: white;
+	padding: 0px 0px 20px 20px;
 }
 
 .custom-table {

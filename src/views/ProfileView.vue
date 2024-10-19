@@ -19,7 +19,6 @@
 
         <div class="user-info">
           <h2 class="username">{{ user.username }}</h2>
-          <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
           <div class="user-bio-container">
             <p v-if="!editingBio" class="user-bio">
               {{ user.biography || 'No bio yet. Click edit to add one!' }}
@@ -34,6 +33,7 @@
               </div>
             </div>
           </div>
+          <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
           <button @click="logout" class="logout-button">Logout</button>
         </div>
       </div>
@@ -57,7 +57,7 @@
           <ManageAudioTable :uid="uid || ''"/>
         </div>
       </div>
-      
+
     </div>
 
     <!-- Mobile view -->
