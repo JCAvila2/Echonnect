@@ -68,9 +68,6 @@
         </template>
 
         <v-list-item-title>{{ item.title }}</v-list-item-title>
-        <v-list-item-subtitle>
-          <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
-        </v-list-item-subtitle>
 
 				<template v-slot:append>
 					<div @click.stop="deleteAudio(item.id)">
@@ -242,7 +239,6 @@ export default {
 .author-item:hover {
 	text-decoration: underline;
 }
-
 
 
 /* Actions icons */
