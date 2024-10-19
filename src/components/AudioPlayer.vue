@@ -5,11 +5,11 @@
 			Your browser does not support the audio element.
 		</audio>
 
-		<div class="container">
+		<div v-if="!isMobile" class="container">
 			<!-- play/pause buttons -->
 			<div class="status-controller">
-				<button v-if="!isPlaying" @click="playAudio"><font-awesome-icon icon="play" /></button>
-				<button v-else @click="pauseAudio"><font-awesome-icon icon="pause" /></button>
+				<button v-if="!isPlaying" @click="playAudio"><font-awesome-icon icon="play" class="play-pause-icon" style="margin-left: 5px;" /></button>
+				<button v-else @click="pauseAudio"><font-awesome-icon icon="pause" class="play-pause-icon" /></button>
 			</div>
 
 			<!-- Progress bar -->
@@ -19,7 +19,8 @@
 
 			<!-- Time -->
 			<div class="time">
-				{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ formatTime(($refs.audio as HTMLAudioElement)?.duration || 0) }}
+				{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ formatTime(($refs.audio as
+					HTMLAudioElement)?.duration || 0) }}
 			</div>
 
 			<!-- Volume -->
@@ -28,6 +29,36 @@
 				:style="{ background: `linear-gradient(to right, ${isHover ? 'darkblue' : '#007bff'} 0%, ${isHover ? 'darkblue' : '#007bff'} ${volume * 100}%, #e0e0e0 ${volume * 100}%, #e0e0e0 100%)` }"
 				@mouseover="isHover = true" @mouseleave="isHover = false" />
 		</div>
+
+		<!-- For mobile -->
+		<div v-else class="container">
+			<!-- Progress bar and time -->
+			<div class="progress-container">
+				<div class="progress-bar" @click.stop="seekAudio"
+					style="	height: 15px; border-radius: 50px;">
+					<div class="progress" :style="{ width: progress + '%' }"></div>
+				</div>
+				<div class="time">
+					{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ formatTime(($refs.audio as
+						HTMLAudioElement)?.duration || 0) }}
+				</div>
+			</div>
+
+			<!-- play/pause buttons -->
+			<div class="status-controller">
+				<button v-if="!isPlaying" @click="playAudio"><font-awesome-icon icon="play" class="play-pause-icon" style="margin-left: 5px;"/></button>
+				<button v-else @click="pauseAudio"><font-awesome-icon icon="pause" class="play-pause-icon" /></button>
+			</div>
+
+			<!-- Volume -->
+			<div class="volume-container">
+			<font-awesome-icon :icon="getVolumeIcon" class="volume-icon" @click="muteVolume" />
+				<input type="range" min="0" max="1" step="0.01" v-model="volume" @input="changeVolume"
+					:style="{ background: `linear-gradient(to right, ${isHover ? 'darkblue' : '#007bff'} 0%, ${isHover ? 'darkblue' : '#007bff'} ${volume * 100}%, #e0e0e0 ${volume * 100}%, #e0e0e0 100%)` }"
+					@mouseover="isHover = true" @mouseleave="isHover = false" />
+			</div>
+		</div>
+
 	</div>
 </template>
 
@@ -52,6 +83,8 @@ export default {
 		if (audio) {
 			audio.volume = this.volume;
 		}
+		this.checkMobile();
+		window.addEventListener('resize', this.checkMobile);
 	},
 	data() {
 		return {
@@ -60,6 +93,7 @@ export default {
 			volume: 0.2 as number, // Default volume
 			previousVolume: 0.2 as number,
 			isHover: false as boolean,
+			isMobile: false as boolean,
 		};
 	},
 	computed: {
@@ -126,8 +160,10 @@ export default {
 				audio.volume = this.previousVolume;
 				this.volume = this.previousVolume;
 			}
-		}
-
+		},
+		checkMobile() {
+			this.isMobile = window.innerWidth < 768;
+		},
 	}
 };
 </script>
@@ -156,11 +192,14 @@ export default {
 	border-radius: 50%;
 	cursor: pointer;
 	transition: background-color 0.3s ease;
-	width: 50px;
-	height: 50px;
+	width: 70px;
+	height: 70px;
 }
 .status-controller button:hover {
 	background-color: #0056b3;
+}
+.play-pause-icon {
+	font-size: 40px;
 }
 
 
@@ -239,5 +278,68 @@ input[type="range"]::-moz-range-thumb {
 input[type="range"]:hover::-webkit-slider-thumb {
 	transform: scale(1.5);
 	background: darkblue;
+}
+
+@media (max-width: 768px) {
+	.container {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.status-controller {
+		margin-block: 30px;
+		margin-right: 0px;
+	}
+	.status-controller button {
+		margin-inline: auto;
+	}
+
+
+	/* Progress % and time */
+	.progress-container {
+		display: flex;
+		width: 100%;
+	}
+
+	.progress-bar:hover .progress {
+		height: 100%;
+		margin-right: 10px;
+		background-color: #007bff;
+	}
+
+	.progress-bar {
+		margin: auto 0;
+		margin-right: 10px;
+	}
+
+	.progress {
+		flex-grow: 1;
+		height: 100%;
+		background-color: #007bff;
+		margin-right: 10px;
+		border-radius: 5px;
+		border-radius: '50px';
+	}
+
+	.time {
+		white-space: nowrap;
+		margin-right: 0px;
+		font-size: 14px;
+	}
+
+	.volume-container {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.volume-control {
+		width: 100%;
+		justify-content: center;
+	}
+
+	input[type="range"] {
+		width: calc(100% - 40px);
+	}
 }
 </style>

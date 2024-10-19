@@ -3,7 +3,14 @@
     <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" single-line
       hide-details class="mb-4" theme="dark"></v-text-field>
 
-    <v-data-table :headers="headers" :items="listOfAudios" :search="search" :items-per-page="5" class="custom-table"
+    <!-- Table for Desktop -->
+    <v-data-table 
+      v-if="!isMobile"
+      :headers="headers" 
+      :items="listOfAudios" 
+      :search="search" 
+      :items-per-page="5" 
+      class="custom-table"
       theme="dark">
 
       <!-- Custom items on header -->
@@ -33,6 +40,26 @@
       </template>
 
     </v-data-table>
+
+    <!-- List for Mobile -->
+    <v-list v-else class="mobile-list" theme="dark">
+      <v-list-item
+        v-for="item in filteredAudios"
+        :key="item.id"
+        @click="HearAudio(item.id)"
+        class="py-2"
+      >
+        <template v-slot:prepend>
+          <v-avatar size="50" style="border-radius: 10%;">
+            <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
+          </v-avatar>
+        </template>
+
+        <v-list-item-title style="font-size: 20px;">{{ item.title }}</v-list-item-title>
+
+      </v-list-item>
+    </v-list>
+
   </div>
 </template>
 
@@ -59,7 +86,7 @@ export default {
     };
   },
   data() {
-    const headers = [
+    const headers: TableHeader[] = [
       { title: '', value: 'imageUrl', sortable: false, width: '50px' },
       { title: 'Title', value: 'title', sortable: true },
       { value: 'duration', sortable: true }, // Custom slot
@@ -70,12 +97,18 @@ export default {
 
     return {
       search: '',
-      headers: headers as TableHeader[],
+      headers,
       listOfAudios: [] as AudioItem[],
+      isMobile: false,
     };
   },
   mounted() {
     this.getAudios();
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkMobile);
   },
   computed: {
     filteredAudios() {
@@ -104,14 +137,18 @@ export default {
     HearAudio(audioId: string) {
       this.router.push(`/audio/${audioId}`);
     },
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
   }
 
 };
 </script>
 
-<style>
+<style scoped>
 .search-container {
   color: white;
+  padding: 0px 0px 20px 20px;
 }
 
 .custom-table {
@@ -130,9 +167,8 @@ export default {
 }
 
 .audio-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   vertical-align: middle;
 }
@@ -145,4 +181,12 @@ export default {
 .author-item:hover {
   text-decoration: underline;
 }
+
+@media (max-width: 768px) {
+	.search-container {
+		padding: 0px;
+		margin-bottom: 20px;
+	}
+}
+
 </style>

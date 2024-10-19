@@ -1,25 +1,37 @@
 <template>
   <div class="audio-player" v-if="audio && author">
-    <div class="header">
+    <div class="audio-section">
       <div class="icon">
         <img :src="audio.imageUrl" :alt="audio.title" />
       </div>
-      <div class="title-section">
-        <h1>{{ audio.title }}</h1>
+      <div class="audio-info">
+        <div class="audio-title">{{ audio.title }}</div>
+        <AudioPlayer :audioSrc="audio.audioUrl" />
         <div class="user-info" @click="watchUserProfile(audio.uid)">
           <img :src="author.profilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
           <span>{{ author.username }}</span>
         </div>
-        <p class="description">{{ audio.description }}</p>
+        
+        <div class="description"> 
+          <span v-if="!isExpanded">{{ shortenedDescription }}</span>
+          <span v-if="isExpanded">{{ audio.description }}</span>
+          <button v-if="audio && audio.description && audio.description.length > shortDescriptionLength" @click="toggleDescription" style="padding-left: 5px;">
+            <strong>{{ isExpanded ? 'See less' : 'See more' }}</strong>
+          </button>
+        </div>
+
         <div class="tags">
           <span v-for="tag in audio.tags" :key="tag" class="tag">{{ tag }}</span>
         </div>
       </div>
     </div>
 
-    <div class="content">
+    <div class="community">
       <div class="stats">
-        <h2>Stats</h2>
+        <h2>
+          Stats
+          <font-awesome-icon icon="chart-line" />
+        </h2>
         <div class="stat-item">
           <span class="stat-label">Plays</span>
           <span class="stat-value">{{ audio.reproductions }}</span>
@@ -35,8 +47,6 @@
       </div>
 
       <div class="player-section">
-        <AudioPlayer :audioSrc="audio.audioUrl" />
-
         <div class="rating-section">
           <span class="rating-label">{{ userRating ? 'Rated:' : 'Rate this audio:' }}</span>
           <div class="star-rating">
@@ -166,8 +176,17 @@ export default defineComponent({
       replyContent: '' as string,
       sortOrder: 'desc' as OrderByDirection, // Default order by newest first
       userRating: 0 as number,
-      hoverRating: 0 as number | null, // null
+      hoverRating: 0 as number | null,
+      isExpanded: false as boolean,
+      shortDescriptionLength: 100 as number,
     };
+  },
+  computed: {
+    shortenedDescription(): string {
+      return this.audio?.description && this.audio.description.length > this.shortDescriptionLength
+        ? this.audio.description.substring(0, this.shortDescriptionLength) + '...'
+        : this.audio?.description ?? '';
+    },
   },
   methods: {
     async fetchAudio() {
@@ -195,6 +214,9 @@ export default defineComponent({
       if (docSnapshot.exists()) {
         this.author = docSnapshot.data() as User;
       }
+    },
+    toggleDescription() {
+      this.isExpanded = !this.isExpanded;
     },
     async fetchTotalComments() {
       const commentsRef = collection(db, 'comments');
@@ -367,33 +389,40 @@ export default defineComponent({
 
 <style scoped>
 .audio-player {
-  background-color: #1e2a35;
   color: white;
   padding: 20px;
   font-family: Arial, sans-serif;
 }
 
-.header {
+.audio-section {
   display: flex;
   align-items: flex-start;
   margin-bottom: 20px;
 }
 
+.audio-info {
+  width: 100%;
+}
 .icon {
   margin-right: 20px;
 }
 
 .icon img {
-  max-width: 200px;
+  width: 300px;
+  height: 300px;
+  object-fit: cover;
 }
 
-.title-section h1 {
-  margin: 0 0 10px 0;
+.audio-title {
+  font-weight: bold;
+  font-size: 3em;
+  margin-bottom: 10px;
 }
 
 .user-info {
   display: flex;
   align-items: center;
+  margin-top: 40px;
   margin-bottom: 10px;
 }
 
@@ -427,13 +456,20 @@ export default defineComponent({
   margin-bottom: 5px;
 }
 
-.content {
+.community {
   display: flex;
+  border-top: 1px solid #3a4a5a;
+  padding-top: 20px;
 }
 
 .stats {
-  width: 200px;
+  width: 300px;
   margin-right: 20px;
+  border-right: 1px solid #3a4a5a;
+  padding-right: 20px;
+}
+.stats h2 {
+  margin-bottom: 20px;
 }
 
 .stat-item {
@@ -586,7 +622,7 @@ export default defineComponent({
 }
 
 .rating-section {
-  margin-top: 15px;
+  margin-top: 0px;
   margin-bottom: 10px;
   display: flex;
   align-items: center;
@@ -616,4 +652,46 @@ export default defineComponent({
 .star.hover {
   color: #0056b3;
 }
+
+
+@media (max-width: 768px) {
+  .audio-section {
+    flex-direction: column;
+    align-items: center;
+
+  }
+
+  .icon {
+    margin-right: 0;
+    margin-bottom: 20px;
+    text-align: center;
+  }
+
+  .icon img {
+    max-width: 100%;
+  }
+
+  .community {
+    flex-direction: column;
+  }
+
+  .stats {
+    width: 100%;
+    padding-right: 0px;
+    margin-right: 0;
+    margin-bottom: 20px;
+    border-right: none;
+  }
+
+  .audio-section > * {
+    padding-bottom: 15px;
+    margin-bottom: 15px;
+  }
+
+  .audio-section > *:last-child {
+    border-bottom: none;
+  }
+}
+
+
 </style>

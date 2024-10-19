@@ -3,7 +3,9 @@
     <v-text-field v-model="search" label="What do you want to hear?" prepend-inner-icon="mdi-magnify" single-line
       hide-details class="mb-4" theme="dark"></v-text-field>
 
+    <!-- Table for Desktop -->
     <v-data-table 
+      v-if="!isMobile"
       :headers="headers" 
       :items="listOfAudios" 
       :search="search" 
@@ -11,7 +13,6 @@
       class="custom-table"
       theme="dark"
       >
-
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
       <template v-slot:header.duration>
@@ -40,8 +41,28 @@
           <td>{{ item.reproductions }}</td>
         </tr>
       </template>
-
     </v-data-table>
+
+    <!-- List for Mobile -->
+    <v-list v-else class="mobile-list" theme="dark">
+      <v-list-item
+        v-for="item in filteredAudios"
+        :key="item.id"
+        @click="HearAudio(item.id)"
+        class="py-2"
+      >
+        <template v-slot:prepend>
+          <v-avatar size="50" style="border-radius: 10%;">
+            <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
+          </v-avatar>
+        </template>
+        <v-list-item-title style="font-size: 20px;">{{ item.title }}</v-list-item-title>
+        <v-list-item-subtitle>
+          <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
+        </v-list-item-subtitle>
+      </v-list-item>
+    </v-list>
+
   </div>
 </template>
 
@@ -77,10 +98,16 @@ export default {
       search: '',
       headers,
       listOfAudios: [] as AudioItem[],
+      isMobile: false,
     };
   },
   mounted() {
     this.getAudios();
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkMobile);
   },
   computed: {
     filteredAudios(): AudioItem[] {
@@ -92,29 +119,30 @@ export default {
   methods: {
     async getAudios() {
       const audios = await getDocs(collection(db, 'audios'));
-      const audioPromises: AudioItem[] = []; // Usar el tipo AudioItem
+      const audioPromises: AudioItem[] = [];
       audios.forEach((audio) => {
         const audioData: AudioItem = {
           id: audio.id,
-          ...audio.data() as Omit<AudioItem, 'id'>, // Asegúrate de que audio.data() contenga las propiedades correctas
+          ...audio.data() as Omit<AudioItem, 'id'>,
         };
         audioPromises.push(audioData);
       });
       this.listOfAudios = audioPromises;
     },
-
-    // Redirect functions
     watchProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
     },
     HearAudio(audioId: string) {
       this.router.push(`/audio/${audioId}`);
     },
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
   }
 };
 </script>
 
-<style>
+<style scoped>
 .search-container {
   padding: 20px;
   color: white;
@@ -124,21 +152,19 @@ export default {
   background-color: transparent;
 }
 
-/* icons on header */
 .icons:hover {
   color: green;
 }
 
-/* Each element */
-.item:hover {
+.item:hover,
+.v-list-item:hover {
   background-color: #2c2c2c;
   cursor: pointer;
 }
 
 .audio-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   vertical-align: middle;
 }
@@ -150,5 +176,15 @@ export default {
 
 .author-item:hover {
   text-decoration: underline;
+}
+
+.mobile-list {
+  background-color: transparent;
+}
+
+@media (max-width: 767px) {
+  .search-container {
+    padding: 10px;
+  }
 }
 </style>

@@ -1,21 +1,25 @@
 <template>
   <div class="profile-container">
-    <div v-if="user" class="profile-content">
+    
+    <!-- Desktop view --> 
+    <div v-if="user && !isMobile" class="profile-content">
       <div class="profile-header">
         <img :src="user?.profilePicture ?? defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
         <div class="user-info">
           <h2 class="username">{{ user.username }}</h2>
-          <p class="user-creation"> <strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
           <p class="user-bio" v-if="user.biography != ''">{{ user.biography }}</p>
+          <p class="user-creation"> <strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
           <button @click="toggleFollow" class="btn" :class="{ 'btn-follow': !isFollowing, 'btn-unfollow': isFollowing }">
             {{ isFollowing ? 'Unfollow' : 'Follow' }}
           </button>
         </div>
       </div>
-
       <div class="stats-and-audios">
         <div class="stats">
-          <h3>Stats</h3>
+          <h3>
+            Stats
+            <font-awesome-icon icon="chart-line" />
+          </h3>
           <ul>
             <li><strong>Followers:</strong> {{ followerCount }}</li>
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
@@ -23,12 +27,44 @@
             <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
         </div>
-
         <div class="audios-table">
           <UserAudiosTable :uid="uid || ''" />
         </div>
       </div>
     </div>
+
+    <!-- Mobile view -->
+    <div v-else-if="user && isMobile" class="profile-content">
+      
+      <div class="profile-picture-container">
+        <img :src="user?.profilePicture ?? defaultProfilePicture" alt="Profile Picture" class="profile-picture" />
+      </div>
+      
+      <div class="user-info">
+        <h2 class="username">{{ user.username }}</h2>
+        <button @click="toggleFollow" class="btn" :class="{ 'btn-follow': !isFollowing, 'btn-unfollow': isFollowing }">
+          {{ isFollowing ? 'Unfollow' : 'Follow' }}
+        </button>
+        <p class="user-bio" v-if="user.biography != ''">{{ user.biography }}</p>
+        <p class="user-creation"> <strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+      </div>
+      <div class="stats">
+        <h3>
+          Stats
+          <font-awesome-icon icon="chart-line" />
+        </h3>
+          <ul>
+            <li><strong>Followers:</strong> {{ followerCount }}</li>
+            <li><strong>Audios:</strong> {{ audiosCount }}</li>
+            <li><strong>Plays:</strong> {{ playsCount }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+          </ul>
+      </div>
+      <div class="audios-table">
+        <UserAudiosTable :uid="uid || ''" />
+      </div>
+    </div>
+
   </div>
 </template>
 
@@ -61,6 +97,11 @@ export default defineComponent({
     this.fetchUser();
     this.fetchUserStats();
     this.checkFollowStatus();
+    this.checkMobile();
+    window.addEventListener('resize', this.checkMobile);
+  },
+  beforeUnmount() {
+    window.removeEventListener('resize', this.checkMobile);
   },
   data() {
     return {
@@ -73,6 +114,7 @@ export default defineComponent({
       averageRating: 0 as number,
       followerCount: 0 as number,
       isFollowing: false as boolean,
+      isMobile: false as boolean,
     };
   },
   methods: {
@@ -109,7 +151,7 @@ export default defineComponent({
     },
     async toggleFollow() {
       if (!this.userAuthStore?.uid) {
-        alert('Please log in to rate this audio.'); // TODO: redirect to login page
+        alert('Please log in follow this user.'); // TODO: redirect to login page
         return;
       }
 
@@ -150,6 +192,9 @@ export default defineComponent({
       const snapshot = await getDocs(followQuery);
       this.isFollowing = !snapshot.empty;
     },
+    checkMobile() {
+      this.isMobile = window.innerWidth < 768;
+    },
   },
 });
 </script>
@@ -158,7 +203,6 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  background-color: #1c2732;
   color: white;
   font-family: Arial, sans-serif;
 }
@@ -175,21 +219,21 @@ export default defineComponent({
 }
 
 .profile-picture {
-  width: 20%;
-  min-width: 200px;
-  height: auto;
+  width: 250px;
+  height: 250px;
   border-radius: 50%;
   object-fit: cover;
-  margin-right: 20px;
 }
 
 .user-info {
   flex-grow: 1;
+  margin-left: 30px;
 }
 
 .username {
-  font-size: 44px;
+  font-size: 81px;
   margin: 0;
+  font-weight: black;
 }
 
 .user-creation {
@@ -199,16 +243,16 @@ export default defineComponent({
 
 .user-bio {
   font-size: 24px;
-  color: #a0a0a0;
   margin: 5px 0;
 }
 
 .btn {
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 .btn-follow {
   padding: 10px 20px;
-  background-color: blue;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
@@ -232,18 +276,18 @@ export default defineComponent({
 .stats-and-audios {
   display: flex;
   flex-wrap: wrap;
-  gap: 20px;
+  gap: 10px;
   margin-top: 20px;
 }
 
 .stats {
-  width: 200px;
-  padding-top: 20px;
+  width: 250px;
   padding-right: 20px;
+  border-right: 2px solid #333;
 }
 
 .stats h3 {
-  font-size: 18px;
+  font-size: 28px;
   margin-bottom: 10px;
 }
 
@@ -259,4 +303,42 @@ export default defineComponent({
 .audios-table {
   flex-grow: 1;
 }
+
+@media (max-width: 768px) {
+  .profile-container {
+    padding: 20px;
+  }
+
+  .profile-picture-container {
+    width: 250px;
+    height: 250px;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .btn {
+    margin-top: 10px;
+  }
+
+  .user-info {
+    margin-left: 0px;
+    margin-bottom: 20px;
+  }
+
+  .logout-button {
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+  .stats {
+    width: 100%;
+    border-right: none;
+    padding-right: 0;
+    margin-top: 20px;
+    margin-bottom: 20px;
+  }
+
+}
+
 </style>
