@@ -52,11 +52,11 @@
         class="py-2"
       >
         <template v-slot:prepend>
-          <v-avatar size="40">
+          <v-avatar size="50" style="border-radius: 10%;">
             <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
           </v-avatar>
         </template>
-        <v-list-item-title>{{ item.title }}</v-list-item-title>
+        <v-list-item-title style="font-size: 20px;">{{ item.title }}</v-list-item-title>
         <v-list-item-subtitle>
           <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
         </v-list-item-subtitle>
@@ -163,9 +163,8 @@ export default {
 }
 
 .audio-icon {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
+  width: 60px;
+  height: 60px;
   object-fit: cover;
   vertical-align: middle;
 }

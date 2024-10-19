@@ -151,7 +151,7 @@ export default defineComponent({
     },
     async toggleFollow() {
       if (!this.userAuthStore?.uid) {
-        alert('Please log in to rate this audio.'); // TODO: redirect to login page
+        alert('Please log in follow this user.'); // TODO: redirect to login page
         return;
       }
 
@@ -252,7 +252,7 @@ export default defineComponent({
 }
 .btn-follow {
   padding: 10px 20px;
-  background-color: blue;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 5px;
