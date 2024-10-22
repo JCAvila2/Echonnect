@@ -23,6 +23,7 @@
           <ul>
             <li><strong>Followers:</strong> {{ followerCount }}</li>
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
+            <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
             <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
@@ -56,6 +57,7 @@
           <ul>
             <li><strong>Followers:</strong> {{ followerCount }}</li>
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
+            <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
             <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
@@ -97,6 +99,7 @@ export default defineComponent({
     this.fetchUser();
     this.fetchUserStats();
     this.checkFollowStatus();
+    this.fetchBookmarksCount();
     this.checkMobile();
     window.addEventListener('resize', this.checkMobile);
   },
@@ -115,6 +118,7 @@ export default defineComponent({
       followerCount: 0 as number,
       isFollowing: false as boolean,
       isMobile: false as boolean,
+      bookmarksCount: 0 as number,
     };
   },
   methods: {
@@ -191,6 +195,12 @@ export default defineComponent({
       );
       const snapshot = await getDocs(followQuery);
       this.isFollowing = !snapshot.empty;
+    },
+    async fetchBookmarksCount() {
+      const bookmarksCollection = collection(db, 'bookmarks');
+      const bookmarksQuery = query(bookmarksCollection, where('authorId', '==', this.uid));
+      const count = await getCountFromServer(bookmarksQuery);
+      this.bookmarksCount = count.data().count;
     },
     checkMobile() {
       this.isMobile = window.innerWidth < 768;

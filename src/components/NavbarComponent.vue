@@ -20,7 +20,7 @@
         <li> <router-link @click="toggleMenu" to="/search"> Search </router-link> </li>
         <li v-if="uid"> <router-link @click="toggleMenu" to="/profile"> Profile </router-link> </li>
         <li v-if="uid"> <router-link @click="toggleMenu" to="/upload"> Upload </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/settings"> Settings </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/bookmarks"> Bookmarks </router-link> </li>
         <li v-if="!uid"> <router-link @click="toggleMenu" to="/login"> Log In </router-link> </li>
         <li v-if="!uid"> <router-link @click="toggleMenu" to="/register"> Register </router-link> </li>
       </ul>

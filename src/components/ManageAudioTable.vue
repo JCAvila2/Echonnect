@@ -186,6 +186,13 @@ export default {
 				await deleteDoc(doc(db, 'ratings', rating.id));
 			});
 
+			// Delete bookmarks from firestore
+			const bookmarksQuery = query(collection(db, 'bookmarks'), where('audioId', '==', audioId));
+			const bookmarks = await getDocs(bookmarksQuery);
+			bookmarks.forEach(async (bookmark) => {
+				await deleteDoc(doc(db, 'bookmarks', bookmark.id));
+			});
+
 			// Update the list of audios
 			this.listOfAudios = this.listOfAudios.filter((audio) => audio.id !== audioId);
 
