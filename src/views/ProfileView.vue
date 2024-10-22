@@ -47,6 +47,7 @@
           <ul>
             <li><strong>Followers:</strong> {{ followerCount }}</li>
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
+            <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
             <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
             </li>
@@ -103,6 +104,7 @@
         <ul>
           <li><strong>Followers:</strong> {{ followerCount }}</li>
           <li><strong>Audios:</strong> {{ audiosCount }}</li>
+          <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
           <li><strong>Plays:</strong> {{ playsCount }}</li>
           <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
           </li>
@@ -160,6 +162,7 @@ export default defineComponent({
       playsCount: 0 as number,
       averageRating: null as number | null,
       followerCount: 0 as number,
+      bookmarksCount: 0 as number,
       editingBio: false as boolean,
       newBio: '' as string,
       bioMaxLength: 150 as number,
@@ -199,6 +202,7 @@ export default defineComponent({
         totalRating: sum('averageRating'),
       });
       await this.fetchFollowersCount();
+      await this.fetchBookmarksCount();
 
       this.audiosCount = count.data().count;
       this.playsCount = snapshot.data().totalPlays;
@@ -209,6 +213,12 @@ export default defineComponent({
       const followQuery = query(followsCollection, where('followedId', '==', this.uid));
       const count = await getCountFromServer(followQuery);
       this.followerCount = count.data().count;
+    },
+    async fetchBookmarksCount() {
+      const bookmarksCollection = collection(db, 'bookmarks');
+      const bookmarksQuery = query(bookmarksCollection, where('authorId', '==', this.uid));
+      const count = await getCountFromServer(bookmarksQuery);
+      this.bookmarksCount = count.data().count;
     },
 
     handleFileChange(event: Event) {

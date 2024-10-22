@@ -11,8 +11,9 @@ import {
   faVolumeLow,
   faVolumeMute,
   faChartLine,
+  faBookmark,
 } from '@fortawesome/free-solid-svg-icons';
-import { faClock, faCalendar } from '@fortawesome/free-regular-svg-icons';
+import { faClock, faCalendar, faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons';
 
 library.add(
   faCamera,
@@ -27,6 +28,8 @@ library.add(
   faVolumeLow,
   faVolumeMute,
   faChartLine,
+  faBookmark,
+  farBookmark,
 );
 
 export { FontAwesomeIcon };

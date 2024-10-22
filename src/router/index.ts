@@ -3,7 +3,7 @@ import SearchView from '@/views/SearchView.vue';
 import ProfileView from '@/views/ProfileView.vue';
 import watchProfileView from '@/views/WatchProfileView.vue';
 import UploadView from '@/views/UploadView.vue';
-import SettingsView from '@/views/SettingsView.vue';
+import BookmarksView from '@/views/BookmarksView.vue';
 import LoginView from '@/views/LoginView.vue';
 import RegisterView from '@/views/RegisterView.vue';
 import { useAuthStore } from '@/stores/auth';
@@ -57,9 +57,12 @@ const router = createRouter({
       props: true,
     },
     {
-      path: '/settings',
-      name: 'settings',
-      component: SettingsView
+      path: '/bookmarks',
+      name: 'bookmarks',
+      component: BookmarksView,
+      meta: {
+        requiresAuth: true
+      }
     },
 
     // Auth

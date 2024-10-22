@@ -5,7 +5,14 @@
         <img :src="audio.imageUrl" :alt="audio.title" />
       </div>
       <div class="audio-info">
-        <div class="audio-title">{{ audio.title }}</div>
+        <div class="audio-title">
+          {{ audio.title }}
+
+          <button @click="toggleBookmark" class="bookmark-btn">
+            <font-awesome-icon icon="fa-solid fa-bookmark" v-if="isBookmarked"/>
+            <font-awesome-icon icon="fa-regular fa-bookmark" v-else/>
+          </button>
+        </div>
         <AudioPlayer :audioSrc="audio.audioUrl" />
         <div class="user-info" @click="watchUserProfile(audio.uid)">
           <img :src="author.profilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
@@ -37,6 +44,10 @@
           <span class="stat-value">{{ audio.reproductions }}</span>
         </div>
         <div class="stat-item">
+          <span class="stat-label">Bookmarks</span>
+          <span class="stat-value">{{ totalBookmarks }}</span>
+        </div>
+        <div class="stat-item">
           <span class="stat-label">Score</span>
           <span class="stat-value">{{ audio.averageRating ? audio.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</span>
         </div>
@@ -50,8 +61,8 @@
         <div class="rating-section">
           <span class="rating-label">{{ userRating ? 'Rated:' : 'Rate this audio:' }}</span>
           <div class="star-rating">
-            <span v-for="star in 5" :key="star" @click="rateAudio(star)" @mouseover="setHover(star)"
-              @mouseleave="clearHover"
+            <span v-for="star in 5" :key="star" @click="rateAudio(star)" @mouseover="setRatingHover(star)"
+              @mouseleave="clearRatingHover"
               :class="['star', { 'active': star <= userRating, 'hover': star <= (hoverRating || 0) }]">
               ★
             </span>
@@ -122,7 +133,7 @@
 
 <script lang="ts">
 import { db } from '@/firebase';
-import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc, OrderByDirection } from 'firebase/firestore';
+import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc, OrderByDirection, deleteDoc } from 'firebase/firestore';
 import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
 import { useAuthStore } from '@/stores/auth';
@@ -168,6 +179,7 @@ export default defineComponent({
       author: null as User | null,
       comments: [] as Comment[] | null,
       totalComments: 0 as number,
+      totalBookmarks: 0 as number,
       displayedComments: 0 as number,
       currentLimit: 5 as number, // Initial limit of comments to load
       showMoreButton: false as boolean,
@@ -179,6 +191,7 @@ export default defineComponent({
       hoverRating: 0 as number | null,
       isExpanded: false as boolean,
       shortDescriptionLength: 100 as number,
+      isBookmarked: false as boolean,
     };
   },
   computed: {
@@ -196,10 +209,13 @@ export default defineComponent({
         this.audio = { id: docSnapshot.id, ...docSnapshot.data() } as AudioItem;
         document.title = this.audio?.title ?? 'Audio';
 
+        // Call other methods that depend on audio data
         await this.fetchAuthor(this.audio?.uid);
         await this.fetchTotalComments();
         await this.loadComments();
         await this.fetchUserRating();
+        await this.fetchBookmarkStatus();
+        await this.fetchBookmarkCount();
 
         const incrementValue = increment(1);
         await updateDoc(audioDoc, { reproductions: incrementValue });
@@ -375,13 +391,49 @@ export default defineComponent({
           this.audio.averageRating = (audioData.sumRatings + rating) / (audioData.totalRatings + 1);
         }
       }
-      //this.userRating = rating;
     },
-    setHover(star: number) {
+    setRatingHover(star: number) {
       this.hoverRating = star;
     },
-    clearHover() {
+    clearRatingHover() {
       this.hoverRating = null;
+    },
+
+    async fetchBookmarkCount() {
+      const bookmarksRef = collection(db, 'bookmarks');
+      const q = query(bookmarksRef, where('audioId', '==', this.id));
+      const snapshot = await getCountFromServer(q);
+      this.totalBookmarks = snapshot.data().count;
+    },
+    async fetchBookmarkStatus() {
+      if (!this.user) return;
+      const bookmarkId = `${this.id}_${this.user.uid}`;
+      const bookmarkRef = doc(db, 'bookmarks', bookmarkId);
+      const bookmarkDoc = await getDoc(bookmarkRef);
+      this.isBookmarked = bookmarkDoc.exists();
+    },
+    async toggleBookmark() {
+      if (!this.user) {
+        alert('Please log in to bookmark this audio.'); // TODO: redirect to login page
+        return;
+      }
+
+      const bookmarkId = `${this.id}_${this.user.uid}`;
+      const bookmarkRef = doc(db, 'bookmarks', bookmarkId);
+      if (this.isBookmarked) {
+        this.isBookmarked = false;
+        this.totalBookmarks--;
+        await deleteDoc(bookmarkRef);
+      } else {
+        this.isBookmarked = true;
+        this.totalBookmarks++;
+        await setDoc(bookmarkRef, {
+          userId: this.user.uid,
+          audioId: this.id,
+          authorId: this.audio?.uid,
+          timestamp: new Date()
+        });
+      }
     }
   }
 });
@@ -417,6 +469,18 @@ export default defineComponent({
   font-weight: bold;
   font-size: 3em;
   margin-bottom: 10px;
+  position: relative;
+}
+
+.bookmark-btn {
+  position: absolute;
+  right: 0;
+  top: 0;
+  cursor: pointer;
+}
+
+.bookmark-btn:hover {
+  color: #0056b3;
 }
 
 .user-info {

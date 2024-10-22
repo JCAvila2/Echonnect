@@ -1,5 +1,5 @@
 <template>
-  <h1>Settings component</h1>
+  <h1>Bookmarks component</h1>
 </template>
 
 <script setup lang="ts">
