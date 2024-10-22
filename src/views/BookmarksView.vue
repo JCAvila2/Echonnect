@@ -1,6 +1,6 @@
 <template>
   <div class="search-container">
-    <v-text-field v-model="search" label="What do you want to hear?" prepend-inner-icon="mdi-magnify" single-line
+    <v-text-field v-model="search" label="Search bookmarked audio..." prepend-inner-icon="mdi-magnify" single-line
       hide-details class="mb-4" theme="dark"></v-text-field>
 
     <!-- Table for Desktop -->
@@ -9,7 +9,7 @@
       :headers="headers" 
       :items="listOfAudios" 
       :search="search" 
-      :items-per-page="5" 
+      :items-per-page="10" 
       class="custom-table"
       theme="dark"
       >
@@ -39,6 +39,11 @@
           <td>{{ formatDate(item.createdAt) }}</td>
           <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
           <td>{{ item.reproductions }}</td>
+          <td>
+            <div class="actions-icons-delete" @click.stop="removeBookmark(item.id)">
+              <font-awesome-icon icon="trash" />
+            </div>
+					</td>
         </tr>
       </template>
     </v-data-table>
@@ -60,6 +65,11 @@
         <v-list-item-subtitle>
           <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
         </v-list-item-subtitle>
+        <template v-slot:append>
+					<div @click.stop="removeBookmark(item.id)">
+						<font-awesome-icon icon="trash" />
+					</div>
+        </template>
       </v-list-item>
     </v-list>
 
@@ -67,7 +77,7 @@
 </template>
 
 <script lang="ts">
-import { collection, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
+import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
@@ -95,6 +105,7 @@ export default {
       { value: 'createdAt', sortable: true }, // Custom slot
       { title: 'Score', value: 'score' },
       { title: 'Plays', value: 'reproductions' },
+      { title: 'Actions', value: 'actions', sortable: false },
     ];
 
     return {
@@ -170,6 +181,12 @@ export default {
 
       this.listOfAudios = audios;
     },
+    async removeBookmark(audioId: string) {
+      const bookmarkId = `${audioId}_${this.uid}`;
+      const bookmarkRef = doc(db, 'bookmarks', bookmarkId);
+      await deleteDoc(bookmarkRef);
+      this.listOfAudios = this.listOfAudios.filter(audio => audio.id !== audioId);
+    },
     watchProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
     },
@@ -217,6 +234,11 @@ export default {
 
 .author-item:hover {
   text-decoration: underline;
+}
+
+.actions-icons-delete:hover {
+  color: red;
+  cursor: pointer;
 }
 
 .mobile-list {
