@@ -173,6 +173,7 @@ export default {
               reproductions: audioData.reproductions,
               uid: audioData.uid,
               audioUrl: audioData.audioUrl,
+              authorRef: audioData.authorRef,
             });
           }
         });

@@ -91,13 +91,15 @@ export default {
           throw new Error('User not authenticated.');
         }
 
-        const userDoc = await getDoc(doc(db, 'users', userId));
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
         const userData = userDoc.data();
 
         // Add audio metadata to Firestore
         const audioDoc = await addDoc(collection(db, 'audios'), {
           uid: userId,
           author: userData?.username,
+          authorRef: userRef,
           title: this.title,
           description: this.description,
           tags: this.tags,

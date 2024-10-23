@@ -1,4 +1,4 @@
-import { Timestamp } from "firebase/firestore";
+import { Timestamp, DocumentReference } from "firebase/firestore";
 
 export interface AudioItem {
 	id: string;
@@ -7,6 +7,7 @@ export interface AudioItem {
 	audioUrl: string;
 	author: string;
 	uid: string;
+	authorRef: DocumentReference;
 	duration: string;
 	createdAt: Timestamp;
 	averageRating?: number;

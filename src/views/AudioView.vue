@@ -210,7 +210,6 @@ export default defineComponent({
         document.title = this.audio?.title ?? 'Audio';
 
         // Call other methods that depend on audio data
-        await this.fetchAuthor(this.audio?.uid);
         await this.fetchTotalComments();
         await this.loadComments();
         await this.fetchUserRating();
@@ -220,15 +219,15 @@ export default defineComponent({
         const incrementValue = increment(1);
         await updateDoc(audioDoc, { reproductions: incrementValue });
         this.audio.reproductions++;
+
+        const authorRef = this.audio?.authorRef;
+        if (authorRef) {
+          const authorDoc = await getDoc(authorRef);
+          this.author = authorDoc.data() as User;
+        }
+
       } else {
         console.log('Audio not found');
-      }
-    },
-    async fetchAuthor(uid: string) {
-      const userDoc = doc(collection(db, 'users'), uid);
-      const docSnapshot = await getDoc(userDoc);
-      if (docSnapshot.exists()) {
-        this.author = docSnapshot.data() as User;
       }
     },
     toggleDescription() {
