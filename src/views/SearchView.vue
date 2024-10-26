@@ -3,6 +3,17 @@
     <v-text-field v-model="search" label="What do you want to hear?" prepend-inner-icon="mdi-magnify" single-line
       hide-details class="mb-4" theme="dark"></v-text-field>
 
+    <v-text-field 
+      v-model="search" 
+      label="What do you want to hear?" 
+      prepend-inner-icon="mdi-magnify" 
+      single-line
+      hide-details 
+      class="mb-4" 
+      theme="dark"
+    ></v-text-field>
+    <v-btn @click="searchAudios" color="primary" class="mb-4">Search</v-btn>
+
     <!-- Table for Desktop -->
     <v-data-table 
       v-if="!isMobile"
@@ -67,7 +78,7 @@
 </template>
 
 <script lang="ts">
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
@@ -118,16 +129,31 @@ export default {
   },
   methods: {
     async getAudios() {
-      const audios = await getDocs(collection(db, 'audios'));
-      const audioPromises: AudioItem[] = [];
-      audios.forEach((audio) => {
+      const audiosQuery = query(
+        collection(db, 'audios'),
+        orderBy('reproductions', 'desc'),
+        limit(10)
+      );
+
+      const audiosSnapshot = await getDocs(audiosQuery);
+      const audioList: AudioItem[] = [];
+
+      audiosSnapshot.forEach((audio) => {
         const audioData: AudioItem = {
           id: audio.id,
           ...audio.data() as Omit<AudioItem, 'id'>,
         };
-        audioPromises.push(audioData);
+        audioList.push(audioData);
       });
-      this.listOfAudios = audioPromises;
+
+      this.listOfAudios = audioList;
+    },
+    async searchAudios() {
+      if (this.search === '') {
+        this.listOfAudios = [];
+        return;
+      }
+      console.log('Searching audios...');
     },
     watchProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
