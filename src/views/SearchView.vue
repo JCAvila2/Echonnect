@@ -2,16 +2,21 @@
   <div class="search-container">
 
     <!-- Search bar -->
-    <v-text-field 
-      v-model="search" 
-      label="What do you want to hear?" 
-      prepend-inner-icon="mdi-magnify" 
-      single-line
-      hide-details 
-      class="mb-4" 
-      theme="dark"
-    ></v-text-field>
-    <v-btn @click="searchAudios" color="primary" class="mb-4">Search</v-btn>
+    <div class="search-bar-container">
+      <v-text-field 
+        v-model="search" 
+        label="What do you want to hear?" 
+        prepend-inner-icon="mdi-magnify" 
+        single-line
+        hide-details 
+        theme="dark"
+        @keydown.enter="searchAudios"
+      >
+      </v-text-field>
+      <button @click="searchAudios" class="search-button">
+        <font-awesome-icon :icon="['fas', 'search']" /> 
+      </button>
+    </div>
 
     <!-- Table for Desktop -->
     <v-data-table 
@@ -204,6 +209,29 @@ export default {
   color: white;
 }
 
+.search-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.search-button {
+  position:absolute;
+  background-color: #007bff;
+  padding-inline: 20px;
+  right: 0;
+  top: 0;
+  height: 100%;
+  border-top-left-radius: 0;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.search-button:hover {
+  background-color: #0056b3;
+}
+
 .custom-table {
   background-color: transparent;
 }
@@ -226,7 +254,7 @@ export default {
 }
 
 .author-item {
-  color: #1db954;
+  color: #007bff;
   cursor: pointer;
 }
 
