@@ -1,14 +1,29 @@
 <template>
   <div class="search-container">
-    <v-text-field v-model="search" label="What do you want to hear?" prepend-inner-icon="mdi-magnify" single-line
-      hide-details class="mb-4" theme="dark"></v-text-field>
+
+    <!-- Search bar -->
+    <div class="search-bar-container">
+      <v-text-field 
+        v-model="search" 
+        label="What do you want to hear?" 
+        prepend-inner-icon="mdi-magnify" 
+        single-line
+        hide-details 
+        theme="dark"
+        @keydown.enter="searchAudios"
+      >
+      </v-text-field>
+      <button @click="searchAudios" class="search-button">
+        <font-awesome-icon :icon="['fas', 'search']" /> 
+      </button>
+    </div>
 
     <!-- Table for Desktop -->
     <v-data-table 
       v-if="!isMobile"
       :headers="headers" 
       :items="listOfAudios" 
-      :search="search" 
+
       :items-per-page="5" 
       class="custom-table"
       theme="dark"
@@ -46,7 +61,7 @@
     <!-- List for Mobile -->
     <v-list v-else class="mobile-list" theme="dark">
       <v-list-item
-        v-for="item in filteredAudios"
+        v-for="item in listOfAudios"
         :key="item.id"
         @click="HearAudio(item.id)"
         class="py-2"
@@ -67,7 +82,7 @@
 </template>
 
 <script lang="ts">
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, limit, orderBy, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
@@ -109,25 +124,71 @@ export default {
   beforeUnmount() {
     window.removeEventListener('resize', this.checkMobile);
   },
-  computed: {
-    filteredAudios(): AudioItem[] {
-      return this.listOfAudios.filter((audio) =>
-        audio.title.toLowerCase().includes(this.search.toLowerCase())
-      );
-    },
-  },
   methods: {
     async getAudios() {
-      const audios = await getDocs(collection(db, 'audios'));
-      const audioPromises: AudioItem[] = [];
-      audios.forEach((audio) => {
+      const audiosQuery = query(
+        collection(db, 'audios'),
+        orderBy('reproductions', 'desc'),
+        limit(10)
+      );
+
+      const audiosSnapshot = await getDocs(audiosQuery);
+      const audioList: AudioItem[] = [];
+
+      audiosSnapshot.forEach((audio) => {
         const audioData: AudioItem = {
           id: audio.id,
           ...audio.data() as Omit<AudioItem, 'id'>,
         };
-        audioPromises.push(audioData);
+        audioList.push(audioData);
       });
-      this.listOfAudios = audioPromises;
+
+      this.listOfAudios = audioList;
+    },
+    async searchAudios() {
+      this.listOfAudios = [];
+      if (this.search === '') {
+        return;
+      }
+
+      // Query by title
+      const titleQuery = query(
+        collection(db, 'audios'),
+        where('title_words', 'array-contains-any', this.search.toLowerCase().split(' ')),
+      )
+
+      // Query by tags
+      const tagsQuery = query(
+        collection(db, 'audios'),
+        where('tags_insensitive', 'array-contains', this.search.toLowerCase()),
+      );
+
+      const titleSnapshot = await getDocs(titleQuery);
+      const tagsSnapshot = await getDocs(tagsQuery);
+
+      // Merge results
+      const allResults = new Map();
+      
+      titleSnapshot.forEach((doc) => {
+        const audioData: AudioItem = {
+          id: doc.id,
+          ...doc.data() as Omit<AudioItem, 'id'>,
+        };
+        allResults.set(doc.id, audioData);
+      });
+
+      tagsSnapshot.forEach((doc) => {
+        const audioData: AudioItem = {
+          id: doc.id,
+          ...doc.data() as Omit<AudioItem, 'id'>,
+        };
+        allResults.set(doc.id, audioData);
+      });
+
+      // Update list of audios
+      allResults.forEach((audioData) => {
+        this.listOfAudios.push(audioData);
+      });
     },
     watchProfile(uid: string) {
       this.router.push(`/profile/${uid}`);
@@ -146,6 +207,29 @@ export default {
 .search-container {
   padding: 20px;
   color: white;
+}
+
+.search-bar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+}
+
+.search-button {
+  position:absolute;
+  background-color: #007bff;
+  padding-inline: 20px;
+  right: 0;
+  top: 0;
+  height: 100%;
+  border-top-left-radius: 0;
+  border-top-right-radius: 4px;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+}
+.search-button:hover {
+  background-color: #0056b3;
 }
 
 .custom-table {
@@ -170,7 +254,7 @@ export default {
 }
 
 .author-item {
-  color: #1db954;
+  color: #007bff;
   cursor: pointer;
 }
 
