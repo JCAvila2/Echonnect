@@ -86,7 +86,7 @@ import { collection, getDocs, limit, orderBy, query, where } from 'firebase/fire
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem, TableHeader } from '@/types/views/searchView';
+import { AudioItem, SearchViewStatus } from '@/types/views/searchView';
 
 export default {
   setup() {
@@ -98,8 +98,8 @@ export default {
       formatDate,
     };
   },
-  data() {
-    const headers: TableHeader[] = [
+  data(): SearchViewStatus {
+    const headers = [
       { title: '', value: 'imageUrl', sortable: false, width: '50px' },
       { title: 'Title', value: 'title', sortable: true },
       { title: 'Author', value: 'author', sortable: true },
@@ -112,7 +112,7 @@ export default {
     return {
       search: '',
       headers,
-      listOfAudios: [] as AudioItem[],
+      listOfAudios: [],
       isMobile: false,
     };
   },
