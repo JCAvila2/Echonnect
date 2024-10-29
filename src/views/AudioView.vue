@@ -429,7 +429,8 @@ export default defineComponent({
         await setDoc(bookmarkRef, {
           userId: this.user.uid,
           audioId: this.id,
-          timestamp: new Date()
+          timestamp: new Date(),
+          authorId: this.audio.uid, // For querying bookmarks by author
         });
       }
     }
