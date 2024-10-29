@@ -25,7 +25,7 @@
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
             <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
         </div>
         <div class="audios-table">
@@ -59,7 +59,7 @@
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
             <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
       </div>
       <div class="audios-table">

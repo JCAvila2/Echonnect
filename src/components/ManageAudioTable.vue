@@ -87,7 +87,8 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
 import { deleteObject, getStorage, ref as storageRef } from 'firebase/storage';
-import { AudioItem, TableHeader } from '@/types/views/searchView';
+import { AudioItem } from '@/types/views/searchView';
+import { ManageAudioTableStatus } from '@/types/components/manageAudioTable';
 
 export default {
 	props: {
@@ -104,8 +105,8 @@ export default {
 			formatDate,
 		};
 	},
-	data() {
-		const headers: TableHeader[] = [
+	data() : ManageAudioTableStatus {
+		const headers = [
 			{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
 			{ title: 'Title', value: 'title', sortable: true },
 			{ value: 'duration', sortable: true }, // Custom slot
@@ -118,7 +119,7 @@ export default {
 		return {
 			search: '',
 			headers,
-			listOfAudios: [] as AudioItem[],
+			listOfAudios: [],
 			isMobile: false,
 		};
 	},

@@ -430,7 +430,7 @@ export default defineComponent({
           userId: this.user.uid,
           audioId: this.id,
           timestamp: new Date(),
-          authorId: this.audio.uid, // For querying bookmarks by author
+          authorId: this.audio?.uid, // For querying bookmarks by author
         });
       }
     }
