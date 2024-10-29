@@ -133,7 +133,7 @@
 
 <script lang="ts">
 import { db } from '@/firebase';
-import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc, OrderByDirection, deleteDoc } from 'firebase/firestore';
+import { doc, collection, getDoc, increment, updateDoc, getDocs, limit, orderBy, query, where, addDoc, getCountFromServer, setDoc, deleteDoc } from 'firebase/firestore';
 import { defineComponent } from 'vue';
 import { formatDate } from '@/utils/formatDate';
 import { useAuthStore } from '@/stores/auth';
@@ -145,7 +145,7 @@ import AudioPlayer from '@/components/AudioPlayer.vue';
 import defaultProfilePicture from '@/assets/default-profile.png';
 import { AudioItem } from '@/types/views/searchView';
 import { User } from '@/types/views/profileView';
-import { Comment } from '@/types/views/audioView';
+import { AudioViewState, Comment } from '@/types/views/audioView';
 
 export default defineComponent({
   props: {
@@ -168,30 +168,30 @@ export default defineComponent({
   mounted() {
     this.fetchAudio();
   },
-  data() {
+  data() : AudioViewState {
     const router = useRouter();
     const { user } = useAuthStore();
     return {
       formatDate,
       router,
       user,
-      audio: null as AudioItem | null,
-      author: null as User | null,
-      comments: [] as Comment[] | null,
-      totalComments: 0 as number,
-      totalBookmarks: 0 as number,
-      displayedComments: 0 as number,
-      currentLimit: 5 as number, // Initial limit of comments to load
-      showMoreButton: false as boolean,
-      newComment: '' as string,
-      replyingTo: null as string | null | undefined,
-      replyContent: '' as string,
-      sortOrder: 'desc' as OrderByDirection, // Default order by newest first
-      userRating: 0 as number,
-      hoverRating: 0 as number | null,
-      isExpanded: false as boolean,
-      shortDescriptionLength: 100 as number,
-      isBookmarked: false as boolean,
+      audio: null,
+      author: null,
+      comments: [],
+      totalComments: 0,
+      totalBookmarks: 0,
+      displayedComments: 0,
+      currentLimit: 5, // Initial limit of comments to load
+      showMoreButton: false,
+      newComment: '',
+      replyingTo: null,
+      replyContent: '',
+      sortOrder: 'desc', // Default order by newest first
+      userRating: 0,
+      hoverRating: 0,
+      isExpanded: false,
+      shortDescriptionLength: 100,
+      isBookmarked: false,
     };
   },
   computed: {
