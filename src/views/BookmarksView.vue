@@ -81,8 +81,9 @@ import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'fireb
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem, TableHeader } from '@/types/views/searchView';
+import { AudioItem } from '@/types/views/searchView';
 import { useAuthStore } from '@/stores/auth';
+import { BookmarksViewStatus } from '@/types/views/bookmarksView';
 
 export default {
   setup() {
@@ -96,8 +97,8 @@ export default {
       formatDate,
     };
   },
-  data() {
-    const headers: TableHeader[] = [
+  data() : BookmarksViewStatus {
+    const headers = [
       { title: '', value: 'imageUrl', sortable: false, width: '50px' },
       { title: 'Title', value: 'title', sortable: true },
       { title: 'Author', value: 'author', sortable: true },
@@ -111,7 +112,7 @@ export default {
     return {
       search: '',
       headers,
-      listOfAudios: [] as AudioItem[],
+      listOfAudios: [],
       isMobile: false,
     };
   },
