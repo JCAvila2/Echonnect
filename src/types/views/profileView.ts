@@ -1,8 +1,6 @@
 import { Timestamp } from "firebase/firestore";
-import { formatDate } from "@/utils/formatDate";
 
 export interface ProfileViewState {
-	formatDate: typeof formatDate;
 	user: User | null;
   defaultProfilePicture: string;
   audiosCount: number;

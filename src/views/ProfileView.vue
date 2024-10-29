@@ -142,7 +142,10 @@ export default defineComponent({
   },
   setup() {
     const uid = useAuthStore().user?.uid;
-    return { uid };
+    return { 
+      uid,
+      formatDate,
+    };
   },
   mounted() {
     this.fetchUser();
@@ -155,7 +158,6 @@ export default defineComponent({
   },
   data(): ProfileViewState {
     return {
-      formatDate,
       user: null,
       defaultProfilePicture,
       audiosCount: 0,

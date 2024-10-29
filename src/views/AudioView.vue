@@ -18,7 +18,7 @@
           <img :src="author.profilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
           <span>{{ author.username }}</span>
         </div>
-        
+
         <div class="description"> 
           <span v-if="!isExpanded">{{ shortenedDescription }}</span>
           <span v-if="isExpanded">{{ audio.description }}</span>
@@ -26,7 +26,7 @@
             <strong>{{ isExpanded ? 'See less' : 'See more' }}</strong>
           </button>
         </div>
-
+        <p class="audio-uploadedAt"><strong>Uploaded:</strong> {{ formatDate(audio.createdAt) }}</p>
         <div class="tags">
           <span v-for="tag in audio.tags" :key="tag" class="tag">{{ tag }}</span>
         </div>
@@ -162,7 +162,8 @@ export default defineComponent({
     return { 
       faSortUp, 
       faSortDown, 
-      defaultProfilePicture
+      defaultProfilePicture,
+      formatDate,
     };
   },
   mounted() {
@@ -172,7 +173,6 @@ export default defineComponent({
     const router = useRouter();
     const { user } = useAuthStore();
     return {
-      formatDate,
       router,
       user,
       audio: null,
@@ -500,6 +500,11 @@ export default defineComponent({
   border-radius: 50%;
   margin-right: 10px;
   object-fit: cover;
+}
+
+.audio-uploadedAt {
+  color: #999;
+  margin-bottom: 10px;
 }
 
 .description {

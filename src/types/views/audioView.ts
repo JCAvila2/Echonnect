@@ -1,11 +1,9 @@
 import { OrderByDirection, Timestamp } from "firebase/firestore";
-import { formatDate } from "@/utils/formatDate";
 import { AudioItem } from "./searchView";
 import { User } from "firebase/auth";
 import { User as CustomUser } from "./profileView";
 
 export interface AudioViewState {
-  formatDate: typeof formatDate;
   router: any;
   user: User | null;
   audio: AudioItem | null;
