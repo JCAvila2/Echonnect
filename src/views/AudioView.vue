@@ -13,7 +13,7 @@
             <font-awesome-icon icon="fa-regular fa-bookmark" v-else/>
           </button>
         </div>
-        <AudioPlayer :audioSrc="audio.audioUrl" />
+        <AudioPlayer :audioSrc="audio.audioUrl" :audio="audio" />
         <div class="user-info" @click="watchUserProfile(audio.uid)">
           <img :src="author.profilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
           <span>{{ author.username }}</span>
@@ -462,6 +462,10 @@ export default defineComponent({
   width: 300px;
   height: 300px;
   object-fit: cover;
+
+  object-fit: contain;
+  vertical-align: middle; 
+  border-radius: 10%;
 }
 
 .audio-title {

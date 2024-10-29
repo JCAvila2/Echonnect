@@ -26,8 +26,8 @@
       <!-- Custom items on body -->
       <template v-slot:item="{ item }">
         <tr @click="HearAudio(item.id)" class="item">
-          <td>
-            <v-avatar size="30">
+          <td style="padding-right: 0px;">
+            <v-avatar size="70">
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
@@ -162,25 +162,21 @@ export default {
 }
 
 /* Each element */
+.item {
+  height: 70px;
+}
+
 .item:hover {
   background-color: #2c2c2c;
   cursor: pointer;
 }
 
 .audio-icon {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  vertical-align: middle;
-}
-
-.author-item {
-  color: #1db954;
-  cursor: pointer;
-}
-
-.author-item:hover {
-  text-decoration: underline;
+  width: 50px;
+  height: 50px;
+  object-fit: contain;
+  vertical-align: middle; 
+  border-radius: 10%;
 }
 
 @media (max-width: 768px) {

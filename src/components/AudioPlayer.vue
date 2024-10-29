@@ -19,8 +19,7 @@
 
 			<!-- Time -->
 			<div class="time">
-				{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ formatTime(($refs.audio as
-					HTMLAudioElement)?.duration || 0) }}
+				{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ audio?.duration || '0:00' }}
 			</div>
 
 			<!-- Volume -->
@@ -39,8 +38,7 @@
 					<div class="progress" :style="{ width: progress + '%' }"></div>
 				</div>
 				<div class="time">
-					{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ formatTime(($refs.audio as
-						HTMLAudioElement)?.duration || 0) }}
+					{{ formatTime(($refs.audio as HTMLAudioElement)?.currentTime || 0) }} / {{ audio?.duration || '0:00' }}
 				</div>
 			</div>
 
@@ -65,6 +63,8 @@
 <script lang="ts">
 import { formatTime } from '@/utils/formatTime';
 import { AudioPlayerStatus } from '@/types/components/audioPlayer';
+import { AudioItem } from '@/types/views/searchView';
+import { PropType } from 'vue';
 
 export default {
 	name: 'AudioPlayer',
@@ -77,6 +77,10 @@ export default {
 		audioSrc: {
 			type: String,
 			required: true
+		}, 
+		audio: {
+			type: Object as PropType<AudioItem>,
+			required: false
 		}
 	},
 	mounted() {
