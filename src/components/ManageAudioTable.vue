@@ -197,6 +197,9 @@ export default {
 			this.listOfAudios = this.listOfAudios.filter((audio) => audio.id !== audioId);
 
 			console.log(audioId, 'deleted successfully');
+
+			// Emit event to update stats in parent component
+			this.$emit('updateStats');
 		},
 		HearAudio(audioId: string) {
 			this.router.push(`/audio/${audioId}`);

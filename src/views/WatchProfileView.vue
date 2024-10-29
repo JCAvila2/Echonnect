@@ -137,6 +137,7 @@ export default defineComponent({
       const coll = collection(db, "audios");
       const q = query(coll, where("uid", "==", this.uid));
       const count = await getCountFromServer(q);
+      const ratingCount = await getCountFromServer(query(coll, where("uid", "==", this.uid), where("averageRating", ">", 0)));
       const snapshot = await getAggregateFromServer(q, {
         totalPlays: sum('reproductions'),
         totalRating: sum('averageRating'),
@@ -145,7 +146,7 @@ export default defineComponent({
 
       this.audiosCount = count.data().count;
       this.playsCount = snapshot.data().totalPlays;
-      this.averageRating = snapshot.data().totalRating / count.data().count;
+      this.averageRating = snapshot.data().totalRating / ratingCount.data().count;
     },
     async fetchFollowersCount() {
       const followsCollection = collection(db, 'follows');
