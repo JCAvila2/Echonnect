@@ -55,7 +55,7 @@
         </div>
 
         <div class="audios-table">
-          <ManageAudioTable :uid="uid || ''"/>
+          <ManageAudioTable @updateStats="fetchUserStats" :uid="uid || ''"/>
         </div>
       </div>
 
@@ -112,7 +112,7 @@
       </div>
 
       <div class="audios-table">
-        <ManageAudioTable :uid="uid || ''"/>
+        <ManageAudioTable @updateStats="fetchUserStats" :uid="uid || ''"/>
       </div>
     </div>
 
@@ -134,7 +134,7 @@ import { useAuthStore } from '@/stores/auth';
 import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
-import { User } from '@/types/views/profileView';
+import { ProfileViewState, User } from '@/types/views/profileView';
 
 export default defineComponent({
   components: {
@@ -142,7 +142,10 @@ export default defineComponent({
   },
   setup() {
     const uid = useAuthStore().user?.uid;
-    return { uid };
+    return { 
+      uid,
+      formatDate,
+    };
   },
   mounted() {
     this.fetchUser();
@@ -153,23 +156,21 @@ export default defineComponent({
   beforeUnmount() {
     window.removeEventListener('resize', this.checkMobile);
   },
-  data() {
+  data(): ProfileViewState {
     return {
-      user: null as User | null,
-      formatDate,
-      defaultProfilePicture: defaultProfilePicture as string,
-      audiosCount: 0 as number,
-      playsCount: 0 as number,
-      averageRating: null as number | null,
-      followerCount: 0 as number,
-      bookmarksCount: 0 as number,
-      editingBio: false as boolean,
-      newBio: '' as string,
-      bioMaxLength: 150 as number,
-
-      file: null as File | null,
-      isUploading: false as boolean,
-      isMobile: false as boolean,
+      user: null,
+      defaultProfilePicture,
+      audiosCount: 0,
+      playsCount: 0,
+      averageRating: null,
+      followerCount: 0,
+      bookmarksCount: 0,
+      editingBio: false,
+      newBio: '',
+      bioMaxLength: 150,
+      file: null,
+      isUploading: false,
+      isMobile: false,
     };
   },
   methods: {
@@ -197,6 +198,7 @@ export default defineComponent({
       const coll = collection(db, "audios");
       const q = query(coll, where("uid", "==", this.uid));
       const count = await getCountFromServer(q);
+      const ratingCount = await getCountFromServer(query(coll, where("uid", "==", this.uid), where("averageRating", ">", 0)));
       const snapshot = await getAggregateFromServer(q, {
         totalPlays: sum('reproductions'),
         totalRating: sum('averageRating'),
@@ -206,7 +208,7 @@ export default defineComponent({
 
       this.audiosCount = count.data().count;
       this.playsCount = snapshot.data().totalPlays;
-      this.averageRating = snapshot.data().totalRating / count.data().count;
+      this.averageRating = snapshot.data().totalRating / ratingCount.data().count;
     },
     async fetchFollowersCount() {
       const followsCollection = collection(db, 'follows');

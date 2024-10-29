@@ -1,4 +1,29 @@
-import { Timestamp } from "firebase/firestore";
+import { OrderByDirection, Timestamp } from "firebase/firestore";
+import { AudioItem } from "./searchView";
+import { User } from "firebase/auth";
+import { User as CustomUser } from "./profileView";
+
+export interface AudioViewState {
+  router: any;
+  user: User | null;
+  audio: AudioItem | null;
+  author: CustomUser | null;
+  comments: Comment[] | null;
+  totalComments: number;
+  totalBookmarks: number;
+  displayedComments: number;
+  currentLimit: number;
+  showMoreButton: boolean;
+  newComment: string;
+  replyingTo: string | null | undefined;
+  replyContent: string;
+  sortOrder: OrderByDirection;
+  userRating: number;
+  hoverRating: number | null;
+  isExpanded: boolean;
+  shortDescriptionLength: number;
+  isBookmarked: boolean;
+}
 
 export interface Comment {
   id?: string;

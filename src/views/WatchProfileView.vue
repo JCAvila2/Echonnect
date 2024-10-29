@@ -25,7 +25,7 @@
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
             <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
         </div>
         <div class="audios-table">
@@ -59,7 +59,7 @@
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
             <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
           </ul>
       </div>
       <div class="audios-table">
@@ -80,6 +80,7 @@ import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
 import { User } from '@/types/views/profileView';
+import { WatchProfileViewStatus } from '@/types/views/watchProfileView';
 
 export default defineComponent({
   props: {
@@ -93,7 +94,10 @@ export default defineComponent({
   },
   setup() {
     const userAuthStore = useAuthStore().user;
-    return { userAuthStore };
+    return { 
+      userAuthStore,
+      formatDate, 
+    };
   },
   mounted() {
     this.fetchUser();
@@ -106,19 +110,17 @@ export default defineComponent({
   beforeUnmount() {
     window.removeEventListener('resize', this.checkMobile);
   },
-  data() {
+  data(): WatchProfileViewStatus {
     return {
-      user: null as User | null,
-      formatDate,
-
-      defaultProfilePicture: defaultProfilePicture as string,
-      audiosCount: 0 as number,
-      playsCount: 0 as number,
-      averageRating: 0 as number,
-      followerCount: 0 as number,
-      isFollowing: false as boolean,
-      isMobile: false as boolean,
-      bookmarksCount: 0 as number,
+      user: null,
+      defaultProfilePicture: defaultProfilePicture,
+      audiosCount: 0,
+      playsCount: 0,
+      averageRating: 0,
+      followerCount: 0,
+      isFollowing: false ,
+      isMobile: false,
+      bookmarksCount: 0,
     };
   },
   methods: {
@@ -137,6 +139,7 @@ export default defineComponent({
       const coll = collection(db, "audios");
       const q = query(coll, where("uid", "==", this.uid));
       const count = await getCountFromServer(q);
+      const ratingCount = await getCountFromServer(query(coll, where("uid", "==", this.uid), where("averageRating", ">", 0)));
       const snapshot = await getAggregateFromServer(q, {
         totalPlays: sum('reproductions'),
         totalRating: sum('averageRating'),
@@ -145,7 +148,7 @@ export default defineComponent({
 
       this.audiosCount = count.data().count;
       this.playsCount = snapshot.data().totalPlays;
-      this.averageRating = snapshot.data().totalRating / count.data().count;
+      this.averageRating = snapshot.data().totalRating / ratingCount.data().count;
     },
     async fetchFollowersCount() {
       const followsCollection = collection(db, 'follows');

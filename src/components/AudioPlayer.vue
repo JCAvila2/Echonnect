@@ -64,6 +64,7 @@
 
 <script lang="ts">
 import { formatTime } from '@/utils/formatTime';
+import { AudioPlayerStatus } from '@/types/components/audioPlayer';
 
 export default {
 	name: 'AudioPlayer',
@@ -86,14 +87,14 @@ export default {
 		this.checkMobile();
 		window.addEventListener('resize', this.checkMobile);
 	},
-	data() {
+	data(): AudioPlayerStatus {
 		return {
-			progress: 0 as number,
-			isPlaying: false as boolean,
-			volume: 0.2 as number, // Default volume
-			previousVolume: 0.2 as number,
-			isHover: false as boolean,
-			isMobile: false as boolean,
+			progress: 0,
+			isPlaying: false,
+			volume: 0.2, // Default volume
+			previousVolume: 0.2,
+			isHover: false,
+			isMobile: false,
 		};
 	},
 	computed: {
