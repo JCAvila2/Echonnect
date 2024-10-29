@@ -53,23 +53,24 @@ import { collection, addDoc, doc, updateDoc, getDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
 import { useAuthStore } from '@/stores/auth';
 import { formatTime } from '@/utils/formatTime';
+import { UploadViewStatus } from '@/types/views/uploadView';
 
 export default {
   setup() {
     document.title = 'Upload Audio';
   },
-  data() {
+  data() : UploadViewStatus {
     return {
-      title: '' as string,
-      description: '' as string,
-      tags: [] as string[],
-      currentTag: '' as string,
-      audioFile: null as File | null,
-      imageFile: null as File | null,
-      isUploading: false as boolean,
-      uploadSuccess: false as boolean,
-      uploadError: null as string | null,
-      audioDuration: '' as string,
+      title: '',
+      description: '',
+      tags: [],
+      currentTag: '',
+      audioFile: null,
+      imageFile: null,
+      isUploading: false,
+      uploadSuccess: false,
+      uploadError: null,
+      audioDuration: '',
     };
   },
   methods: {
