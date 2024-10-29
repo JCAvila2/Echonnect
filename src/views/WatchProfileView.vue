@@ -80,6 +80,7 @@ import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
 import { User } from '@/types/views/profileView';
+import { WatchProfileViewStatus } from '@/types/views/watchProfileView';
 
 export default defineComponent({
   props: {
@@ -93,7 +94,10 @@ export default defineComponent({
   },
   setup() {
     const userAuthStore = useAuthStore().user;
-    return { userAuthStore };
+    return { 
+      userAuthStore,
+      formatDate, 
+    };
   },
   mounted() {
     this.fetchUser();
@@ -106,19 +110,17 @@ export default defineComponent({
   beforeUnmount() {
     window.removeEventListener('resize', this.checkMobile);
   },
-  data() {
+  data(): WatchProfileViewStatus {
     return {
-      user: null as User | null,
-      formatDate,
-
-      defaultProfilePicture: defaultProfilePicture as string,
-      audiosCount: 0 as number,
-      playsCount: 0 as number,
-      averageRating: 0 as number,
-      followerCount: 0 as number,
-      isFollowing: false as boolean,
-      isMobile: false as boolean,
-      bookmarksCount: 0 as number,
+      user: null,
+      defaultProfilePicture: defaultProfilePicture,
+      audiosCount: 0,
+      playsCount: 0,
+      averageRating: 0,
+      followerCount: 0,
+      isFollowing: false ,
+      isMobile: false,
+      bookmarksCount: 0,
     };
   },
   methods: {
