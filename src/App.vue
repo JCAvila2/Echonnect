@@ -30,11 +30,17 @@ export default defineComponent({
   --color-background: #181818;
 }
 
+html, body {
+  height: 100%;
+  overflow: hidden;
+}
+
 #app {
   margin: 0 0;
   width: 100%;
   height: calc(100vh - calc(var(--navbar-height) + 10px));
   /* Margin to the top of the page content to avoid overlapping */
+  overflow: auto;
 }
 
 body {
