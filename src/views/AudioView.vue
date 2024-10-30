@@ -16,7 +16,7 @@
         <AudioPlayer :audioSrc="audio.audioUrl" :audio="audio" />
         <div class="user-info" @click="watchUserProfile(audio.uid)">
           <img :src="author.profilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
-          <span>{{ author.username }}</span>
+          <span class="username">{{ author.username }}</span>
         </div>
 
         <div class="description"> 
@@ -102,7 +102,7 @@
                 </div>
                 <div v-if="comment.replies && comment.replies.length > 0" class="replies">
                   <div v-for="reply in comment.replies" :key="reply.id" class="reply">
-                    <img :src="reply.userProfilePicture || defaultProfilePicture" alt="User avatar" class="avatar small" />
+                    <img :src="reply.userProfilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
                     <div class="reply-content">
                       <div class="comment-header">
                         <span class="comment-username" @click="watchUserProfile(reply.uid)">{{ reply.username }}</span>
@@ -491,18 +491,24 @@ export default defineComponent({
   align-items: center;
   margin-top: 40px;
   margin-bottom: 10px;
+  width: fit-content;
 }
 
 .user-info:hover {
   cursor: pointer;
-  color: green;
+  color: #007bff;
+}
+
+.username {
+  margin-left: 10px; 
+  font-weight: bolder;
 }
 
 .avatar {
   width: 50px;
   height: 50px;
   border-radius: 50%;
-  margin-right: 10px;
+  margin-right: 0px;
   object-fit: cover;
 }
 
@@ -591,7 +597,7 @@ export default defineComponent({
 }
 
 .comments-list {
-  background-color: #2a3a4a;
+  /* background-color: #2a3a4a; */
   padding: 20px;
   border-radius: 5px;
 }
@@ -603,7 +609,7 @@ export default defineComponent({
 
 .comment-header {
   display: flex;
-  justify-content: space-between;
+  justify-content: start;
   margin-bottom: 5px;
 }
 
@@ -613,7 +619,7 @@ export default defineComponent({
 
 .comment-username:hover {
   cursor: pointer;
-  color: green;
+  color: #007bff;
 }
 
 .comment-date {
@@ -675,7 +681,6 @@ export default defineComponent({
 }
 
 .replies {
-  margin-left: 20px;
   margin-top: 10px;
 }
 
