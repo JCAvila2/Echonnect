@@ -8,6 +8,17 @@
   "searchPlaceholder": "¿Qué quieres escuchar?",
   "title": "Título",
   "author": "Autor",
-  "score": "Puntuación",
-  "plays": "Reproducciones"
+  "rating": "Calificación",
+  "plays": "Reproducciones",
+  "noBioYet": "Aún no tienes biografía. Haz clic en Editar para añadir una.",
+  "save": "Guardar",
+  "cancel": "Cancelar",
+  "joined": "Se unió el",
+  "logout": "Cerrar sesión",
+  "stats": "Estadísticas",
+  "followers": "Seguidores",
+  "audios": "Audios",
+  "avgRating": "Prom. Calificaciones",
+  "noRatingYet": "Aún no hay calificaciones",
+  "actions": "Acciones"
 }

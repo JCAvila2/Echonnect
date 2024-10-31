@@ -51,7 +51,7 @@
           </td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
+          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
           <td>{{ item.reproductions }}</td>
         </tr>
       </template>
@@ -92,14 +92,18 @@ export default {
   setup() {
     const router = useRouter();
     const { t, locale } = useI18n();
-    document.title = 'Search';
-
+    document.title = t('search');
     return {
       router,
       formatDate,
       locale,
       t,
     };
+  },
+  watch: {
+    locale() {
+      document.title = this.t('search');
+    },
   },
   data(): SearchViewStatus {
     return {
@@ -116,7 +120,7 @@ export default {
         { title: this.t('author'), value: 'author', sortable: true, width: '25%' },
         { value: 'duration', sortable: true, width: '10%' }, // Custom slot
         { value: 'createdAt', sortable: true, width: '10%' }, // Custom slot
-        { title: this.t('score'), value: 'score', width: '10%' },
+        { title: this.t('rating'), value: 'score', width: '10%' },
         { title: this.t('plays'), value: 'reproductions', width: '10%' },
       ];
     },

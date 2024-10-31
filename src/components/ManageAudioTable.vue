@@ -1,7 +1,13 @@
 <template>
 	<div class="search-container">
-		<v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" single-line hide-details class="mb-4"
-			theme="dark"></v-text-field>
+		<v-text-field 
+			v-model="search" 
+			:label="$t('searchPlaceholder')" 
+			prepend-inner-icon="mdi-magnify" 
+			single-line hide-details class="mb-4"
+			theme="dark"
+		>
+		</v-text-field>
 
 		<!-- Table for Desktop -->
 		<v-data-table 
@@ -87,8 +93,9 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
 import { deleteObject, getStorage, ref as storageRef } from 'firebase/storage';
-import { AudioItem } from '@/types/views/searchView';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { ManageAudioTableStatus } from '@/types/components/manageAudioTable';
+import { useI18n } from 'vue-i18n';
 
 export default {
 	props: {
@@ -99,26 +106,17 @@ export default {
 	},
 	setup() {
 		const router = useRouter();
+		const { locale } = useI18n();
 
 		return {
 			router,
 			formatDate,
+			locale,
 		};
 	},
 	data() : ManageAudioTableStatus {
-		const headers = [
-			{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
-			{ title: 'Title', value: 'title', sortable: true },
-			{ value: 'duration', sortable: true }, // Custom slot
-			{ value: 'createdAt', sortable: true }, // Custom slot
-			{ title: 'Score', value: 'score', sortable: true },
-			{ title: 'Plays', value: 'reproductions', sortable: true },
-			{ title: 'Actions', value: 'actions', sortable: false },
-		];
-
 		return {
 			search: '',
-			headers,
 			listOfAudios: [],
 			isMobile: false,
 		};
@@ -136,6 +134,17 @@ export default {
 			return this.listOfAudios.filter((audio) =>
 				audio.title.toLowerCase().includes(this.search.toLowerCase())
 			);
+		},
+		headers(): TableHeader[] {
+			return [
+				{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
+				{ title: this.$t('title'), value: 'title', sortable: true },
+				{ value: 'duration', sortable: true, width: '10%' }, // Custom slot
+				{ value: 'createdAt', sortable: true, width: '10%' }, // Custom slot
+				{ title: this.$t('rating'), value: 'score', width: '15%' },
+				{ title: this.$t('plays'), value: 'reproductions', width: '15%' },
+				{ title: this.$t('actions'), value: 'actions', sortable: false },
+			];
 		},
 	},
 	methods: {

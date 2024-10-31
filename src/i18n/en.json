@@ -8,6 +8,17 @@
   "searchPlaceholder": "What do you want to hear?",
   "title": "Title",
   "author": "Author",
-  "score": "Score",
-  "plays": "Plays"
+  "rating": "Rating",
+  "plays": "Plays",
+  "noBioYet": "No bio yet. Click edit to add one!",
+  "save": "Save",
+  "cancel": "Cancel",
+  "joined": "Joined",
+  "logout": "Logout",
+  "stats": "Stats",
+  "followers": "Followers",
+  "audios": "Audios",
+  "avgRating": "Avg. Rating",
+  "noRatingYet": "No ratings yet",
+  "actions": "Actions"
 }
