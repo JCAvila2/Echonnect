@@ -117,7 +117,7 @@
     </div>
 
     <div v-else>
-      <h2>Loading...</h2>
+      <h2>{{ $t('loading') }}...</h2>
     </div>
 
   </div>
