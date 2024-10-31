@@ -17,33 +17,45 @@
     <!-- Navbar links -->
     <div :class="['navbar-links', { 'is-active': isMenuOpen }]">
       <ul>
-        <li> <router-link @click="toggleMenu" to="/search"> Search </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/profile"> Profile </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/upload"> Upload </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/bookmarks"> Bookmarks </router-link> </li>
-        <li v-if="!uid"> <router-link @click="toggleMenu" to="/login"> Log In </router-link> </li>
-        <li v-if="!uid"> <router-link @click="toggleMenu" to="/register"> Register </router-link> </li>
+        <li> <router-link @click="toggleMenu" to="/search"> {{ $t('search') }} </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/profile"> {{ $t('profile') }} </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/upload"> {{ $t('upload') }} </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/bookmarks"> {{ $t('bookmarks') }} </router-link> </li>
+        <li v-if="!uid"> <router-link @click="toggleMenu" to="/login"> {{ $t('login') }} </router-link> </li>
+        <li v-if="!uid"> <router-link @click="toggleMenu" to="/register"> {{ $t('register') }} </router-link> </li>
+        <li @click="changeLanguage('es')">ES</li>
+        <li @click="changeLanguage('en')">EN</li>
       </ul>
     </div>
   </nav>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
     const authStore = useAuthStore();
     const uid = computed(() => authStore.user?.uid);
     const isMenuOpen = ref(false);
+    const { locale } = useI18n();
 
-    const toggleMenu = () => {
-      isMenuOpen.value = !isMenuOpen.value;
+    return { 
+      uid, 
+      isMenuOpen, 
+      locale,
     };
-
-    return { uid, isMenuOpen, toggleMenu };
   },
+  methods: {
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen;
+    },
+    changeLanguage(lang: string) {
+      this.locale = lang;
+    }
+  }
 };
 </script>
 
