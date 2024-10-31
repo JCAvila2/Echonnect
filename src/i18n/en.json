@@ -4,5 +4,10 @@
   "upload": "Upload",
   "bookmarks": "Bookmarks",
   "login": "Login",
-  "register": "Register"
+  "register": "Register",
+  "searchPlaceholder": "What do you want to hear?",
+  "title": "Title",
+  "author": "Author",
+  "score": "Score",
+  "plays": "Plays"
 }

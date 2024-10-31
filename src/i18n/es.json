@@ -4,5 +4,10 @@
   "upload": "Cargar",
   "bookmarks": "Favoritos",
   "login": "Ingresar",
-  "register": "Registrarse"
+  "register": "Registrarse",
+  "searchPlaceholder": "¿Qué quieres escuchar?",
+  "title": "Título",
+  "author": "Autor",
+  "score": "Puntuación",
+  "plays": "Reproducciones"
 }

@@ -5,7 +5,7 @@
     <div class="search-bar-container">
       <v-text-field 
         v-model="search" 
-        label="What do you want to hear?" 
+        :label="$t('searchPlaceholder')" 
         prepend-inner-icon="mdi-magnify" 
         single-line
         hide-details 
@@ -23,7 +23,6 @@
       v-if="!isMobile"
       :headers="headers" 
       :items="listOfAudios" 
-
       :items-per-page="5" 
       class="custom-table"
       theme="dark"
@@ -86,35 +85,41 @@ import { collection, getDocs, limit, orderBy, query, where } from 'firebase/fire
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem, SearchViewStatus } from '@/types/views/searchView';
+import { AudioItem, SearchViewStatus, TableHeader } from '@/types/views/searchView';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
     const router = useRouter();
+    const { t, locale } = useI18n();
     document.title = 'Search';
 
     return {
       router,
       formatDate,
+      locale,
+      t,
     };
   },
   data(): SearchViewStatus {
-    const headers = [
-      { title: '', value: 'imageUrl', sortable: false, width: '50px' },
-      { title: 'Title', value: 'title', sortable: true },
-      { title: 'Author', value: 'author', sortable: true },
-      { value: 'duration', sortable: true }, // Custom slot
-      { value: 'createdAt', sortable: true }, // Custom slot
-      { title: 'Score', value: 'score' },
-      { title: 'Plays', value: 'reproductions' },
-    ];
-
     return {
       search: '',
-      headers,
       listOfAudios: [],
       isMobile: false,
     };
+  },
+  computed: {
+    headers(): TableHeader[] {
+      return [
+        { title: '', value: 'imageUrl', sortable: false, width: '50px' },
+        { title: this.t('title'), value: 'title', sortable: true },
+        { title: this.t('author'), value: 'author', sortable: true, width: '25%' },
+        { value: 'duration', sortable: true, width: '10%' }, // Custom slot
+        { value: 'createdAt', sortable: true, width: '10%' }, // Custom slot
+        { title: this.t('score'), value: 'score', width: '10%' },
+        { title: this.t('plays'), value: 'reproductions', width: '10%' },
+      ];
+    },
   },
   mounted() {
     this.getAudios();

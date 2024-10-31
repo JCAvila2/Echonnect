@@ -2,7 +2,6 @@ import { Timestamp, DocumentReference } from "firebase/firestore";
 
 export interface SearchViewStatus { 
   search: string;
-  headers: TableHeader[];
   listOfAudios: AudioItem[];
   isMobile: boolean;
 }
