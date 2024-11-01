@@ -23,5 +23,14 @@
   "actions": "Actions",
   "loading": "Loading",
   "follow": "Follow",
-  "unfollow": "Unfollow"
+  "unfollow": "Unfollow",
+  "uploadAudio": "Upload Audio",
+  "selectAudio": "Select Audio",
+  "selectImage": "Select Image",
+  "description": "Description",
+  "addATag": "Add a tag",
+  "add": "Add",
+  "tags": "Tags",
+  "uploading": "Uploading...",
+  "uploadSuccess": "Upload successful!"
 }

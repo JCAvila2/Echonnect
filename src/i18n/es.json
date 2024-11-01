@@ -1,7 +1,7 @@
 {
   "search": "Buscar",
   "profile": "Perfil",
-  "upload": "Cargar",
+  "upload": "Subir",
   "bookmarks": "Favoritos",
   "login": "Ingresar",
   "register": "Registrarse",
@@ -23,5 +23,14 @@
   "actions": "Acciones",
   "loading": "Cargando",
   "follow": "Seguir",
-  "unfollow": "Dejar de seguir"
+  "unfollow": "Dejar de seguir",
+  "uploadAudio": "Subir Audio",
+  "selectAudio": "Seleccionar Audio",
+  "selectImage": "Seleccionar Imagen",
+  "description": "Descripción",
+  "addATag": "Agregar una etiqueta",
+  "add": "Agregar",
+  "tags": "Etiquetas",
+  "uploading": "Subiendo...",
+  "uploadSuccess": "¡Subida exitosa!"
 }

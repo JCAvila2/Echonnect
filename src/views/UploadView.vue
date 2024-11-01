@@ -1,32 +1,33 @@
 <template>
   <div class="upload-container">
-    <h1 class="upload-title">Upload Audio</h1>
+    <h1 class="upload-title">{{ $t('uploadAudio') }}</h1>
 
     <div class="file-input-container">
       <input type="file" id="audio-file" @change="handleAudioFileChange" accept="audio/*" class="file-input" />
-      <label for="audio-file" :class="audioFile ? 'file-label-selected' : 'file-label'">{{ audioFile ? audioFile.name :
-        'Choose an Audio' }}</label>
+      <label for="audio-file" :class="audioFile ? 'file-label-selected' : 'file-label'">
+        {{ audioFile ? audioFile.name : $t('selectAudio') }}
+      </label>
     </div>
 
     <div class="file-input-container">
       <input type="file" id="image-file" @change="handleImageFileChange" accept="image/*" class="file-input" />
       <label for="image-file" :class="imageFile ? 'file-label-selected' : 'file-label'"> {{ imageFile ? imageFile.name :
-        'Choose an image' }}</label>
+        $t('selectImage') }}</label>
     </div>
 
-    <input v-model="title" type="text" placeholder="Title" class="text-input" />
-    <textarea v-model="description" placeholder="Description" class="text-input textarea"></textarea>
+    <input v-model="title" type="text" :placeholder="$t('title')" class="text-input" />
+    <textarea v-model="description" :placeholder="$t('description')" class="text-input textarea"></textarea>
 
     <div class="tags-input-container">
-      <input v-model="currentTag" @keyup.enter="addTag" type="text" placeholder="Add a tag"
+      <input v-model="currentTag" @keyup.enter="addTag" type="text" :placeholder="$t('addATag')"
         class="text-input tag-input" />
       <button @click="addTag" class="add-tag-button">
-        Add
+        {{ $t('add') }}
       </button>
     </div>
 
     <div class="tags-info">
-      Tags: {{ tags.length }}
+      {{ $t('tags') }}: {{ tags.length }}
     </div>
 
     <div class="tags-container">
@@ -39,10 +40,10 @@
     <button
       :disabled="!audioFile || isUploading || !imageFile || title === '' || description === '' || tags.length === 0"
       @click="uploadAudio" class="upload-button">
-      {{ isUploading ? 'Uploading...' : 'Upload Audio' }}
+      {{ isUploading ? $t('uploading') : $t('uploadAudio') }}
     </button>
 
-    <div v-if="uploadSuccess" class="status-message success">Upload successful!</div>
+    <div v-if="uploadSuccess" class="status-message success">{{ $t('uploadSuccess') }}</div>
     <div v-if="uploadError" class="status-message error">{{ uploadError }}</div>
   </div>
 </template>
@@ -54,12 +55,23 @@ import { db } from '@/firebase';
 import { useAuthStore } from '@/stores/auth';
 import { formatTime } from '@/utils/formatTime';
 import { UploadViewStatus } from '@/types/views/uploadView';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
-    document.title = 'Upload Audio';
+    const { t, locale } = useI18n();
+    document.title = t('uploadAudio');
+    return {
+      t,
+      locale
+    };
   },
-  data() : UploadViewStatus {
+  watch: {
+    locale() {
+      document.title = this.t('uploadAudio');
+    }
+  },
+  data(): UploadViewStatus {
     return {
       title: '',
       description: '',
