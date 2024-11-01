@@ -21,5 +21,7 @@
   "avgRating": "Avg. Rating",
   "noRatingYet": "No ratings yet",
   "actions": "Actions",
-  "loading": "Loading"
+  "loading": "Loading",
+  "follow": "Follow",
+  "unfollow": "Unfollow"
 }
