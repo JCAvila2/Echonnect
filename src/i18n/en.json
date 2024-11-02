@@ -43,5 +43,7 @@
   "reply": "Reply",
   "moreComments": "More comments",
   "loadingComments": "Loading comments...",
-  "loadingAudio": "Loading audio..."
+  "loadingAudio": "Loading audio...",
+  "searchBookmarked": "Search bookmarked audio..."
+  
 }

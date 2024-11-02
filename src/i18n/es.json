@@ -43,5 +43,6 @@
   "reply": "Responder",
   "moreComments": "Más comentarios",
   "loadingComments": "Cargando comentarios...",
-  "loadingAudio": "Cargando audio..."
+  "loadingAudio": "Cargando audio...",
+  "searchBookmarked": "Buscar audio en favoritos..."
 }
