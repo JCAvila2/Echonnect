@@ -23,10 +23,10 @@
           <span v-if="!isExpanded">{{ shortenedDescription }}</span>
           <span v-if="isExpanded">{{ audio.description }}</span>
           <button v-if="audio && audio.description && audio.description.length > shortDescriptionLength" @click="toggleDescription" style="padding-left: 5px;">
-            <strong>{{ isExpanded ? 'See less' : 'See more' }}</strong>
+            <strong>{{ isExpanded ? $t('seeLess') : $t('seeMore') }}</strong>
           </button>
         </div>
-        <p class="audio-uploadedAt"><strong>Uploaded:</strong> {{ formatDate(audio.createdAt) }}</p>
+        <p class="audio-uploadedAt"><strong>{{ $t('uploadedOn') }}:</strong> {{ formatDate(audio.createdAt) }}</p>
         <div class="tags">
           <span v-for="tag in audio.tags" :key="tag" class="tag">{{ tag }}</span>
         </div>
@@ -36,30 +36,30 @@
     <div class="community">
       <div class="stats">
         <h2>
-          Stats
+          {{ $t('stats') }}
           <font-awesome-icon icon="chart-line" />
         </h2>
         <div class="stat-item">
-          <span class="stat-label">Plays</span>
+          <span class="stat-label">{{ $t('plays') }}</span>
           <span class="stat-value">{{ audio.reproductions }}</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Bookmarks</span>
+          <span class="stat-label">{{ $t('bookmarks') }}</span>
           <span class="stat-value">{{ totalBookmarks }}</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Score</span>
-          <span class="stat-value">{{ audio.averageRating ? audio.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</span>
+          <span class="stat-label">{{ $t('rating') }}</span>
+          <span class="stat-value">{{ audio.averageRating ? audio.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</span>
         </div>
         <div class="stat-item">
-          <span class="stat-label">Comments</span>
+          <span class="stat-label">{{ $t('comments') }}</span>
           <span class="stat-value">{{ totalComments }}</span>
         </div>
       </div>
 
       <div class="player-section">
         <div class="rating-section">
-          <span class="rating-label">{{ userRating ? 'Rated:' : 'Rate this audio:' }}</span>
+          <span class="rating-label">{{ userRating ? ($t('rated') + ':') : ($t('rateThisAudio')+':') }}</span>
           <div class="star-rating">
             <span v-for="star in 5" :key="star" @click="rateAudio(star)" @mouseover="setRatingHover(star)"
               @mouseleave="clearRatingHover"
@@ -70,14 +70,14 @@
         </div>
 
         <div class="comment-section">
-          <input v-model="newComment" type="text" placeholder="Comment..." class="comment-input" @keyup.enter="addComment"/>
+          <input v-model="newComment" type="text" :placeholder="$t('comment') + '...'" class="comment-input" @keyup.enter="addComment"/>
           <button @click="addComment" class="send-button">➤</button>
         </div>
 
         <div class="comments-list">
           <div class="comments-header">
             <h3 style="margin-bottom: 20px;">
-              Comments ({{ displayedComments }}/{{ totalComments }})
+              {{ $t('comments') }} ({{ displayedComments }}/{{ totalComments }})
               <button @click="toggleSortOrder" class="sort-button">
                 <font-awesome-icon :icon="sortOrder === 'desc' ? faSortDown : faSortUp" />
               </button>
@@ -94,10 +94,10 @@
                 </div>
                 <p>{{ comment.content }}</p>
                 <div class="comment-actions">
-                  <button @click="toggleReplyForm(comment.id)" class="reply-button">Reply</button>
+                  <button @click="toggleReplyForm(comment.id)" class="reply-button">{{ $t('reply') }}</button>
                 </div>
                 <div v-if="replyingTo === comment.id" class="reply-form">
-                  <input v-model="replyContent" type="text" placeholder="Write a reply..." class="reply-input" @keyup.enter="addReply(comment.id)" />
+                  <input v-model="replyContent" type="text" :placeholder="$t('reply') + '...'" class="reply-input" @keyup.enter="addReply(comment.id)" />
                   <button @click="addReply(comment.id)" class="send-button">➤</button>
                 </div>
                 <div v-if="comment.replies && comment.replies.length > 0" class="replies">
@@ -115,11 +115,11 @@
               </div>
             </div>
             <button v-if="showMoreButton" @click="loadMoreComments" class="more-comments">
-              More comments
+              {{ $t('moreComments') }}
             </button>
           </div>
           <div v-else>
-            <p>Loading comments...</p>
+            <p>{{ $t('loadingComments') }}</p>
           </div>
         </div>
 
@@ -127,7 +127,7 @@
     </div>
   </div>
   <div v-else>
-    <p>Loading audio...</p>
+    <p>{{ $t('loadingAudio') }}</p>
   </div>
 </template>
 
@@ -146,6 +146,7 @@ import defaultProfilePicture from '@/assets/default-profile.png';
 import { AudioItem } from '@/types/views/searchView';
 import { User } from '@/types/views/profileView';
 import { AudioViewState, Comment } from '@/types/views/audioView';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -159,11 +160,14 @@ export default defineComponent({
     AudioPlayer,
   },
   setup() {
+    const { t, locale } = useI18n();
     return { 
       faSortUp, 
       faSortDown, 
       defaultProfilePicture,
       formatDate,
+      locale, 
+      t,
     };
   },
   mounted() {

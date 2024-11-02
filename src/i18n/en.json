@@ -32,5 +32,16 @@
   "add": "Add",
   "tags": "Tags",
   "uploading": "Uploading...",
-  "uploadSuccess": "Upload successful!"
+  "uploadSuccess": "Upload successful!",
+  "comments": "Comments",
+  "uploadedOn": "Uploaded on",
+  "seeLess": "See less",
+  "seeMore": "See more",
+  "rated": "Rated",
+  "rateThisAudio": "Rate this audio",
+  "comment": "Comment",
+  "reply": "Reply",
+  "moreComments": "More comments",
+  "loadingComments": "Loading comments...",
+  "loadingAudio": "Loading audio..."
 }

@@ -32,5 +32,16 @@
   "add": "Agregar",
   "tags": "Etiquetas",
   "uploading": "Subiendo...",
-  "uploadSuccess": "¡Subida exitosa!"
+  "uploadSuccess": "¡Subida exitosa!",
+  "comments": "Comentarios",
+  "uploadedOn": "Subido el",
+  "seeLess": "Ver menos",
+  "seeMore": "Ver más",
+  "rated": "Calificado",
+  "rateThisAudio": "Califica este audio",
+  "comment": "Comentar",
+  "reply": "Responder",
+  "moreComments": "Más comentarios",
+  "loadingComments": "Cargando comentarios...",
+  "loadingAudio": "Cargando audio..."
 }
