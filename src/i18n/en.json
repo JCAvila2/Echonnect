@@ -44,6 +44,16 @@
   "moreComments": "More comments",
   "loadingComments": "Loading comments...",
   "loadingAudio": "Loading audio...",
-  "searchBookmarked": "Search bookmarked audio..."
-  
+  "searchBookmarked": "Search bookmarked audio...",
+  "username": "Username",
+  "email": "Email",
+  "password": "Password", 
+  "alreadyHaveAccount": "Already have an account?",
+  "loginLabel": "Log in to your account",
+  "forgotPassword": "Did you forget your password?",
+  "changePassword": "Change Password",
+  "dontHaveAccount": "Don't have an account?",
+  "incorrectEmail": "Incorrect email",
+  "incorrectPassword": "Incorrect password",
+  "incorrectCredentials": "Incorrect username or password"
 }

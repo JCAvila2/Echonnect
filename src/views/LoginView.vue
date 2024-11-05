@@ -1,37 +1,47 @@
 <template>
   <div class="login_form">
-    <h1>Log in to your Account</h1>
+    <h1>{{ t('loginLabel') }}</h1>
     <p v-if="errorMessage" style="color: red; text-align: center;">{{ errorMessage }}</p>
     <form @submit.prevent="login">
       <div class="input_area">
         <div class="txt_field">
           <input v-model="email" required />
-          <label> Email </label>
+          <label> {{ t('email') }} </label>
         </div>
         <div class="txt_field">
           <input v-model="password" type="password" required />
-          <label> Password </label>
+          <label> {{ t('password') }} </label>
         </div>
-        <button type="submit" class="login_button"> Log In </button>
+        <button type="submit" class="login_button"> {{ t('login') }} </button>
       </div>
     </form>
     <div class="register">
-      Did you forget the password? <div @click="changePassword" class="changePassword"> Change Password </div>
+      {{ t('forgotPassword') }} <div @click="changePassword" class="changePassword"> {{ t('changePassword') }} </div>
     </div>
     <div class="register">
-      Don't have an account? <router-link to="/register"> Register </router-link>
+      {{ t('dontHaveAccount') }} <router-link to="/register"> {{ t('register') }} </router-link>
     </div>
   </div>
 </template>
 
-
 <script lang="ts">
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
-    document.title = 'Login';
+    const { t, locale } = useI18n();
+    document.title = t('login');
+    return {
+      t,
+      locale,
+    };
   },
+  watch: {
+    locale() {
+      document.title = this.t('login');
+    }
+  },  
   data() {
     return {
       email: '',
@@ -50,13 +60,13 @@ export default {
           console.log(error.code);
           switch (error.code) {
             case 'auth/user-not-found':
-              this.errorMessage = 'Incorrect Email';
+              this.errorMessage = this.t('incorrectEmail');
               break;
             case 'auth/wrong-password':
-              this.errorMessage = 'Incorrect Password';
+              this.errorMessage = this.t('incorrectPassword');
               break;
             default:
-              this.errorMessage = 'Invalid Email or Password';
+              this.errorMessage = this.t('incorrectCredentials');
               break;
           }
         });

@@ -221,6 +221,7 @@ header {
   top: 100%;
   right: 0;
   background-color: black;
+  color: white;
   border: 1px solid gray;
   z-index: 1000;
   display: none;

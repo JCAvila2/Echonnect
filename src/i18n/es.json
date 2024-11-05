@@ -44,5 +44,16 @@
   "moreComments": "Más comentarios",
   "loadingComments": "Cargando comentarios...",
   "loadingAudio": "Cargando audio...",
-  "searchBookmarked": "Buscar audio en favoritos..."
+  "searchBookmarked": "Buscar audio en favoritos...",
+  "username": "Nombre de usuario",
+  "email": "Correo electrónico",
+  "password": "Contraseña",     
+  "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+  "loginLabel": "Inicia sesión en tu cuenta",
+  "forgotPassword": "¿Olvidaste tu contraseña?",
+  "changePassword": "Cambiar Contraseña",
+  "dontHaveAccount": "¿No tienes una cuenta?",
+  "incorrectEmail": "Correo electrónico incorrecto",
+  "incorrectPassword": "Contraseña incorrecta",
+  "incorrectCredentials": "Nombre de usuario o contraseña incorrectos"
 }
