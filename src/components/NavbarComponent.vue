@@ -53,8 +53,18 @@ export default {
   /* Adjust according to the header height */
 }
 
+body.light {
+  --color-text-header: black;
+  --color-background-header: #f5f5f5;
+}
+
+body.dark {
+  --color-text-header: white;
+  --color-background-header: black;
+}
+
 header {
-  background-color: black;
+  background-color: var(--color-background-header);
   padding: 0px 0;
   position: fixed;
   top: 0;
@@ -83,7 +93,7 @@ header {
 }
 
 .brand-title h1 {
-  color: white;
+  color: var(--color-text-header);
   font-size: 2.5rem;
 }
 
@@ -106,7 +116,7 @@ header {
   align-items: center;
   padding: 0px 50px;
   /* Adjust padding to control the clickable area */
-  color: white;
+  color: var(--color-text-header);
   text-decoration: none;
   font-size: 18px;
   height: 100%;
@@ -135,7 +145,7 @@ header {
 .menu-toggle span {
   width: 30px;
   height: 3px;
-  background-color: white;
+  background-color: var(--color-text-header);
   margin: 5px 0;
 }
 
@@ -150,7 +160,7 @@ header {
     position: absolute;
     top: var(--header-height);
     right: 0;
-    background-color: black;
+    background-color: var(--color-background-header);
     width: 100%;
     flex-direction: column;
     align-items: center;
@@ -169,7 +179,7 @@ header {
     width: 100%;
     text-align: center;
     margin: 0;
-    background-color: black;
+    background-color: var(--color-background-header);
   }
 
   .navbar-links a {
