@@ -9,7 +9,6 @@
         prepend-inner-icon="mdi-magnify" 
         single-line
         hide-details 
-        theme="dark"
         @keydown.enter="searchAudios"
       >
       </v-text-field>
@@ -23,10 +22,9 @@
       v-if="!isMobile"
       :headers="headers" 
       :items="listOfAudios" 
-
       :items-per-page="5" 
       class="custom-table"
-      theme="dark"
+      :theme="themeStore.theme"
       >
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -59,7 +57,7 @@
     </v-data-table>
 
     <!-- List for Mobile -->
-    <v-list v-else class="mobile-list" theme="dark">
+    <v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in listOfAudios"
         :key="item.id"
@@ -87,15 +85,18 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
 import { AudioItem, SearchViewStatus } from '@/types/views/searchView';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
   setup() {
     const router = useRouter();
+    const themeStore = useThemeStore();
     document.title = 'Search';
-
+    console.log(themeStore.theme);
     return {
       router,
       formatDate,
+      themeStore,
     };
   },
   data(): SearchViewStatus {
@@ -206,7 +207,6 @@ export default {
 <style scoped>
 .search-container {
   padding: 20px;
-  color: white;
 }
 
 .search-bar-container {
@@ -214,6 +214,7 @@ export default {
   justify-content: space-between;
   align-items: center;
   position: relative;
+  color: var(--searbars-text);
 }
 
 .search-button {
@@ -246,7 +247,7 @@ export default {
 
 .item:hover,
 .v-list-item:hover {
-  background-color: #2c2c2c;
+  background-color: var(--tables-background-hover);
   cursor: pointer;
 }
 

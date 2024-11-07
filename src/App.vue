@@ -63,11 +63,15 @@ html, body {
 body.light {
   --color-text: black;
   --color-background: #f5f5f5;
+  --tables-background-hover: #d4d4d4;
+  --searbars-text: black;
 }
 
 body.dark {
   --color-text: #333;
   --color-background: #181818;
+  --tables-background-hover: #2c2c2c;
+  --searbars-text: white;
 }
 
 body {
