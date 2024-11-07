@@ -25,7 +25,7 @@
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
             <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</li>
           </ul>
         </div>
         <div class="audios-table">
@@ -59,7 +59,7 @@
             <li><strong>Audios:</strong> {{ audiosCount }}</li>
             <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
             <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</li>
           </ul>
       </div>
       <div class="audios-table">
@@ -116,7 +116,7 @@ export default defineComponent({
       defaultProfilePicture: defaultProfilePicture,
       audiosCount: 0,
       playsCount: 0,
-      averageRating: 0,
+      averageRating: null,
       followerCount: 0,
       isFollowing: false ,
       isMobile: false,
@@ -216,7 +216,7 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  color: white;
+  color: var(--text-color);
   font-family: Arial, sans-serif;
 }
 
