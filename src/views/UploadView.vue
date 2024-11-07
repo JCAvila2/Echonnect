@@ -197,9 +197,9 @@ export default {
   max-width: 500px;
   margin: 2rem auto;
   padding: 2rem;
-  background-color: #1e1e1e;
+  background-color: var(--upload-background-color);
   border-radius: 8px;
-  color: #ffffff;
+  color: var(--color-text);
 }
 
 .upload-title {
@@ -219,8 +219,8 @@ export default {
 .file-label {
   display: block;
   padding: 0.75rem 1rem;
-  background-color: #2c2c2c;
-  color: #ffffff;
+  background-color: var(--tables-background-hover);
+  color: var(--color-text);
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -230,7 +230,7 @@ export default {
   display: block;
   padding: 0.75rem 1rem;
   background-color: green;
-  color: #ffffff;
+  color: var(--color-text);
   border-radius: 5px;
   cursor: pointer;
   transition: background-color 0.3s;
@@ -244,10 +244,10 @@ export default {
   width: 100%;
   padding: 0.75rem;
   margin-bottom: 1rem;
-  background-color: #2c2c2c;
+  background-color: var(--tables-background-hover);
   border: none;
   border-radius: 5px;
-  color: #ffffff;
+  color: var(--color-text);
 }
 
 .textarea {
@@ -268,8 +268,8 @@ export default {
 
 .add-tag-button {
   padding: 0.75rem 1rem;
-  background-color: #2c2c2c;
-  color: #ffffff;
+  background-color: var(--tables-background-hover);
+  color: var(--color-text);
   border: none;
   border-radius: 5px;
   cursor: pointer;
@@ -290,8 +290,8 @@ export default {
 .tag {
   display: inline-flex;
   align-items: center;
-  background-color: #2c2c2c;
-  color: #ffffff;
+  background-color: var(--tag-background-color);
+  color: var(--color-text);
   padding: 0.25rem 0.5rem;
   border-radius: 15px;
   font-size: 0.9rem;
@@ -300,7 +300,7 @@ export default {
 .remove-tag-button {
   background: none;
   border: none;
-  color: #ffffff;
+  color: var(--color-text);
   margin-left: 0.25rem;
   cursor: pointer;
   font-size: 1rem;
