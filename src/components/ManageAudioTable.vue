@@ -1,7 +1,12 @@
 <template>
 	<div class="search-container">
-		<v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" single-line hide-details class="mb-4"
-			theme="dark"></v-text-field>
+		<v-text-field 
+			v-model="search" 
+			label="Search" 
+			prepend-inner-icon="mdi-magnify" 
+			single-line hide-details class="mb-4"
+		>
+		</v-text-field>
 
 		<!-- Table for Desktop -->
 		<v-data-table 
@@ -11,7 +16,7 @@
 			:search="search" 
 			:items-per-page="5" 
 			class="custom-table"
-			theme="dark">
+			:theme="themeStore.theme">
 
 			<!-- Custom items on header -->
 			<!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -54,7 +59,7 @@
 		</v-data-table>
 
 		<!-- List for Mobile -->
-		<v-list v-else class="mobile-list" theme="dark">
+		<v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -89,6 +94,7 @@ import { formatDate } from '@/utils/formatDate';
 import { deleteObject, getStorage, ref as storageRef } from 'firebase/storage';
 import { AudioItem } from '@/types/views/searchView';
 import { ManageAudioTableStatus } from '@/types/components/manageAudioTable';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
 	props: {
@@ -99,10 +105,12 @@ export default {
 	},
 	setup() {
 		const router = useRouter();
+		const themeStore = useThemeStore();
 
 		return {
 			router,
 			formatDate,
+			themeStore,
 		};
 	},
 	data() : ManageAudioTableStatus {
@@ -215,7 +223,8 @@ export default {
 
 <style scoped>
 .search-container {
-	color: white;
+	/* color: white; */
+	color: var(--color-text);
 	padding: 0px 0px 20px 20px;
 }
 
@@ -235,6 +244,7 @@ export default {
 
 .item:hover {
 	background-color: #2c2c2c;
+	background-color: var(--tables-background-hover);
 	cursor: pointer;
 }
 
