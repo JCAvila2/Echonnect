@@ -240,7 +240,7 @@ export default {
 
 .time {
 	margin-right: 10px;
-	color: white;
+	color: var(--color-text);
 	white-space: nowrap;
 }
 

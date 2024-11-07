@@ -440,7 +440,7 @@ export default defineComponent({
 
 <style scoped>
 .audio-player {
-  color: white;
+  color: var(--color-text);
   padding: 20px;
   font-family: Arial, sans-serif;
 }
@@ -528,6 +528,7 @@ export default defineComponent({
 
 .tag {
   background-color: #3a4a5a;
+  background-color: var(--tag-background-color);
   padding: 5px 10px;
   border-radius: 15px;
   margin-right: 5px;
@@ -536,14 +537,14 @@ export default defineComponent({
 
 .community {
   display: flex;
-  border-top: 1px solid #3a4a5a;
+  border-top: 1px solid var(--tag-background-color);
   padding-top: 20px;
 }
 
 .stats {
   width: 300px;
   margin-right: 20px;
-  border-right: 1px solid #3a4a5a;
+  border-right: 1px solid var(--tag-background-color);
   padding-right: 20px;
 }
 .stats h2 {
@@ -583,7 +584,7 @@ export default defineComponent({
   padding: 10px;
   border: none;
   border-radius: 5px 0 0 5px;
-  background-color: #3a4a5a;
+  background-color: var(--tag-background-color);
   color: white;
 }
 
@@ -597,7 +598,6 @@ export default defineComponent({
 }
 
 .comments-list {
-  /* background-color: #2a3a4a; */
   padding: 20px;
   border-radius: 5px;
 }
@@ -674,9 +674,8 @@ export default defineComponent({
 .reply-input {
   flex-grow: 1;
   padding: 5px;
-  border: 1px solid #3a4a5a;
   border-radius: 3px;
-  background-color: #2a3a4a;
+  background-color: var(--tag-background-color);
   color: white;
 }
 
