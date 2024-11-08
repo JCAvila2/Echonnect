@@ -17,33 +17,83 @@
     <!-- Navbar links -->
     <div :class="['navbar-links', { 'is-active': isMenuOpen }]">
       <ul>
-        <li> <router-link @click="toggleMenu" to="/search"> Search </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/profile"> Profile </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/upload"> Upload </router-link> </li>
-        <li v-if="uid"> <router-link @click="toggleMenu" to="/bookmarks"> Bookmarks </router-link> </li>
-        <li v-if="!uid"> <router-link @click="toggleMenu" to="/login"> Log In </router-link> </li>
-        <li v-if="!uid"> <router-link @click="toggleMenu" to="/register"> Register </router-link> </li>
+        <li> <router-link @click="toggleMenu" to="/search"> {{ $t('search') }} </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/profile"> {{ $t('profile') }} </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/upload"> {{ $t('upload') }} </router-link> </li>
+        <li v-if="uid"> <router-link @click="toggleMenu" to="/bookmarks"> {{ $t('bookmarks') }} </router-link> </li>
+        <li v-if="!uid"> <router-link @click="toggleMenu" to="/login"> {{ $t('login') }} </router-link> </li>
+        <li v-if="!uid"> <router-link @click="toggleMenu" to="/register"> {{ $t('register') }} </router-link> </li>
+
+        <!-- Language Dropdown -->
+        <li class="language-dropdown">
+          <div @click="toggleLanguageDropdown" class="language-selector">
+            <img :src="currentLanguageFlag" :alt="locale" class="language-flag">
+            <!-- <span class="language-code">{{ locale.toUpperCase() }}</span> -->
+            <span class="dropdown-arrow">▼</span>
+          </div>
+          <ul v-if="isLanguageDropdownOpen" class="language-options">
+            <li 
+              v-for="(lang, index) in availableLanguages" 
+              :key="index"
+              @click="changeLanguage(lang.code)"
+            >
+              <img :src="lang.flag" :alt="lang.code" class="language-flag">
+              <span>{{ lang.name }}</span>
+            </li>
+          </ul>
+        </li>
+
       </ul>
     </div>
   </nav>
 </template>
 
-<script>
+<script lang="ts">
 import { ref, computed } from 'vue';
 import { useAuthStore } from '@/stores/auth';
+import { useI18n } from 'vue-i18n';
+import enFlag from '@/assets/flags/en.png';
+import esFlag from '@/assets/flags/es.png';
 
 export default {
   setup() {
     const authStore = useAuthStore();
     const uid = computed(() => authStore.user?.uid);
     const isMenuOpen = ref(false);
+    const { locale } = useI18n();
 
-    const toggleMenu = () => {
-      isMenuOpen.value = !isMenuOpen.value;
+    const isLanguageDropdownOpen = ref(false);
+    const availableLanguages = [
+      { code: 'en', name: 'English', flag: enFlag },
+      { code: 'es', name: 'Español', flag: esFlag },
+    ];
+
+    const currentLanguageFlag = computed(() => {
+      const currentLang = availableLanguages.find(lang => lang.code === locale.value);
+      return currentLang ? currentLang.flag : enFlag;
+    });
+
+    return { 
+      uid, 
+      isMenuOpen, 
+      locale,
+      isLanguageDropdownOpen,
+      availableLanguages,
+      currentLanguageFlag,
     };
-
-    return { uid, isMenuOpen, toggleMenu };
   },
+  methods: {
+    toggleMenu() {
+      this.isMenuOpen = !this.isMenuOpen;
+    },
+    changeLanguage(lang: string) {
+      this.locale = lang;
+      this.isLanguageDropdownOpen = false;
+    },
+    toggleLanguageDropdown() {
+      this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
+    },
+  }
 };
 </script>
 
@@ -149,6 +199,66 @@ header {
   margin: 5px 0;
 }
 
+/* Language Dropdown Styles */
+.language-dropdown {
+  display: flex;
+  align-items: center;
+  height: 100%;
+}
+
+.language-selector {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 15px;
+  color: white;
+}
+
+.language-flag {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.dropdown-arrow {
+  margin-left: 5px;
+  font-size: 0.7em;
+}
+
+.language-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: black;
+  color: white;
+  border: 1px solid gray;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 150px;
+}
+
+.language-options li {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.language-options li:hover {
+  background-color: gray;
+}
+
+.language-options li img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
 /* Media query for smaller screens */
 @media (max-width: 768px) {
   .navbar {
@@ -197,6 +307,11 @@ header {
 
   .brand-title h1 {
     font-size: 2rem;
+  }
+
+  .language-options {
+    position: static;
+    width: 100%;
   }
 }
 </style>

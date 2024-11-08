@@ -2,10 +2,12 @@
   <div class="search-container">
     <v-text-field 
       v-model="search" 
-      label="Search" 
+      :label="$t('searchPlaceholder')" 
       prepend-inner-icon="mdi-magnify" 
       single-line
-      hide-details class="mb-4">
+      hide-details 
+      class="mb-4"
+    >
     </v-text-field>
 
     <!-- Table for Desktop -->
@@ -39,7 +41,7 @@
           <td class="truncated-text">{{ item.title }}</td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
+          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
           <td>{{ item.reproductions }}</td>
         </tr>
       </template>
@@ -73,7 +75,7 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem } from '@/types/views/searchView';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { UserAudiosTableStatus } from '@/types/components/userAudiosTable';
 import { useThemeStore } from '@/stores/theme';
 
@@ -94,18 +96,8 @@ export default {
     };
   },
   data() : UserAudiosTableStatus {
-    const headers = [
-      { title: '', value: 'imageUrl', sortable: false, width: '50px' },
-      { title: 'Title', value: 'title', sortable: true },
-      { value: 'duration', sortable: true }, // Custom slot
-      { value: 'createdAt', sortable: true }, // Custom slot
-      { title: 'Score', value: 'score' },
-      { title: 'Plays', value: 'reproductions', sortable: true },
-    ];
-
     return {
       search: '',
-      headers,
       listOfAudios: [],
       isMobile: false,
     };
@@ -124,6 +116,16 @@ export default {
         audio.title.toLowerCase().includes(this.search.toLowerCase())
       );
     },
+    headers(): TableHeader[] {
+			return [
+				{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
+				{ title: this.$t('title'), value: 'title', sortable: true },
+				{ value: 'duration', sortable: true, width: '15%' }, // Custom slot
+				{ value: 'createdAt', sortable: true, width: '15%' }, // Custom slot
+				{ title: this.$t('rating'), value: 'score', width: '20%' },
+				{ title: this.$t('plays'), value: 'reproductions', width: '20%' },
+			];
+		},
   },
   methods: {
     async getAudios() {

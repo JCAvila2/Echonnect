@@ -1,13 +1,14 @@
 <template>
   <div class="search-container">
+
+    <!-- Search bar -->
     <v-text-field 
       v-model="search" 
-      label="Search bookmarked audio..." 
+      :label="$t('searchBookmarked')" 
       prepend-inner-icon="mdi-magnify" 
       single-line
-      hide-details 
-      class="mb-4" 
-      :theme="themeStore.theme">
+      hide-details class="mb-4" 
+    >
     </v-text-field>
 
     <!-- Table for Desktop -->
@@ -44,7 +45,7 @@
           </td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
+          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
           <td>{{ item.reproductions }}</td>
           <td>
             <div class="actions-icons-delete" @click.stop="removeBookmark(item.id)">
@@ -88,43 +89,40 @@ import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'fireb
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem } from '@/types/views/searchView';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { useAuthStore } from '@/stores/auth';
 import { BookmarksViewStatus } from '@/types/views/bookmarksView';
 import { useThemeStore } from '@/stores/theme';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
     const router = useRouter();
     const uid = useAuthStore().user?.uid;
     const themeStore = useThemeStore();
-    document.title = 'Bookmarks';
+    const { t, locale } = useI18n();
+    document.title = t('bookmarks');
 
     return {
       router,
       uid,
       formatDate,
       themeStore,
+      locale,
+      t
     };
   },
-  data() : BookmarksViewStatus {
-    const headers = [
-      { title: '', value: 'imageUrl', sortable: false, width: '50px' },
-      { title: 'Title', value: 'title', sortable: true },
-      { title: 'Author', value: 'author', sortable: true },
-      { value: 'duration', sortable: true }, // Custom slot
-      { value: 'createdAt', sortable: true }, // Custom slot
-      { title: 'Score', value: 'score' },
-      { title: 'Plays', value: 'reproductions' },
-      { title: 'Actions', value: 'actions', sortable: false },
-    ];
-
+  data(): BookmarksViewStatus {
     return {
       search: '',
-      headers,
       listOfAudios: [],
       isMobile: false,
     };
+  },
+  watch: {
+    locale() {
+      document.title = this.t('bookmarks');
+    },
   },
   mounted() {
     this.getBookmarks();
@@ -139,6 +137,18 @@ export default {
       return this.listOfAudios.filter((audio) =>
         audio.title.toLowerCase().includes(this.search.toLowerCase())
       );
+    },
+    headers(): TableHeader[] {
+      return [
+        { title: '', value: 'imageUrl', sortable: false, width: '50px' },
+        { title: this.t('title'), value: 'title', sortable: true },
+        { title: this.t('author'), value: 'author', sortable: true, width: '25%' },
+        { value: 'duration', sortable: true, width: '10%' }, // Custom slot
+        { value: 'createdAt', sortable: true, width: '10%' }, // Custom slot
+        { title: this.t('rating'), value: 'score', width: '10%' },
+        { title: this.t('plays'), value: 'reproductions', width: '10%' },
+        { title: this.t('actions'), value: 'actions', sortable: false },
+      ];
     },
   },
   methods: {

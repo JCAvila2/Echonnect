@@ -1,39 +1,49 @@
 <template>
   <div class="login_form">
-    <h1>Register</h1>
+    <h1>{{ t('register') }}</h1>
     <p v-if="errorMessage" style="color: red; text-align: center" v-html="errorMessage"></p>
     <form @submit.prevent="register">
       <div class="input_area">
         <div class="txt_field">
           <input v-model="username" required />
-          <label> Username </label>
+          <label> {{ t('username') }} </label>
         </div>
         <div class="txt_field">
           <input v-model="email" required @keyup="validateEmail" />
-          <label> Email </label>
+          <label> {{ t('email') }} </label>
         </div>
         <div class="txt_field">
           <input v-model="password" type="password" required @keyup="validatePassword" />
-          <label> Password </label>
+          <label> {{ t('password') }} </label>
         </div>
-        <button type="submit" class="login_button"> Register </button>
+        <button type="submit" class="login_button"> {{ t('register') }} </button>
       </div>
     </form>
     <div class="register">
-      Already have an account? <router-link to="/login"> Log In </router-link>
+      {{ t('alreadyHaveAccount') }} <router-link to="/login"> {{ t('login') }} </router-link>
     </div>
   </div>
 </template>
 
-
 <script lang="ts">
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
-    document.title = 'Register';
+    const { t, locale } = useI18n();
+    document.title = t('register');
+    return {
+      t,
+      locale,
+    };
   },
+  watch: {
+    locale() {
+      document.title = this.t('register');
+    }
+  },      
   data() {
     return {
       username: '',
