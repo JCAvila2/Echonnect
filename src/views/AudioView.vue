@@ -6,7 +6,7 @@
       </div>
       <div class="audio-info">
         <div class="audio-title">
-          {{ audio.title }}
+          <div class="audio-title-text">{{ audio.title }}</div>
 
           <button @click="toggleBookmark" class="bookmark-btn">
             <font-awesome-icon icon="fa-solid fa-bookmark" v-if="isBookmarked"/>
@@ -472,13 +472,20 @@ export default defineComponent({
   font-weight: bold;
   font-size: 3em;
   margin-bottom: 10px;
-  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  max-width: 100%;
+}
+
+.audio-title-text {
+  flex: 1;
+  min-width: 0;
+  word-wrap: break-word;
 }
 
 .bookmark-btn {
-  position: absolute;
-  right: 0;
-  top: 0;
   cursor: pointer;
 }
 
