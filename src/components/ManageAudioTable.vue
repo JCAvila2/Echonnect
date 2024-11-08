@@ -36,7 +36,7 @@
 							<img :src="item.imageUrl" :alt="item.title" class="audio-icon">
 						</v-avatar>
 					</td>
-					<td>{{ item.title }}</td>
+					<td class="truncated-text">{{ item.title }}</td>
 					<td>{{ item.duration ?? '-:--' }}</td>
 					<td>{{ formatDate(item.createdAt) }}</td>
 					<td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
@@ -75,7 +75,7 @@
         <v-list-item-title style="font-size: 20px;">{{ item.title }}</v-list-item-title>
 
 				<template v-slot:append>
-					<div @click.stop="deleteAudio(item.id)">
+					<div @click.stop="deleteAudio(item.id)" style="padding-left: 20px;">
 						<font-awesome-icon icon="trash" />
 					</div>
         </template>
@@ -256,15 +256,12 @@ export default {
   border-radius: 10%;
 }
 
-.author-item {
-	color: #1db954;
-	cursor: pointer;
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
-
-.author-item:hover {
-	text-decoration: underline;
-}
-
 
 /* Actions icons */
 .actions-icons-container {

@@ -38,7 +38,7 @@
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
-          <td>{{ item.title }}</td>
+          <td class="truncated-text">{{ item.title }}</td>
           <td>
             <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }} </span>
           </td>
@@ -73,7 +73,7 @@
           <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
         </v-list-item-subtitle>
         <template v-slot:append>
-					<div @click.stop="removeBookmark(item.id)">
+					<div @click.stop="removeBookmark(item.id)" style="padding-left: 10px;">
 						<font-awesome-icon icon="trash" />
 					</div>
         </template>
@@ -242,6 +242,13 @@ export default {
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
+}
+
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
 
 .author-item {

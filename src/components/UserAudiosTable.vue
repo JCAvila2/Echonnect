@@ -36,7 +36,7 @@
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
-          <td>{{ item.title }}</td>
+          <td class="truncated-text">{{ item.title }}</td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
           <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
@@ -100,7 +100,7 @@ export default {
       { value: 'duration', sortable: true }, // Custom slot
       { value: 'createdAt', sortable: true }, // Custom slot
       { title: 'Score', value: 'score' },
-      { title: 'Plays', value: 'reproductions' },
+      { title: 'Plays', value: 'reproductions', sortable: true },
     ];
 
     return {
@@ -184,6 +184,13 @@ export default {
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
+}
+
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
 
 @media (max-width: 768px) {

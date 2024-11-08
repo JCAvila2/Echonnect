@@ -462,7 +462,6 @@ export default defineComponent({
   width: 300px;
   height: 300px;
   object-fit: cover;
-
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
@@ -486,6 +485,7 @@ export default defineComponent({
 }
 
 .bookmark-btn {
+  padding-left: 20px;
   cursor: pointer;
 }
 
