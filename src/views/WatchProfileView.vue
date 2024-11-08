@@ -225,7 +225,6 @@ export default defineComponent({
   height: 100%;
   padding: 50px;
   color: var(--text-color);
-  font-family: Arial, sans-serif;
 }
 
 .profile-content {

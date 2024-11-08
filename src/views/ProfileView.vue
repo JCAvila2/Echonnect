@@ -350,7 +350,6 @@ export default defineComponent({
   height: 100%;
   padding: 50px;
   color: var(--color-text);
-  font-family: Arial, sans-serif;
 }
 
 .profile-content {
