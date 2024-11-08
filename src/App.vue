@@ -42,6 +42,8 @@ export default defineComponent({
 </template>
 
 <style>
+@import "/src/assets/theme.css";
+
 :root {
   --navbar-height: 80px;
   /* add around +10px */
@@ -58,22 +60,6 @@ html, body {
   height: calc(100vh - calc(var(--navbar-height) + 10px));
   /* Margin to the top of the page content to avoid overlapping */
   overflow: auto;
-}
-
-body.light {
-  --color-text: black;
-  --color-background: #f5f5f5;
-  --tables-background-hover: #d4d4d4;
-  --tag-background-color: #7eb8f3;
-  --upload-background-color: #c0c0c0;
-}
-
-body.dark {
-  --color-text: white;
-  --color-background: #181818;
-  --tables-background-hover: #2c2c2c;
-  --tag-background-color: #3a4a5a;
-  --upload-background-color: #1e1e1e;
 }
 
 body {
