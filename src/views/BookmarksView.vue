@@ -8,8 +8,7 @@
       prepend-inner-icon="mdi-magnify" 
       single-line
       hide-details class="mb-4" 
-      theme="dark"
-      >
+    >
     </v-text-field>
 
     <!-- Table for Desktop -->
@@ -20,7 +19,7 @@
       :search="search" 
       :items-per-page="10" 
       class="custom-table"
-      theme="dark"
+      :theme="themeStore.theme"
       >
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -40,7 +39,7 @@
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
-          <td>{{ item.title }}</td>
+          <td class="truncated-text">{{ item.title }}</td>
           <td>
             <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }} </span>
           </td>
@@ -58,7 +57,7 @@
     </v-data-table>
 
     <!-- List for Mobile -->
-    <v-list v-else class="mobile-list" theme="dark">
+    <v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -75,7 +74,7 @@
           <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
         </v-list-item-subtitle>
         <template v-slot:append>
-					<div @click.stop="removeBookmark(item.id)">
+					<div @click.stop="removeBookmark(item.id)" style="padding-left: 10px;">
 						<font-awesome-icon icon="trash" />
 					</div>
         </template>
@@ -93,12 +92,14 @@ import { formatDate } from '@/utils/formatDate';
 import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { useAuthStore } from '@/stores/auth';
 import { BookmarksViewStatus } from '@/types/views/bookmarksView';
+import { useThemeStore } from '@/stores/theme';
 import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
     const router = useRouter();
     const uid = useAuthStore().user?.uid;
+    const themeStore = useThemeStore();
     const { t, locale } = useI18n();
     document.title = t('bookmarks');
 
@@ -106,6 +107,7 @@ export default {
       router,
       uid,
       formatDate,
+      themeStore,
       locale,
       t
     };
@@ -223,7 +225,7 @@ export default {
 <style scoped>
 .search-container {
   padding: 20px;
-  color: white;
+  color: var(--searbars-text);
 }
 
 .custom-table {
@@ -240,7 +242,7 @@ export default {
 
 .item:hover,
 .v-list-item:hover {
-  background-color: #2c2c2c;
+  background-color: var(--tables-background-hover);
   cursor: pointer;
 }
 
@@ -250,6 +252,13 @@ export default {
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
+}
+
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
 
 .author-item {

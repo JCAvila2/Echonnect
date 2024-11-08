@@ -25,7 +25,7 @@
             <li><strong>{{ $t('audios') }}:</strong> {{ audiosCount }}</li>
             <li><strong>{{ $t('bookmarks') }}:</strong> {{ bookmarksCount }}</li>
             <li><strong>{{ $t('plays') }}:</strong> {{ playsCount }}</li>
-            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || $t('noRatingYet') }}</li>
+            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</li>
           </ul>
         </div>
         <div class="audios-table">
@@ -59,7 +59,7 @@
             <li><strong>{{ $t('audios') }}:</strong> {{ audiosCount }}</li>
             <li><strong>{{ $t('bookmarks') }}:</strong> {{ bookmarksCount }}</li>
             <li><strong>{{ $t('plays') }}:</strong> {{ playsCount }}</li>
-            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || $t('noRatingYet') }}</li>
+            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</li>
           </ul>
       </div>
       <div class="audios-table">
@@ -124,7 +124,7 @@ export default defineComponent({
       defaultProfilePicture: defaultProfilePicture,
       audiosCount: 0,
       playsCount: 0,
-      averageRating: 0,
+      averageRating: null,
       followerCount: 0,
       isFollowing: false ,
       isMobile: false,
@@ -224,8 +224,7 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  color: white;
-  font-family: Arial, sans-serif;
+  color: var(--text-color);
 }
 
 .profile-content {

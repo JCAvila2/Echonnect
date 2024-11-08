@@ -349,8 +349,7 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  color: white;
-  font-family: Arial, sans-serif;
+  color: var(--color-text);
 }
 
 .profile-content {
@@ -383,7 +382,7 @@ export default defineComponent({
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 24px;
-  color: white;
+  color: var(--color-text);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -409,7 +408,7 @@ export default defineComponent({
   position: relative;
   bottom: 0px;
   font-size: 24px;
-  color: white;
+  color: var(--color-text);
   transition: opacity 0.3s ease;
 }
 
@@ -436,7 +435,7 @@ export default defineComponent({
 
 .user-bio {
   font-size: 24px;
-  color: white;
+  color: var(--color-text);
   margin: 5px 0;
 }
 

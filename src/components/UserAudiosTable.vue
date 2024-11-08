@@ -6,8 +6,7 @@
       prepend-inner-icon="mdi-magnify" 
       single-line
       hide-details 
-      class="mb-4" 
-      theme="dark"
+      class="mb-4"
     >
     </v-text-field>
 
@@ -19,7 +18,7 @@
       :search="search" 
       :items-per-page="5" 
       class="custom-table"
-      theme="dark">
+      :theme="themeStore.theme">
 
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -39,7 +38,7 @@
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
-          <td>{{ item.title }}</td>
+          <td class="truncated-text">{{ item.title }}</td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
           <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
@@ -50,7 +49,7 @@
     </v-data-table>
 
     <!-- List for Mobile -->
-    <v-list v-else class="mobile-list" theme="dark">
+    <v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -78,6 +77,7 @@ import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
 import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { UserAudiosTableStatus } from '@/types/components/userAudiosTable';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
   props: {
@@ -88,10 +88,11 @@ export default {
   },
   setup() {
     const router = useRouter();
-
+    const themeStore = useThemeStore();
     return {
       router,
       formatDate,
+      themeStore,
     };
   },
   data() : UserAudiosTableStatus {
@@ -156,7 +157,7 @@ export default {
 
 <style scoped>
 .search-container {
-  color: white;
+  color: var(--text-color);
   padding: 0px 0px 20px 20px;
 }
 
@@ -185,6 +186,13 @@ export default {
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
+}
+
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
 
 @media (max-width: 768px) {

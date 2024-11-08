@@ -2,6 +2,7 @@
 import { defineComponent } from 'vue';
 import Navbar from '@/components/NavbarComponent.vue';
 import { RouterView } from 'vue-router';
+import { useThemeStore } from '@/stores/theme';
 
 export default defineComponent({
   components: {
@@ -10,6 +11,21 @@ export default defineComponent({
   },
   setup() {
     document.title = 'Echonnect';
+
+    const themeStore = useThemeStore();
+    themeStore.setTheme('dark');
+
+    return {
+      themeStore,
+    };
+  },
+  watch: {
+    themeStore: {
+      deep: true,
+      handler() {
+        document.body.className = this.themeStore.theme;
+      },
+    },
   },
 });
 </script>
@@ -19,15 +35,18 @@ export default defineComponent({
     <Navbar />
   </header>
 
+  {{ themeStore.theme }}
+  <button @click="themeStore.toggleTheme" style="background-color: red;">Toggle Theme</button>
+
   <RouterView />
 </template>
 
 <style>
+@import "/src/assets/theme.css";
+
 :root {
   --navbar-height: 80px;
   /* add around +10px */
-  --color-text: #333;
-  --color-background: #181818;
 }
 
 html, body {
