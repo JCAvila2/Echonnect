@@ -1,7 +1,14 @@
 <template>
   <div class="search-container">
-    <v-text-field v-model="search" label="Search bookmarked audio..." prepend-inner-icon="mdi-magnify" single-line
-      hide-details class="mb-4" theme="dark"></v-text-field>
+    <v-text-field 
+      v-model="search" 
+      label="Search bookmarked audio..." 
+      prepend-inner-icon="mdi-magnify" 
+      single-line
+      hide-details 
+      class="mb-4" 
+      :theme="themeStore.theme">
+    </v-text-field>
 
     <!-- Table for Desktop -->
     <v-data-table 
@@ -11,7 +18,7 @@
       :search="search" 
       :items-per-page="10" 
       class="custom-table"
-      theme="dark"
+      :theme="themeStore.theme"
       >
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -49,7 +56,7 @@
     </v-data-table>
 
     <!-- List for Mobile -->
-    <v-list v-else class="mobile-list" theme="dark">
+    <v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -84,17 +91,20 @@ import { formatDate } from '@/utils/formatDate';
 import { AudioItem } from '@/types/views/searchView';
 import { useAuthStore } from '@/stores/auth';
 import { BookmarksViewStatus } from '@/types/views/bookmarksView';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
   setup() {
     const router = useRouter();
     const uid = useAuthStore().user?.uid;
+    const themeStore = useThemeStore();
     document.title = 'Bookmarks';
 
     return {
       router,
       uid,
       formatDate,
+      themeStore,
     };
   },
   data() : BookmarksViewStatus {
@@ -205,7 +215,7 @@ export default {
 <style scoped>
 .search-container {
   padding: 20px;
-  color: white;
+  color: var(--searbars-text);
 }
 
 .custom-table {
@@ -222,7 +232,7 @@ export default {
 
 .item:hover,
 .v-list-item:hover {
-  background-color: #2c2c2c;
+  background-color: var(--tables-background-hover);
   cursor: pointer;
 }
 

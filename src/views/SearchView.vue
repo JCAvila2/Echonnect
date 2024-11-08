@@ -92,7 +92,7 @@ export default {
     const router = useRouter();
     const themeStore = useThemeStore();
     document.title = 'Search';
-    console.log(themeStore.theme);
+
     return {
       router,
       formatDate,
