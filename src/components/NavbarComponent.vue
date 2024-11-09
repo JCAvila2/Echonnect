@@ -64,7 +64,7 @@
 </template>
 
 <script lang="ts">
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted, onUnmounted } from 'vue';
 import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
 import enFlag from '@/assets/flags/en.png';
@@ -88,6 +88,23 @@ export default {
     const currentLanguageFlag = computed(() => {
       const currentLang = availableLanguages.find(lang => lang.code === locale.value);
       return currentLang ? currentLang.flag : enFlag;
+    });
+
+    // Listener to close dropdowns when clicking outside
+    const handleClickOutside = (event: MouseEvent) => {
+      const dropdown = document.querySelector('.settings-dropdown');
+      if (dropdown && !dropdown.contains(event.target as Node)) {
+        isSettingsDropdownOpen.value = false;
+        isLanguageDropdownOpen.value = false;
+      }
+    };
+
+    onMounted(() => {
+      document.addEventListener('click', handleClickOutside);
+    });
+
+    onUnmounted(() => {
+      document.removeEventListener('click', handleClickOutside);
     });
 
     return { 
