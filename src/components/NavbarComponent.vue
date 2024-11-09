@@ -23,26 +23,41 @@
         <li v-if="uid"> <router-link @click="toggleMenu" to="/bookmarks"> {{ $t('bookmarks') }} </router-link> </li>
         <li v-if="!uid"> <router-link @click="toggleMenu" to="/login"> {{ $t('login') }} </router-link> </li>
         <li v-if="!uid"> <router-link @click="toggleMenu" to="/register"> {{ $t('register') }} </router-link> </li>
-
-        <!-- Language Dropdown -->
-        <li class="language-dropdown">
-          <div @click="toggleLanguageDropdown" class="language-selector">
-            <img :src="currentLanguageFlag" :alt="locale" class="language-flag">
-            <!-- <span class="language-code">{{ locale.toUpperCase() }}</span> -->
-            <span class="dropdown-arrow">▼</span>
+        <li class="settings-dropdown">
+          <div @click="toggleSettingsDropdown" class="settings-selector">
+            <font-awesome-icon icon="fa-solid fa-gear" />
           </div>
-          <ul v-if="isLanguageDropdownOpen" class="language-options">
-            <li 
-              v-for="(lang, index) in availableLanguages" 
-              :key="index"
-              @click="changeLanguage(lang.code)"
-            >
-              <img :src="lang.flag" :alt="lang.code" class="language-flag">
-              <span>{{ lang.name }}</span>
+          <ul v-if="isSettingsDropdownOpen" class="settings-options">
+            <li>
+              <div class="switch-container">
+                {{ $t('theme') }}
+                <div class="theme-switch">
+                  <label class="switch">
+                    <input type="checkbox" v-model="isDarkMode" @change="themeStore.toggleTheme">
+                    <span class="slider"></span>
+                  </label>
+                </div>
+              </div>
+            </li>
+            <li>
+              <div @click="toggleLanguageDropdown" class="language-selector">
+                <img :src="currentLanguageFlag" :alt="locale" class="language-flag">
+                {{ $t('language') }}
+                <span class="dropdown-arrow">▼</span>
+              </div>
+              <ul v-if="isLanguageDropdownOpen" class="language-options">
+                <li 
+                  v-for="(lang, index) in availableLanguages" 
+                  :key="index"
+                  @click="changeLanguage(lang.code)"
+                >
+                  <img :src="lang.flag" :alt="lang.code" class="language-flag">
+                  <span>{{ lang.name }}</span>
+                </li>
+              </ul>
             </li>
           </ul>
         </li>
-
       </ul>
     </div>
   </nav>
@@ -54,6 +69,7 @@ import { useAuthStore } from '@/stores/auth';
 import { useI18n } from 'vue-i18n';
 import enFlag from '@/assets/flags/en.png';
 import esFlag from '@/assets/flags/es.png';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
   setup() {
@@ -61,7 +77,8 @@ export default {
     const uid = computed(() => authStore.user?.uid);
     const isMenuOpen = ref(false);
     const { locale } = useI18n();
-
+    const themeStore = useThemeStore();
+    const isSettingsDropdownOpen = ref(false);
     const isLanguageDropdownOpen = ref(false);
     const availableLanguages = [
       { code: 'en', name: 'English', flag: enFlag },
@@ -77,9 +94,12 @@ export default {
       uid, 
       isMenuOpen, 
       locale,
+      isSettingsDropdownOpen,
       isLanguageDropdownOpen,
       availableLanguages,
       currentLanguageFlag,
+      themeStore,
+      isDarkMode: themeStore.theme === 'dark',
     };
   },
   methods: {
@@ -89,6 +109,10 @@ export default {
     changeLanguage(lang: string) {
       this.locale = lang;
       this.isLanguageDropdownOpen = false;
+      this.isSettingsDropdownOpen = false;
+    },
+    toggleSettingsDropdown() {
+      this.isSettingsDropdownOpen = !this.isSettingsDropdownOpen;
     },
     toggleLanguageDropdown() {
       this.isLanguageDropdownOpen = !this.isLanguageDropdownOpen;
@@ -164,15 +188,13 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 0px 50px;
-  /* Adjust padding to control the clickable area */
+  padding: 0px 50px; /* Adjust padding to control the clickable area */
   color: var(--color-text-header);
   text-decoration: none;
   font-size: 18px;
   height: 100%;
 }
 
-/* TODO: change colors */
 .navbar-links a:hover {
   color: black;
   background-color: gray;
@@ -199,6 +221,122 @@ header {
   margin: 5px 0;
 }
 
+/* Settings Dropdown Styles */
+.settings-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  width: 60px;
+  cursor: pointer;
+  font-size: 30px;
+}
+.settings-selector:hover {
+  color: #0056b3;
+}
+
+.settings-flag {
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  border-radius: 50%;
+}
+
+.dropdown-arrow {
+  margin-left: 5px;
+  font-size: 0.7em;
+}
+
+.settings-options {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: black;
+  background-color: var(--color-background-header);
+  color: var(--color-text-header);
+  border: 1px solid gray;
+  z-index: 1000;
+  display: none;
+  flex-direction: column;
+  align-items: flex-start;
+  min-height: 150px;
+}
+
+.settings-options li {
+  display: flex;
+  align-items: center;
+  padding: 10px 15px;
+  cursor: pointer;
+  width: 100%;
+}
+
+.settings-options li img {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+
+/* Theme Toggle Style */
+.switch-container {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  width: 100%;
+  justify-content: center;
+}
+
+.theme-switch {
+  display: inline-block;
+}
+
+.switch {
+  position: relative;
+  display: inline-block;
+  margin-left: 20px;
+  width: 50px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #2196F3;
+  transition: 0.4s;
+  border-radius: 24px;
+}
+
+.slider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  transition: 0.4s;
+  border-radius: 50%;
+}
+
+input:checked + .slider {
+  background-color: gray;
+}
+
+input:checked + .slider:before { /* On Dark Active */
+  transform: translateX(26px);
+  background-color: black; 
+}
+
 /* Language Dropdown Styles */
 .language-dropdown {
   display: flex;
@@ -211,7 +349,7 @@ header {
   align-items: center;
   cursor: pointer;
   padding: 0 15px;
-  color: white;
+  color: var(--color-text-header);
 }
 
 .language-flag {
@@ -230,8 +368,8 @@ header {
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: black;
-  color: white;
+  background-color: var(--color-background-header);
+  color: var(--color-text-header);
   border: 1px solid gray;
   z-index: 1000;
   display: none;

@@ -55,5 +55,7 @@
   "dontHaveAccount": "Don't have an account?",
   "incorrectEmail": "Incorrect email",
   "incorrectPassword": "Incorrect password",
-  "incorrectCredentials": "Incorrect username or password"
+  "incorrectCredentials": "Incorrect username or password",
+  "theme": "Theme",
+  "language": "Language"
 }

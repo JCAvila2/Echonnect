@@ -13,6 +13,7 @@ import {
   faChartLine,
   faBookmark,
   faSearch,
+  faGear,
 } from '@fortawesome/free-solid-svg-icons';
 import { faClock, faCalendar, faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons';
 
@@ -32,6 +33,7 @@ library.add(
   faBookmark,
   farBookmark,
   faSearch,
+  faGear,
 );
 
 export { FontAwesomeIcon };

@@ -34,10 +34,6 @@ export default defineComponent({
   <header>
     <Navbar />
   </header>
-
-  {{ themeStore.theme }}
-  <button @click="themeStore.toggleTheme" style="background-color: red;">Toggle Theme</button>
-
   <RouterView />
 </template>
 
