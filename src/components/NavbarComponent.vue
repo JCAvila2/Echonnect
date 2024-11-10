@@ -90,7 +90,16 @@ export default {
       return currentLang ? currentLang.flag : enFlag;
     });
 
-    // Listener to close dropdowns when clicking outside
+    // Listener to close dropdowns when clicking outside the navbar
+    const handleClickOutsideNavbar = (event: MouseEvent) => {
+      const dropdown = document.querySelector('.navbar-links');
+      const menuToggle = document.querySelector('.menu-toggle');
+      if (dropdown && !dropdown.contains(event.target as Node) && !menuToggle?.contains(event.target as Node)) {
+        isMenuOpen.value = false;
+      }
+    };
+
+    // Listener to close dropdowns when clicking outside the settings dropdown
     const handleClickOutside = (event: MouseEvent) => {
       const dropdown = document.querySelector('.settings-dropdown');
       if (dropdown && !dropdown.contains(event.target as Node)) {
@@ -101,10 +110,12 @@ export default {
 
     onMounted(() => {
       document.addEventListener('click', handleClickOutside);
+      document.addEventListener('click', handleClickOutsideNavbar);
     });
 
     onUnmounted(() => {
       document.removeEventListener('click', handleClickOutside);
+      document.removeEventListener('click', handleClickOutsideNavbar);
     });
 
     return { 
@@ -144,18 +155,8 @@ export default {
   /* Adjust according to the header height */
 }
 
-body.light {
-  --color-text-header: black;
-  --color-background-header: #f5f5f5;
-}
-
-body.dark {
-  --color-text-header: white;
-  --color-background-header: black;
-}
-
 header {
-  background-color: var(--color-background-header);
+  background-color: var(--color-background);
   padding: 0px 0;
   position: fixed;
   top: 0;
@@ -184,7 +185,7 @@ header {
 }
 
 .brand-title h1 {
-  color: var(--color-text-header);
+  color: var(--color-text);
   font-size: 2.5rem;
 }
 
@@ -206,7 +207,7 @@ header {
   justify-content: center;
   align-items: center;
   padding: 0px 50px; /* Adjust padding to control the clickable area */
-  color: var(--color-text-header);
+  color: var(--color-text);
   text-decoration: none;
   font-size: 18px;
   height: 100%;
@@ -234,7 +235,7 @@ header {
 .menu-toggle span {
   width: 30px;
   height: 3px;
-  background-color: var(--color-text-header);
+  background-color: var(--color-text);
   margin: 5px 0;
 }
 
@@ -269,8 +270,8 @@ header {
   top: 100%;
   right: 0;
   background-color: black;
-  background-color: var(--color-background-header);
-  color: var(--color-text-header);
+  background-color: var(--color-background);
+  color: var(--color-text);
   border: 1px solid gray;
   z-index: 1000;
   display: none;
@@ -366,7 +367,7 @@ input:checked + .slider:before { /* On Dark Active */
   align-items: center;
   cursor: pointer;
   padding: 0 15px;
-  color: var(--color-text-header);
+  color: var(--color-text);
 }
 
 .language-flag {
@@ -385,7 +386,7 @@ input:checked + .slider:before { /* On Dark Active */
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: var(--color-background-header);
+  background-color: var(--color-background);
   color: var(--color-text-header);
   border: 1px solid gray;
   z-index: 1000;
@@ -425,7 +426,7 @@ input:checked + .slider:before { /* On Dark Active */
     position: absolute;
     top: var(--header-height);
     right: 0;
-    background-color: var(--color-background-header);
+    background-color: var(--color-background);
     width: 100%;
     flex-direction: column;
     align-items: center;
@@ -444,7 +445,7 @@ input:checked + .slider:before { /* On Dark Active */
     width: 100%;
     text-align: center;
     margin: 0;
-    background-color: var(--color-background-header);
+    background-color: var(--color-background);
   }
 
   .navbar-links a {
@@ -463,10 +464,24 @@ input:checked + .slider:before { /* On Dark Active */
   .brand-title h1 {
     font-size: 2rem;
   }
-
-  .language-options {
-    position: static;
+  
+  .settings-selector {
     width: 100%;
+    justify-content: center;
+    padding: 15px 0px;
+    color: var(--color-text);
+    margin-top: 0px;
+  }
+
+  .settings-selector:hover {
+    color: var(--color-text);
+  }
+
+  .language-selector {
+    width: 100%;
+    justify-content: center;
+    padding: 15px 0px;
+    color: var(--color-text);
   }
 }
 </style>
