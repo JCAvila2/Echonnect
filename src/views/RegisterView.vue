@@ -26,6 +26,7 @@
 </template>
 
 <script lang="ts">
+import { useThemeStore } from '@/stores/theme';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
 import { useI18n } from 'vue-i18n';
@@ -33,10 +34,12 @@ import { useI18n } from 'vue-i18n';
 export default {
   setup() {
     const { t, locale } = useI18n();
+    const themeStore = useThemeStore();
     document.title = t('register');
     return {
       t,
       locale,
+      themeStore,
     };
   },
   watch: {
@@ -113,7 +116,9 @@ export default {
             username: this.username,
             biography: '',
             profilePicture: null,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            theme: this.themeStore.theme ?? 'dark',
+            language: this.locale ?? 'en',
           });
 
           this.$router.push('/profile');
