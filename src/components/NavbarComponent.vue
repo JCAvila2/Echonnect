@@ -151,8 +151,7 @@ export default {
 
 <style>
 :root {
-  --header-height: 80px;
-  /* Adjust according to the header height */
+  --header-height: 80px; /* Adjust according to the header height */
 }
 
 header {
@@ -214,14 +213,13 @@ header {
 }
 
 .navbar-links a:hover {
-  color: black;
-  background-color: gray;
+  color:#0056b3;
 }
 
 /* Active link style */
 .navbar-links a.router-link-active {
-  color: black;
-  background-color: gray;
+  text-shadow:0px 0px 1px #0056b3;
+  color: #0056b3;
 }
 
 /* Menu toggle (hamburger icon) for mobile */
@@ -269,7 +267,6 @@ header {
   position: absolute;
   top: 100%;
   right: 0;
-  background-color: black;
   background-color: var(--color-background);
   color: var(--color-text);
   border: 1px solid gray;
@@ -284,8 +281,13 @@ header {
   display: flex;
   align-items: center;
   padding: 10px 15px;
-  cursor: pointer;
   width: 100%;
+  border-top: 1px solid gray;
+}
+
+.settings-options li:first-child {
+  border-top: none;
+  cursor: default;
 }
 
 .settings-options li img {
@@ -299,7 +301,6 @@ header {
 .switch-container {
   display: flex;
   align-items: center;
-  cursor: pointer;
   width: 100%;
   justify-content: center;
 }
@@ -314,6 +315,7 @@ header {
   margin-left: 20px;
   width: 50px;
   height: 24px;
+  cursor: pointer;
 }
 
 .switch input {
@@ -446,6 +448,7 @@ input:checked + .slider:before { /* On Dark Active */
     text-align: center;
     margin: 0;
     background-color: var(--color-background);
+    border-top: 2px solid gray;
   }
 
   .navbar-links a {
@@ -454,7 +457,7 @@ input:checked + .slider:before { /* On Dark Active */
   }
 
   .navbar-links a.router-link-active {
-    background-color: gray;
+    color:#0056b3;
   }
 
   .menu-toggle {
@@ -463,6 +466,12 @@ input:checked + .slider:before { /* On Dark Active */
 
   .brand-title h1 {
     font-size: 2rem;
+  }
+
+  .settings-dropdown {
+    transform: translateY(0);
+    top: 100% ;
+    margin-top: 0.25rem;
   }
   
   .settings-selector {
