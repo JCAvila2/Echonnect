@@ -1,37 +1,47 @@
 <template>
   <div class="login_form">
-    <h1>Log in to your Account</h1>
+    <h1>{{ t('loginLabel') }}</h1>
     <p v-if="errorMessage" style="color: red; text-align: center;">{{ errorMessage }}</p>
     <form @submit.prevent="login">
       <div class="input_area">
         <div class="txt_field">
           <input v-model="email" required />
-          <label> Email </label>
+          <label> {{ t('email') }} </label>
         </div>
         <div class="txt_field">
           <input v-model="password" type="password" required />
-          <label> Password </label>
+          <label> {{ t('password') }} </label>
         </div>
-        <button type="submit" class="login_button"> Log In </button>
+        <button type="submit" class="login_button"> {{ t('login') }} </button>
       </div>
     </form>
     <div class="register">
-      Did you forget the password? <div @click="changePassword" class="changePassword"> Change Password </div>
+      {{ t('forgotPassword') }} <div @click="changePassword" class="changePassword"> {{ t('changePassword') }} </div>
     </div>
     <div class="register">
-      Don't have an account? <router-link to="/register"> Register </router-link>
+      {{ t('dontHaveAccount') }} <router-link to="/register"> {{ t('register') }} </router-link>
     </div>
   </div>
 </template>
 
-
 <script lang="ts">
 import { getAuth, signInWithEmailAndPassword, sendPasswordResetEmail } from 'firebase/auth';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
-    document.title = 'Login';
+    const { t, locale } = useI18n();
+    document.title = t('login');
+    return {
+      t,
+      locale,
+    };
   },
+  watch: {
+    locale() {
+      document.title = this.t('login');
+    }
+  },  
   data() {
     return {
       email: '',
@@ -50,13 +60,13 @@ export default {
           console.log(error.code);
           switch (error.code) {
             case 'auth/user-not-found':
-              this.errorMessage = 'Incorrect Email';
+              this.errorMessage = this.t('incorrectEmail');
               break;
             case 'auth/wrong-password':
-              this.errorMessage = 'Incorrect Password';
+              this.errorMessage = this.t('incorrectPassword');
               break;
             default:
-              this.errorMessage = 'Invalid Email or Password';
+              this.errorMessage = this.t('incorrectCredentials');
               break;
           }
         });
@@ -81,14 +91,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .login_form {
   top: 10px;
   position: relative;
   left: 50%;
   transform: translateX(-50%);
   width: 600px;
-  background: #19282D;
+  background-color: var(--color-background);
   border-radius: 10px;
   border: 1px solid black;
   padding-bottom: 20px;
@@ -97,7 +107,7 @@ export default {
 .login_form h1 {
   text-align: center;
   padding: 20px 0;
-  color: white;
+  color: var(--color-text);
   border-bottom: 1px solid silver;
 }
 
@@ -120,14 +130,14 @@ export default {
   border: none;
   background: none;
   outline: none;
-  color: white;
+  color: var(--color-text);
 }
 
 .txt_field label {
   position: absolute;
   top: 50%;
   left: 5px;
-  color: white;
+  color: var(--color-text);
   transform: translateY(-50%);
   font-size: 16px;
   pointer-events: none;
@@ -166,8 +176,7 @@ ul {
 .login_button {
   width: 100%;
   height: 50px;
-  border: 1px solid;
-  background: #2691d9;
+  background-color: #2691d9;
   border-radius: 25px;
   font-size: 18px;
   color: #e9f4fb;
@@ -177,7 +186,7 @@ ul {
 }
 
 .login_button:hover {
-  border-color: #2691d9;
+  background-color: #0056b3;
   transition: .5s;
 }
 
@@ -186,7 +195,7 @@ ul {
   margin: 10px 0;
   text-align: center;
   font-size: 16px;
-  color: white;
+  color: var(--color-text);
 }
 
 .register a {

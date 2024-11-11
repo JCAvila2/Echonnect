@@ -1,7 +1,12 @@
 <template>
 	<div class="search-container">
-		<v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" single-line hide-details class="mb-4"
-			theme="dark"></v-text-field>
+		<v-text-field 
+			v-model="search" 
+			:label="$t('searchPlaceholder')" 
+			prepend-inner-icon="mdi-magnify" 
+			single-line hide-details class="mb-4"
+		>
+		</v-text-field>
 
 		<!-- Table for Desktop -->
 		<v-data-table 
@@ -11,7 +16,7 @@
 			:search="search" 
 			:items-per-page="5" 
 			class="custom-table"
-			theme="dark">
+			:theme="themeStore.theme">
 
 			<!-- Custom items on header -->
 			<!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -31,10 +36,10 @@
 							<img :src="item.imageUrl" :alt="item.title" class="audio-icon">
 						</v-avatar>
 					</td>
-					<td>{{ item.title }}</td>
+					<td class="truncated-text">{{ item.title }}</td>
 					<td>{{ item.duration ?? '-:--' }}</td>
 					<td>{{ formatDate(item.createdAt) }}</td>
-					<td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
+					<td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
 					<td>{{ item.reproductions }}</td>
 
 					<td>
@@ -54,7 +59,7 @@
 		</v-data-table>
 
 		<!-- List for Mobile -->
-		<v-list v-else class="mobile-list" theme="dark">
+		<v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -70,7 +75,7 @@
         <v-list-item-title style="font-size: 20px;">{{ item.title }}</v-list-item-title>
 
 				<template v-slot:append>
-					<div @click.stop="deleteAudio(item.id)">
+					<div @click.stop="deleteAudio(item.id)" style="padding-left: 20px;">
 						<font-awesome-icon icon="trash" />
 					</div>
         </template>
@@ -87,8 +92,10 @@ import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
 import { deleteObject, getStorage, ref as storageRef } from 'firebase/storage';
-import { AudioItem } from '@/types/views/searchView';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { ManageAudioTableStatus } from '@/types/components/manageAudioTable';
+import { useThemeStore } from '@/stores/theme';
+import { useI18n } from 'vue-i18n';
 
 export default {
 	props: {
@@ -99,26 +106,19 @@ export default {
 	},
 	setup() {
 		const router = useRouter();
+		const themeStore = useThemeStore();
+		const { locale } = useI18n();
 
 		return {
 			router,
 			formatDate,
+			themeStore,
+			locale,
 		};
 	},
 	data() : ManageAudioTableStatus {
-		const headers = [
-			{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
-			{ title: 'Title', value: 'title', sortable: true },
-			{ value: 'duration', sortable: true }, // Custom slot
-			{ value: 'createdAt', sortable: true }, // Custom slot
-			{ title: 'Score', value: 'score', sortable: true },
-			{ title: 'Plays', value: 'reproductions', sortable: true },
-			{ title: 'Actions', value: 'actions', sortable: false },
-		];
-
 		return {
 			search: '',
-			headers,
 			listOfAudios: [],
 			isMobile: false,
 		};
@@ -136,6 +136,17 @@ export default {
 			return this.listOfAudios.filter((audio) =>
 				audio.title.toLowerCase().includes(this.search.toLowerCase())
 			);
+		},
+		headers(): TableHeader[] {
+			return [
+				{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
+				{ title: this.$t('title'), value: 'title', sortable: true },
+				{ value: 'duration', sortable: true, width: '10%' }, // Custom slot
+				{ value: 'createdAt', sortable: true, width: '10%' }, // Custom slot
+				{ title: this.$t('rating'), value: 'score', width: '15%' },
+				{ title: this.$t('plays'), value: 'reproductions', width: '15%' },
+				{ title: this.$t('actions'), value: 'actions', sortable: false },
+			];
 		},
 	},
 	methods: {
@@ -215,7 +226,8 @@ export default {
 
 <style scoped>
 .search-container {
-	color: white;
+	/* color: white; */
+	color: var(--color-text);
 	padding: 0px 0px 20px 20px;
 }
 
@@ -235,6 +247,7 @@ export default {
 
 .item:hover {
 	background-color: #2c2c2c;
+	background-color: var(--tables-background-hover);
 	cursor: pointer;
 }
 
@@ -246,15 +259,12 @@ export default {
   border-radius: 10%;
 }
 
-.author-item {
-	color: #1db954;
-	cursor: pointer;
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
-
-.author-item:hover {
-	text-decoration: underline;
-}
-
 
 /* Actions icons */
 .actions-icons-container {

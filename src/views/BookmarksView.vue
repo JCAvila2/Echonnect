@@ -1,7 +1,15 @@
 <template>
   <div class="search-container">
-    <v-text-field v-model="search" label="Search bookmarked audio..." prepend-inner-icon="mdi-magnify" single-line
-      hide-details class="mb-4" theme="dark"></v-text-field>
+
+    <!-- Search bar -->
+    <v-text-field 
+      v-model="search" 
+      :label="$t('searchBookmarked')" 
+      prepend-inner-icon="mdi-magnify" 
+      single-line
+      hide-details class="mb-4" 
+    >
+    </v-text-field>
 
     <!-- Table for Desktop -->
     <v-data-table 
@@ -11,7 +19,7 @@
       :search="search" 
       :items-per-page="10" 
       class="custom-table"
-      theme="dark"
+      :theme="themeStore.theme"
       >
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -31,13 +39,13 @@
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
-          <td>{{ item.title }}</td>
+          <td class="truncated-text">{{ item.title }}</td>
           <td>
             <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }} </span>
           </td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
+          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
           <td>{{ item.reproductions }}</td>
           <td>
             <div class="actions-icons-delete" @click.stop="removeBookmark(item.id)">
@@ -49,7 +57,7 @@
     </v-data-table>
 
     <!-- List for Mobile -->
-    <v-list v-else class="mobile-list" theme="dark">
+    <v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -66,7 +74,7 @@
           <span @click.stop="watchProfile(item.uid)" class="author-item">{{ item.author }}</span>
         </v-list-item-subtitle>
         <template v-slot:append>
-					<div @click.stop="removeBookmark(item.id)">
+					<div @click.stop="removeBookmark(item.id)" style="padding-left: 10px;">
 						<font-awesome-icon icon="trash" />
 					</div>
         </template>
@@ -81,40 +89,40 @@ import { collection, deleteDoc, doc, getDoc, getDocs, query, where } from 'fireb
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem } from '@/types/views/searchView';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { useAuthStore } from '@/stores/auth';
 import { BookmarksViewStatus } from '@/types/views/bookmarksView';
+import { useThemeStore } from '@/stores/theme';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
     const router = useRouter();
     const uid = useAuthStore().user?.uid;
-    document.title = 'Bookmarks';
+    const themeStore = useThemeStore();
+    const { t, locale } = useI18n();
+    document.title = t('bookmarks');
 
     return {
       router,
       uid,
       formatDate,
+      themeStore,
+      locale,
+      t
     };
   },
-  data() : BookmarksViewStatus {
-    const headers = [
-      { title: '', value: 'imageUrl', sortable: false, width: '50px' },
-      { title: 'Title', value: 'title', sortable: true },
-      { title: 'Author', value: 'author', sortable: true },
-      { value: 'duration', sortable: true }, // Custom slot
-      { value: 'createdAt', sortable: true }, // Custom slot
-      { title: 'Score', value: 'score' },
-      { title: 'Plays', value: 'reproductions' },
-      { title: 'Actions', value: 'actions', sortable: false },
-    ];
-
+  data(): BookmarksViewStatus {
     return {
       search: '',
-      headers,
       listOfAudios: [],
       isMobile: false,
     };
+  },
+  watch: {
+    locale() {
+      document.title = this.t('bookmarks');
+    },
   },
   mounted() {
     this.getBookmarks();
@@ -129,6 +137,18 @@ export default {
       return this.listOfAudios.filter((audio) =>
         audio.title.toLowerCase().includes(this.search.toLowerCase())
       );
+    },
+    headers(): TableHeader[] {
+      return [
+        { title: '', value: 'imageUrl', sortable: false, width: '50px' },
+        { title: this.t('title'), value: 'title', sortable: true },
+        { title: this.t('author'), value: 'author', sortable: true, width: '25%' },
+        { value: 'duration', sortable: true, width: '10%' }, // Custom slot
+        { value: 'createdAt', sortable: true, width: '10%' }, // Custom slot
+        { title: this.t('rating'), value: 'score', width: '10%' },
+        { title: this.t('plays'), value: 'reproductions', width: '10%' },
+        { title: this.t('actions'), value: 'actions', sortable: false },
+      ];
     },
   },
   methods: {
@@ -205,7 +225,7 @@ export default {
 <style scoped>
 .search-container {
   padding: 20px;
-  color: white;
+  color: var(--searbars-text);
 }
 
 .custom-table {
@@ -222,7 +242,7 @@ export default {
 
 .item:hover,
 .v-list-item:hover {
-  background-color: #2c2c2c;
+  background-color: var(--tables-background-hover);
   cursor: pointer;
 }
 
@@ -232,6 +252,13 @@ export default {
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
+}
+
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
 
 .author-item {

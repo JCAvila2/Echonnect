@@ -1,39 +1,52 @@
 <template>
   <div class="login_form">
-    <h1>Register</h1>
+    <h1>{{ t('register') }}</h1>
     <p v-if="errorMessage" style="color: red; text-align: center" v-html="errorMessage"></p>
     <form @submit.prevent="register">
       <div class="input_area">
         <div class="txt_field">
           <input v-model="username" required />
-          <label> Username </label>
+          <label> {{ t('username') }} </label>
         </div>
         <div class="txt_field">
           <input v-model="email" required @keyup="validateEmail" />
-          <label> Email </label>
+          <label> {{ t('email') }} </label>
         </div>
         <div class="txt_field">
           <input v-model="password" type="password" required @keyup="validatePassword" />
-          <label> Password </label>
+          <label> {{ t('password') }} </label>
         </div>
-        <button type="submit" class="login_button"> Register </button>
+        <button type="submit" class="login_button"> {{ t('register') }} </button>
       </div>
     </form>
     <div class="register">
-      Already have an account? <router-link to="/login"> Log In </router-link>
+      {{ t('alreadyHaveAccount') }} <router-link to="/login"> {{ t('login') }} </router-link>
     </div>
   </div>
 </template>
 
-
 <script lang="ts">
+import { useThemeStore } from '@/stores/theme';
 import { getAuth, createUserWithEmailAndPassword } from 'firebase/auth';
 import { getFirestore, doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { useI18n } from 'vue-i18n';
 
 export default {
   setup() {
-    document.title = 'Register';
+    const { t, locale } = useI18n();
+    const themeStore = useThemeStore();
+    document.title = t('register');
+    return {
+      t,
+      locale,
+      themeStore,
+    };
   },
+  watch: {
+    locale() {
+      document.title = this.t('register');
+    }
+  },      
   data() {
     return {
       username: '',
@@ -103,7 +116,9 @@ export default {
             username: this.username,
             biography: '',
             profilePicture: null,
-            createdAt: serverTimestamp()
+            createdAt: serverTimestamp(),
+            theme: this.themeStore.theme ?? 'dark',
+            language: this.locale ?? 'en',
           });
 
           this.$router.push('/profile');
@@ -127,14 +142,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .login_form {
   top: 10px;
   position: relative;
   left: 50%;
   transform: translateX(-50%);
   width: 600px;
-  background: #19282D;
+  background-color: var(--color-background);
   border-radius: 10px;
   border: 1px solid black;
   padding-bottom: 20px;
@@ -143,7 +158,7 @@ export default {
 .login_form h1 {
   text-align: center;
   padding: 20px 0;
-  color: white;
+  color: var(--color-text);
   border-bottom: 1px solid silver;
 }
 
@@ -166,14 +181,14 @@ export default {
   border: none;
   background: none;
   outline: none;
-  color: white;
+  color: var(--color-text);
 }
 
 .txt_field label {
   position: absolute;
   top: 50%;
   left: 5px;
-  color: white;
+  color: var(--color-text);
   transform: translateY(-50%);
   font-size: 16px;
   pointer-events: none;
@@ -211,8 +226,8 @@ ul {
 .login_button {
   width: 100%;
   height: 50px;
-  border: 1px solid;
-  background: #2691d9;
+  border: 0px;
+  background-color: #2691d9;
   border-radius: 25px;
   font-size: 18px;
   color: #e9f4fb;
@@ -222,7 +237,7 @@ ul {
 }
 
 .login_button:hover {
-  border-color: #2691d9;
+  background-color: #0056b3;
   transition: .5s;
 }
 
@@ -230,7 +245,7 @@ ul {
   margin: 10px 0;
   text-align: center;
   font-size: 16px;
-  color: white;
+  color: var(--color-text);
 }
 
 .register a {

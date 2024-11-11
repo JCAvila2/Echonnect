@@ -1,7 +1,14 @@
 <template>
   <div class="search-container">
-    <v-text-field v-model="search" label="Search" prepend-inner-icon="mdi-magnify" single-line
-      hide-details class="mb-4" theme="dark"></v-text-field>
+    <v-text-field 
+      v-model="search" 
+      :label="$t('searchPlaceholder')" 
+      prepend-inner-icon="mdi-magnify" 
+      single-line
+      hide-details 
+      class="mb-4"
+    >
+    </v-text-field>
 
     <!-- Table for Desktop -->
     <v-data-table 
@@ -11,7 +18,7 @@
       :search="search" 
       :items-per-page="5" 
       class="custom-table"
-      theme="dark">
+      :theme="themeStore.theme">
 
       <!-- Custom items on header -->
       <!-- eslint-disable-next-line vue/valid-v-slot -->
@@ -31,10 +38,10 @@
               <img :src="item.imageUrl" :alt="item.title" class="audio-icon">
             </v-avatar>
           </td>
-          <td>{{ item.title }}</td>
+          <td class="truncated-text">{{ item.title }}</td>
           <td>{{ item.duration ?? '-:--' }}</td>
           <td>{{ formatDate(item.createdAt) }}</td>
-          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}</td>
+          <td>{{ item?.averageRating ? item.averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</td>
           <td>{{ item.reproductions }}</td>
         </tr>
       </template>
@@ -42,7 +49,7 @@
     </v-data-table>
 
     <!-- List for Mobile -->
-    <v-list v-else class="mobile-list" theme="dark">
+    <v-list v-else class="mobile-list" :theme="themeStore.theme">
       <v-list-item
         v-for="item in filteredAudios"
         :key="item.id"
@@ -68,8 +75,9 @@ import { collection, getDocs, query, where } from 'firebase/firestore';
 import { useRouter } from 'vue-router';
 import { db } from '@/firebase/';
 import { formatDate } from '@/utils/formatDate';
-import { AudioItem } from '@/types/views/searchView';
+import { AudioItem, TableHeader } from '@/types/views/searchView';
 import { UserAudiosTableStatus } from '@/types/components/userAudiosTable';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
   props: {
@@ -80,25 +88,16 @@ export default {
   },
   setup() {
     const router = useRouter();
-
+    const themeStore = useThemeStore();
     return {
       router,
       formatDate,
+      themeStore,
     };
   },
   data() : UserAudiosTableStatus {
-    const headers = [
-      { title: '', value: 'imageUrl', sortable: false, width: '50px' },
-      { title: 'Title', value: 'title', sortable: true },
-      { value: 'duration', sortable: true }, // Custom slot
-      { value: 'createdAt', sortable: true }, // Custom slot
-      { title: 'Score', value: 'score' },
-      { title: 'Plays', value: 'reproductions' },
-    ];
-
     return {
       search: '',
-      headers,
       listOfAudios: [],
       isMobile: false,
     };
@@ -117,6 +116,16 @@ export default {
         audio.title.toLowerCase().includes(this.search.toLowerCase())
       );
     },
+    headers(): TableHeader[] {
+			return [
+				{ title: '', value: 'imageUrl', sortable: false, width: '50px' },
+				{ title: this.$t('title'), value: 'title', sortable: true },
+				{ value: 'duration', sortable: true, width: '15%' }, // Custom slot
+				{ value: 'createdAt', sortable: true, width: '15%' }, // Custom slot
+				{ title: this.$t('rating'), value: 'score', width: '20%' },
+				{ title: this.$t('plays'), value: 'reproductions', width: '20%' },
+			];
+		},
   },
   methods: {
     async getAudios() {
@@ -148,7 +157,7 @@ export default {
 
 <style scoped>
 .search-container {
-  color: white;
+  color: var(--text-color);
   padding: 0px 0px 20px 20px;
 }
 
@@ -177,6 +186,13 @@ export default {
   object-fit: contain;
   vertical-align: middle; 
   border-radius: 10%;
+}
+
+.truncated-text {
+  max-width: 150px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Show '...' when the title is too long */
 }
 
 @media (max-width: 768px) {

@@ -12,8 +12,9 @@ export interface AudioViewState {
   totalComments: number;
   totalBookmarks: number;
   displayedComments: number;
+  displayedMainComments: number;
   currentLimit: number;
-  showMoreButton: boolean;
+  showMoreMainCommentsButton: boolean;
   newComment: string;
   replyingTo: string | null | undefined;
   replyContent: string;
@@ -35,4 +36,6 @@ export interface Comment {
   userProfilePicture?: string | null;
   username: string;
   replies?: Comment[];
+  showReplies: boolean;
+  replyCount: number;
 }

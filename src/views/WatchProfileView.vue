@@ -8,24 +8,24 @@
         <div class="user-info">
           <h2 class="username">{{ user.username }}</h2>
           <p class="user-bio" v-if="user.biography != ''">{{ user.biography }}</p>
-          <p class="user-creation"> <strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+          <p class="user-creation"> <strong>{{ $t('joined') }}:</strong> {{ formatDate(user.createdAt) }}</p>
           <button @click="toggleFollow" class="btn" :class="{ 'btn-follow': !isFollowing, 'btn-unfollow': isFollowing }">
-            {{ isFollowing ? 'Unfollow' : 'Follow' }}
+            {{ isFollowing ? $t('unfollow') : $t('follow')  }}
           </button>
         </div>
       </div>
       <div class="stats-and-audios">
         <div class="stats">
           <h3>
-            Stats
+            {{ $t('stats') }}
             <font-awesome-icon icon="chart-line" />
           </h3>
           <ul>
-            <li><strong>Followers:</strong> {{ followerCount }}</li>
-            <li><strong>Audios:</strong> {{ audiosCount }}</li>
-            <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
-            <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>{{ $t('followers') }}:</strong> {{ followerCount }}</li>
+            <li><strong>{{ $t('audios') }}:</strong> {{ audiosCount }}</li>
+            <li><strong>{{ $t('bookmarks') }}:</strong> {{ bookmarksCount }}</li>
+            <li><strong>{{ $t('plays') }}:</strong> {{ playsCount }}</li>
+            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</li>
           </ul>
         </div>
         <div class="audios-table">
@@ -44,27 +44,31 @@
       <div class="user-info">
         <h2 class="username">{{ user.username }}</h2>
         <button @click="toggleFollow" class="btn" :class="{ 'btn-follow': !isFollowing, 'btn-unfollow': isFollowing }">
-          {{ isFollowing ? 'Unfollow' : 'Follow' }}
+          {{ isFollowing ? $t('unfollow') : $t('follow') }}
         </button>
         <p class="user-bio" v-if="user.biography != ''">{{ user.biography }}</p>
-        <p class="user-creation"> <strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
+        <p class="user-creation"> <strong>{{ $t('joined') }}:</strong> {{ formatDate(user.createdAt) }}</p>
       </div>
       <div class="stats">
         <h3>
-          Stats
+          {{ $t('stats') }}
           <font-awesome-icon icon="chart-line" />
         </h3>
           <ul>
-            <li><strong>Followers:</strong> {{ followerCount }}</li>
-            <li><strong>Audios:</strong> {{ audiosCount }}</li>
-            <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
-            <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating?.toFixed(1) + ' ⭐' || 'N/A' }}</li>
+            <li><strong>{{ $t('followers') }}:</strong> {{ followerCount }}</li>
+            <li><strong>{{ $t('audios') }}:</strong> {{ audiosCount }}</li>
+            <li><strong>{{ $t('bookmarks') }}:</strong> {{ bookmarksCount }}</li>
+            <li><strong>{{ $t('plays') }}:</strong> {{ playsCount }}</li>
+            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}</li>
           </ul>
       </div>
       <div class="audios-table">
         <UserAudiosTable :uid="uid || ''" />
       </div>
+    </div>
+
+    <div v-else>
+      <h2>{{ $t('loading') }}...</h2>
     </div>
 
   </div>
@@ -81,6 +85,7 @@ import { formatDate } from '@/utils/formatDate';
 import defaultProfilePicture from '@/assets/default-profile.png';
 import { User } from '@/types/views/profileView';
 import { WatchProfileViewStatus } from '@/types/views/watchProfileView';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   props: {
@@ -94,9 +99,12 @@ export default defineComponent({
   },
   setup() {
     const userAuthStore = useAuthStore().user;
+    const { t, locale } = useI18n();
     return { 
       userAuthStore,
       formatDate, 
+      locale,
+      t,
     };
   },
   mounted() {
@@ -116,7 +124,7 @@ export default defineComponent({
       defaultProfilePicture: defaultProfilePicture,
       audiosCount: 0,
       playsCount: 0,
-      averageRating: 0,
+      averageRating: null,
       followerCount: 0,
       isFollowing: false ,
       isMobile: false,
@@ -216,8 +224,7 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  color: white;
-  font-family: Arial, sans-serif;
+  color: var(--text-color);
 }
 
 .profile-content {

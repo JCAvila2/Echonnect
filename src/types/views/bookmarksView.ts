@@ -1,8 +1,7 @@
-import { AudioItem, TableHeader } from "./searchView";
+import { AudioItem } from "./searchView";
 
 export interface BookmarksViewStatus { 
   search: string;
-  headers: TableHeader[];
   listOfAudios: AudioItem[];
   isMobile: boolean;
 }

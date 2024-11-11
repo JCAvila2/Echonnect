@@ -21,35 +21,35 @@
           <h2 class="username">{{ user.username }}</h2>
           <div class="user-bio-container">
             <p v-if="!editingBio" class="user-bio">
-              {{ user.biography || 'No bio yet. Click edit to add one!' }}
+              {{ user.biography || $t('noBioYet') }}
               <font-awesome-icon icon="pen" class="edit-bio-icon" @click="startEditingBio" />
             </p>
             <div v-else class="edit-bio-form">
               <textarea v-model="newBio" class="bio-textarea" :maxlength="bioMaxLength"></textarea>
               <div class="bio-actions">
                 <span class="bio-char-count">{{ newBio.length }}/{{ bioMaxLength }}</span>
-                <button @click="saveBio" class="save-bio-button">Save</button>
-                <button @click="cancelEditingBio" class="cancel-bio-button">Cancel</button>
+                <button @click="saveBio" class="save-bio-button">{{ $t('save') }}</button>
+                <button @click="cancelEditingBio" class="cancel-bio-button">{{ $t('cancel') }}</button>
               </div>
             </div>
           </div>
-          <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
-          <button @click="logout" class="logout-button">Logout</button>
+          <p class="user-creation"><strong>{{ $t('joined') }}:</strong> {{ formatDate(user.createdAt) }}</p>
+          <button @click="logout" class="logout-button">{{ $t('logout') }}</button>
         </div>
       </div>
 
       <div class="stats-and-audios">
         <div class="stats">
           <h3>
-            Stats
+            {{ $t('stats') }}
             <font-awesome-icon icon="chart-line" />
           </h3>
           <ul>
-            <li><strong>Followers:</strong> {{ followerCount }}</li>
-            <li><strong>Audios:</strong> {{ audiosCount }}</li>
-            <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
-            <li><strong>Plays:</strong> {{ playsCount }}</li>
-            <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
+            <li><strong>{{ $t('followers') }}:</strong> {{ followerCount }}</li>
+            <li><strong>{{ $t('audios') }}:</strong> {{ audiosCount }}</li>
+            <li><strong>{{ $t('bookmarks') }}:</strong> {{ bookmarksCount }}</li>
+            <li><strong>{{ $t('plays') }}:</strong> {{ playsCount }}</li>
+            <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}
             </li>
           </ul>
         </div>
@@ -80,33 +80,33 @@
         <h2 class="username">{{ user.username }}</h2>      
         <div class="user-bio-container">
           <div v-if="!editingBio" class="user-bio">
-            <span>{{ user.biography || 'No bio yet. Click edit to add one!'  }}</span>
+            <span>{{ user.biography || t('noBioYet')  }}</span>
             <font-awesome-icon icon="pen" class="edit-bio-icon" @click="startEditingBio" />
           </div>
           <div v-else class="edit-bio-form">
             <textarea v-model="newBio" class="bio-textarea" :maxlength="bioMaxLength"></textarea>
             <div class="bio-actions">
               <span class="bio-char-count">{{ newBio.length }}/{{ bioMaxLength }}</span>
-              <button @click="saveBio" class="save-bio-button">Save</button>
-              <button @click="cancelEditingBio" class="cancel-bio-button">Cancel</button>
+              <button @click="saveBio" class="save-bio-button">{{ $t('save') }}</button>
+              <button @click="cancelEditingBio" class="cancel-bio-button">{{ $t('cancel') }}</button>
             </div>
           </div>
         </div>
-        <p class="user-creation"><strong>Joined:</strong> {{ formatDate(user.createdAt) }}</p>
-        <button @click="logout" class="logout-button">Logout</button>
+        <p class="user-creation"><strong>{{ $t('joined') }}:</strong> {{ formatDate(user.createdAt) }}</p>
+        <button @click="logout" class="logout-button">{{ $t('logout') }}</button>
       </div>
 
       <div class="stats">
         <h3>
-          Stats
+          {{ $t('stats') }}
           <font-awesome-icon icon="chart-line" />
         </h3>
         <ul>
-          <li><strong>Followers:</strong> {{ followerCount }}</li>
-          <li><strong>Audios:</strong> {{ audiosCount }}</li>
-          <li><strong>Bookmarks:</strong> {{ bookmarksCount }}</li>
-          <li><strong>Plays:</strong> {{ playsCount }}</li>
-          <li><strong>Avg. Score:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : 'No ratings yet' }}
+          <li><strong>{{ $t('followers') }}:</strong> {{ followerCount }}</li>
+          <li><strong>{{ $t('audios') }}:</strong> {{ audiosCount }}</li>
+          <li><strong>{{ $t('bookmarks') }}:</strong> {{ bookmarksCount }}</li>
+          <li><strong>{{ $t('plays') }}:</strong> {{ playsCount }}</li>
+          <li><strong>{{ $t('avgRating') }}:</strong> {{ averageRating ? averageRating.toFixed(1) + ' ⭐' : $t('noRatingYet') }}
           </li>
         </ul>
       </div>
@@ -117,7 +117,7 @@
     </div>
 
     <div v-else>
-      <h2>Loading...</h2>
+      <h2>{{ $t('loading') }}...</h2>
     </div>
 
   </div>
@@ -135,6 +135,7 @@ import { formatDate } from '@/utils/formatDate';
 // @ts-ignore
 import defaultProfilePicture from '@/assets/default-profile.png';
 import { ProfileViewState, User } from '@/types/views/profileView';
+import { useI18n } from 'vue-i18n';
 
 export default defineComponent({
   components: {
@@ -142,11 +143,20 @@ export default defineComponent({
   },
   setup() {
     const uid = useAuthStore().user?.uid;
+    const { t, locale } = useI18n();
+    document.title = t('profile');
     return { 
       uid,
       formatDate,
+      locale,
+      t,
     };
   },
+  watch: {
+    locale() {
+      document.title = this.t('profile');
+    }
+  },  
   mounted() {
     this.fetchUser();
     this.fetchUserStats();
@@ -339,8 +349,7 @@ export default defineComponent({
 .profile-container {
   height: 100%;
   padding: 50px;
-  color: white;
-  font-family: Arial, sans-serif;
+  color: var(--color-text);
 }
 
 .profile-content {
@@ -373,7 +382,7 @@ export default defineComponent({
   left: 50%;
   transform: translate(-50%, -50%);
   font-size: 24px;
-  color: white;
+  color: var(--color-text);
   opacity: 0;
   transition: opacity 0.3s ease;
   pointer-events: none;
@@ -399,7 +408,7 @@ export default defineComponent({
   position: relative;
   bottom: 0px;
   font-size: 24px;
-  color: white;
+  color: var(--color-text);
   transition: opacity 0.3s ease;
 }
 
@@ -426,7 +435,7 @@ export default defineComponent({
 
 .user-bio {
   font-size: 24px;
-  color: white;
+  color: var(--color-text);
   margin: 5px 0;
 }
 
