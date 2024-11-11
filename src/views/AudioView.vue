@@ -95,12 +95,19 @@
                 <p>{{ comment.content }}</p>
                 <div class="comment-actions">
                   <button @click="toggleReplyForm(comment.id)" class="reply-button">{{ $t('reply') }}</button>
+                  <button 
+                    v-if="comment.replyCount > 0" 
+                    @click="loadReplies(comment)" 
+                    class="show-replies-button"
+                  >
+                    {{ comment.showReplies ? $t('hideReplies') : $t('showReplies') }} ({{ comment.replyCount }})
+                  </button>
                 </div>
                 <div v-if="replyingTo === comment.id" class="reply-form">
                   <input v-model="replyContent" type="text" :placeholder="$t('reply') + '...'" class="reply-input" @keyup.enter="addReply(comment.id)" />
                   <button @click="addReply(comment.id)" class="send-button">➤</button>
                 </div>
-                <div v-if="comment.replies && comment.replies.length > 0" class="replies">
+                <div v-if="comment.replies && comment.replies.length > 0 && comment.showReplies" class="replies">
                   <div v-for="reply in comment.replies" :key="reply.id" class="reply">
                     <img :src="reply.userProfilePicture || defaultProfilePicture" alt="User avatar" class="avatar" />
                     <div class="reply-content">
@@ -114,7 +121,7 @@
                 </div>
               </div>
             </div>
-            <button v-if="showMoreButton" @click="loadMoreComments" class="more-comments">
+            <button v-if="showMoreMainCommentsButton" @click="loadMoreComments" class="more-comments">
               {{ $t('moreComments') }}
             </button>
           </div>
@@ -185,8 +192,9 @@ export default defineComponent({
       totalComments: 0,
       totalBookmarks: 0,
       displayedComments: 0,
+      displayedMainComments: 0,
       currentLimit: 5, // Initial limit of comments to load
-      showMoreButton: false,
+      showMoreMainCommentsButton: false,
       newComment: '',
       replyingTo: null,
       replyContent: '',
@@ -242,33 +250,134 @@ export default defineComponent({
       const q = query(commentsRef, where('audioId', '==', this.id));
       const snapshot = await getCountFromServer(q);
       this.totalComments = snapshot.data().count;
-    },
-    async loadComments() {
-      const newComments = await this.fetchComments(this.id, null, this.currentLimit);
 
-      for (let comment of newComments) {
-        comment.replies = await this.fetchComments(this.id, comment.id);
-      }
-
-      this.comments = newComments;
-      this.displayedComments = this.comments.reduce((total, comment) => total + 1 + (comment.replies?.length || 0), 0);
-      this.showMoreButton = this.displayedComments < this.totalComments;
+      // Get the main comments count (not replies)
+      const mainCommentsQuery = query(
+        commentsRef,
+        where('audioId', '==', this.id),
+        where('parentId', '==', null)
+      );
+      const mainCommentsSnapshot = await getCountFromServer(mainCommentsQuery);
+      this.displayedMainComments = mainCommentsSnapshot.data().count;
     },
     async fetchComments(audioId: string, parentId: string | null = null, limitCount = 5): Promise<Comment[]> {
       const commentsRef = collection(db, 'comments');
-      const q = query(
+      
+      // Get main comments (not replies)
+      if (!parentId) {
+        const mainCommentsQuery = query(
+          commentsRef,
+          where('audioId', '==', audioId),
+          where('parentId', '==', null),
+          orderBy('timestamp', this.sortOrder),
+          limit(limitCount)
+        );
+
+        const querySnapshot = await getDocs(mainCommentsQuery);
+        const comments = await Promise.all(
+          querySnapshot.docs.map(async (doc) => {
+            // Get reply count for each comment
+            const repliesQuery = query(
+              commentsRef,
+              where('audioId', '==', audioId),
+              where('parentId', '==', doc.id)
+            );
+            const replyCount = (await getCountFromServer(repliesQuery)).data().count;
+
+            return {
+              id: doc.id,
+              ...doc.data() as Comment,
+              replyCount,
+              showReplies: false,
+              replies: []
+            } as Comment;
+          })
+        );
+
+        return comments;
+      }
+
+      // If parentId is provided, get replies for that comment
+      const repliesQuery = query(
         commentsRef,
         where('audioId', '==', audioId),
         where('parentId', '==', parentId),
-        orderBy('timestamp', parentId ? 'asc' : this.sortOrder),
-        limit(limitCount)
+        orderBy('timestamp', 'asc')
       );
 
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(repliesQuery);
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
-        ...doc.data(),
-      } as Comment));
+        audioId: doc.data().audioId,
+        content: doc.data().content,
+        timestamp: doc.data().timestamp,
+        uid: doc.data().uid,
+        username: doc.data().username,
+        userProfilePicture: doc.data().userProfilePicture,
+        parentId: doc.data().parentId,
+        replyCount: doc.data().replyCount,
+        showReplies: doc.data().showReplies,
+        replies: doc.data().replies
+      }));
+    },
+    async loadComments() {
+      const newComments = await this.fetchComments(this.id, null, this.currentLimit);
+      this.comments = newComments;
+      this.displayedComments = this.comments.length;
+      this.showMoreMainCommentsButton = this.displayedComments < this.displayedMainComments;
+    },
+    async loadReplies(comment: Comment) {
+      if (!comment.showReplies) {
+        // Only fetch replies if we haven't already
+        if (!comment.replies || comment.replies.length === 0) {
+          comment.replies = await this.fetchComments(this.id, comment.id);
+        }
+        comment.showReplies = true;
+        this.displayedComments += comment?.replies?.length;
+      } else {
+        comment.showReplies = false;
+        if (comment.replies) {
+          this.displayedComments -= comment.replies?.length;
+        }
+      }
+    },
+    async addReply(parentId: string | undefined) {
+      if (!this.user) {
+        alert('Please log in to comment.'); // TODO: redirect to login page
+        return;
+      }
+      if (!this.replyContent.trim()) return;
+
+      const userDoc = doc(collection(db, 'users'), this.user?.uid);
+      const docSnapshot = await getDoc(userDoc);
+      if (!docSnapshot.exists()) {
+        console.log('User not found');
+        return;
+      }
+
+      const replyData = {
+        parentId: parentId,
+        audioId: this.id,
+        content: this.replyContent,
+        timestamp: new Date(),
+        userProfilePicture: docSnapshot.data().profilePicture,
+        username: docSnapshot.data().username,
+        uid: this.user?.uid,
+      };
+
+      await addDoc(collection(db, 'comments'), replyData);
+      this.replyingTo = null;
+      this.replyContent = '';
+      this.totalComments++;
+
+      // Update the reply count and replies for the parent comment
+      const parentComment = this.comments?.find(c => c.id === parentId);
+      if (parentComment) {
+        parentComment.replyCount++;
+        if (parentComment.showReplies) {
+          parentComment.replies = await this.fetchComments(this.id, parentId);
+        }
+      }
     },
     async loadMoreComments() {
       this.currentLimit += 5; // Load X more comments
@@ -300,36 +409,6 @@ export default defineComponent({
 
       await addDoc(collection(db, 'comments'), commentData);
       this.newComment = '';
-      this.totalComments++;
-      this.loadComments();
-    },
-    async addReply(parentId: string | undefined) {
-      if (!this.user) {
-        alert('Please log in comment.'); // TODO: redirect to login page
-        return;
-      }
-      if (!this.replyContent.trim()) return;
-
-      const userDoc = doc(collection(db, 'users'), this.user?.uid);
-      const docSnapshot = await getDoc(userDoc);
-      if (!docSnapshot.exists()) {
-        console.log('User not found');
-        return;
-      }
-
-      const replyData = {
-        parentId: parentId,
-        audioId: this.id,
-        content: this.replyContent,
-        timestamp: new Date(),
-        userProfilePicture: docSnapshot.data().profilePicture,
-        username: docSnapshot.data().username,
-        uid: this.user?.uid,
-      };
-
-      await addDoc(collection(db, 'comments'), replyData);
-      this.replyingTo = null;
-      this.replyContent = '';
       this.totalComments++;
       this.loadComments();
     },
@@ -596,7 +675,7 @@ export default defineComponent({
   border: none;
   border-radius: 5px 0 0 5px;
   background-color: var(--tag-background-color);
-  color: white;
+  color: var(--color-text);
 }
 
 .send-button {
@@ -697,6 +776,21 @@ export default defineComponent({
 .reply {
   display: flex;
   margin-bottom: 10px;
+}
+
+.show-replies-button {
+  background: none;
+  border: none;
+  color: #4a90e2;
+  padding: 5px;
+  cursor: pointer;
+  font-size: 0.9em;
+  margin-left: 10px;
+}
+
+.show-replies-button:hover {
+  background-color: rgb(0, 102, 255);
+  border-radius: 20px;
 }
 
 .reply-content {

@@ -57,5 +57,7 @@
   "incorrectPassword": "Incorrect password",
   "incorrectCredentials": "Incorrect username or password",
   "theme": "Theme",
-  "language": "Language"
+  "language": "Language", 
+  "showReplies": "Show replies",
+  "hideReplies": "Hide replies"
 }

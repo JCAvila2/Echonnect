@@ -57,5 +57,7 @@
   "incorrectPassword": "Contraseña incorrecta",
   "incorrectCredentials": "Nombre de usuario o contraseña incorrectos",
   "theme": "Tema",
-  "language": "Idioma"
+  "language": "Idioma",
+  "showReplies": "Mostrar respuestas",
+  "hideReplies": "Ocultar respuestas"
 }
