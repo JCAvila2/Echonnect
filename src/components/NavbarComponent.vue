@@ -130,6 +130,14 @@ export default {
       isDarkMode: themeStore.theme === 'dark',
     };
   },
+  watch: {
+    themeStore: {
+      deep: true,
+      handler() {
+        this.isDarkMode = this.themeStore.theme === 'dark';
+      },
+    },
+  },
   methods: {
     toggleMenu() {
       this.isMenuOpen = !this.isMenuOpen;

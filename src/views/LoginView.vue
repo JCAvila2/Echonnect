@@ -91,14 +91,14 @@ export default {
 };
 </script>
 
-<style>
+<style scoped>
 .login_form {
   top: 10px;
   position: relative;
   left: 50%;
   transform: translateX(-50%);
   width: 600px;
-  background: #19282D;
+  background-color: var(--color-background);
   border-radius: 10px;
   border: 1px solid black;
   padding-bottom: 20px;
@@ -107,7 +107,7 @@ export default {
 .login_form h1 {
   text-align: center;
   padding: 20px 0;
-  color: white;
+  color: var(--color-text);
   border-bottom: 1px solid silver;
 }
 
@@ -130,14 +130,14 @@ export default {
   border: none;
   background: none;
   outline: none;
-  color: white;
+  color: var(--color-text);
 }
 
 .txt_field label {
   position: absolute;
   top: 50%;
   left: 5px;
-  color: white;
+  color: var(--color-text);
   transform: translateY(-50%);
   font-size: 16px;
   pointer-events: none;
@@ -176,8 +176,7 @@ ul {
 .login_button {
   width: 100%;
   height: 50px;
-  border: 1px solid;
-  background: #2691d9;
+  background-color: #2691d9;
   border-radius: 25px;
   font-size: 18px;
   color: #e9f4fb;
@@ -187,7 +186,7 @@ ul {
 }
 
 .login_button:hover {
-  border-color: #2691d9;
+  background-color: #0056b3;
   transition: .5s;
 }
 
@@ -196,7 +195,7 @@ ul {
   margin: 10px 0;
   text-align: center;
   font-size: 16px;
-  color: white;
+  color: var(--color-text);
 }
 
 .register a {
