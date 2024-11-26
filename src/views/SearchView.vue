@@ -6,7 +6,6 @@
       <v-text-field 
         v-model="search" 
         :label="$t('searchPlaceholder')" 
-        prepend-inner-icon="mdi-magnify" 
         single-line
         hide-details 
         @keydown.enter="searchAudios"
