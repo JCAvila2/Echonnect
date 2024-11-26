@@ -26,6 +26,9 @@ export default defineComponent({
       locale,
     };
   },
+  mounted() {
+    document.body.className = this.themeStore.theme;
+  },
   computed: {
     uid() {
       return this.authStore.user?.uid;
