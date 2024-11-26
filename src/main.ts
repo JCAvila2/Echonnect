@@ -1,9 +1,9 @@
 import { createApp } from 'vue';
 import { createPinia } from 'pinia';
 import { FontAwesomeIcon } from '@/assets/fontawesome';
-import { aliases, fa } from 'vuetify/iconsets/fa-svg'; // Cambia a fa-svg
-import { fas } from '@fortawesome/free-solid-svg-icons'; // Importa el conjunto de iconos sólidos
-import { far } from '@fortawesome/free-regular-svg-icons'; // Importa el conjunto de iconos regulares
+import { aliases, fa } from 'vuetify/iconsets/fa-svg'; 
+import { fas } from '@fortawesome/free-solid-svg-icons';
+import { far } from '@fortawesome/free-regular-svg-icons';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import 'vuetify/styles';
 import { createVuetify } from 'vuetify';
