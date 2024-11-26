@@ -14,6 +14,7 @@ import {
   faBookmark,
   faSearch,
   faGear,
+  faImage,
 } from '@fortawesome/free-solid-svg-icons';
 import { faClock, faCalendar, faBookmark as farBookmark } from '@fortawesome/free-regular-svg-icons';
 
@@ -34,6 +35,7 @@ library.add(
   farBookmark,
   faSearch,
   faGear,
+  faImage,
 );
 
 export { FontAwesomeIcon };

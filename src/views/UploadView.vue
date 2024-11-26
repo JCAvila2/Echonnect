@@ -2,21 +2,33 @@
   <div class="upload-container">
     <h1 class="upload-title">{{ $t('uploadAudio') }}</h1>
 
-    <div class="file-input-container">
-      <input type="file" id="audio-file" @change="handleAudioFileChange" accept="audio/*" class="file-input" />
-      <label for="audio-file" :class="audioFile ? 'file-label-selected' : 'file-label'">
-        {{ audioFile ? audioFile.name : $t('selectAudio') }}
-      </label>
-    </div>
+    <v-file-input
+      v-model="audioFile"
+      accept="audio/*"
+      :label="$t('selectAudio')"
+      prepend-icon="volume-up"
+      @change="handleAudioFileChange"
+      clearable
+      show-size
+    ></v-file-input>
 
-    <div class="file-input-container">
-      <input type="file" id="image-file" @change="handleImageFileChange" accept="image/*" class="file-input" />
-      <label for="image-file" :class="imageFile ? 'file-label-selected' : 'file-label'"> {{ imageFile ? imageFile.name :
-        $t('selectImage') }}</label>
-    </div>
+    <v-file-input
+      v-model="imageFile"
+      accept="image/*"
+      :label="$t('selectImage')"
+      prepend-icon="image"
+      variant="filled"
+      @change="handleImageFileChange"
+      clearable
+      show-size
+    ></v-file-input>
 
-    <input v-model="title" type="text" :placeholder="$t('title')" class="text-input" />
-    <textarea v-model="description" :placeholder="$t('description')" class="text-input textarea"></textarea>
+    <v-text-field :label="$t('title')" v-model="title" hide-details="auto" variant="solo-filled"
+      :theme="themeStore ? themeStore.theme : 'dark'" class="fields">
+    </v-text-field>
+
+    <v-textarea v-model="description" :label="$t('description')" variant="solo-filled"
+      :theme="themeStore ? themeStore.theme : 'dark'" class="fields"></v-textarea>
 
     <div class="tags-input-container">
       <input v-model="currentTag" @keyup.enter="addTag" type="text" :placeholder="$t('addATag')"
@@ -56,14 +68,17 @@ import { useAuthStore } from '@/stores/auth';
 import { formatTime } from '@/utils/formatTime';
 import { UploadViewStatus } from '@/types/views/uploadView';
 import { useI18n } from 'vue-i18n';
+import { useThemeStore } from '@/stores/theme';
 
 export default {
   setup() {
     const { t, locale } = useI18n();
     document.title = t('uploadAudio');
+    const themeStore = useThemeStore();
     return {
       t,
-      locale
+      locale,
+      themeStore,
     };
   },
   watch: {
@@ -262,9 +277,8 @@ export default {
   color: var(--color-text);
 }
 
-.textarea {
-  min-height: 100px;
-  resize: vertical;
+.fields {
+  margin-bottom: 1rem;
 }
 
 .tags-input-container {
