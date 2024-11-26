@@ -125,7 +125,7 @@
 
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { collection, doc, getAggregateFromServer, getCountFromServer, getDoc, query, sum, updateDoc, where } from 'firebase/firestore';
+import { collection, doc, getAggregateFromServer, getCountFromServer, getDoc, getDocs, query, sum, updateDoc, where, writeBatch } from 'firebase/firestore';
 import { getDownloadURL, ref as storageRef, uploadBytes, getStorage, deleteObject } from 'firebase/storage';
 import { db } from '@/firebase/';
 import ManageAudioTable from '@/components/ManageAudioTable.vue';
@@ -274,6 +274,21 @@ export default defineComponent({
         await updateDoc(userDoc, {
           profilePicture: downloadURL
         });
+
+        // Update comments with the user's profile picture
+        const commentsCollection = collection(db, "comments");
+        const commentsQuery = query(commentsCollection, where("uid", "==", this.uid));
+        const querySnapshot = await getDocs(commentsQuery);
+        if (querySnapshot.empty) {
+          return;
+        }
+        const batch = writeBatch(db);
+        querySnapshot.forEach((docSnapshot) => {
+          const docRef = doc(db, "comments", docSnapshot.id);
+          batch.update(docRef, { userProfilePicture: downloadURL });
+        });
+        await batch.commit();
+        // TODO: notify user of success (toast)
       } catch (error) {
         console.error('Error uploading profile picture:', error);
         // Handle the error appropriately (e.g., show an error message to the user)
@@ -302,6 +317,21 @@ export default defineComponent({
         await updateDoc(userDoc, {
           profilePicture: null
         });
+
+        // Update comments with the user's profile picture
+        const commentsCollection = collection(db, "comments");
+        const commentsQuery = query(commentsCollection, where("uid", "==", this.uid));
+        const querySnapshot = await getDocs(commentsQuery);
+        if (querySnapshot.empty) {
+          return;
+        }
+        const batch = writeBatch(db);
+        querySnapshot.forEach((docSnapshot) => {
+          const docRef = doc(db, "comments", docSnapshot.id);
+          batch.update(docRef, { userProfilePicture: null });
+        });
+        await batch.commit();
+        // TODO: notify user of success (toast)
       } catch (error) {
         console.error('Error removing profile picture:', error);
       }
