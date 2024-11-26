@@ -126,7 +126,7 @@
             </button>
           </div>
           <div v-else>
-            <p>{{ $t('loadingComments') }}</p>
+            <p>{{ $t('loadingComments') }} <v-progress-circular indeterminate></v-progress-circular></p>
           </div>
         </div>
 
@@ -134,7 +134,13 @@
     </div>
   </div>
   <div v-else>
-    <p>{{ $t('loadingAudio') }}</p>
+    <v-container>
+      <v-row>
+        <v-col cols="12" class="d-flex justify-center">
+          <v-progress-circular indeterminate></v-progress-circular>
+        </v-col>
+      </v-row>
+    </v-container>
   </div>
 </template>
 
@@ -193,7 +199,7 @@ export default defineComponent({
       totalBookmarks: 0,
       displayedComments: 0,
       displayedMainComments: 0,
-      currentLimit: 5, // Initial limit of comments to load
+      currentLimit: 3, // Initial limit of comments to load
       showMoreMainCommentsButton: false,
       newComment: '',
       replyingTo: null,
@@ -380,7 +386,7 @@ export default defineComponent({
       }
     },
     async loadMoreComments() {
-      this.currentLimit += 5; // Load X more comments
+      this.currentLimit += 3; // Load X more comments
       await this.loadComments();
     },
     async addComment() {

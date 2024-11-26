@@ -68,7 +68,13 @@
     </div>
 
     <div v-else>
-      <h2>{{ $t('loading') }}...</h2>
+      <v-container>
+        <v-row>
+          <v-col cols="12" class="d-flex justify-center">
+            <v-progress-circular indeterminate></v-progress-circular>
+          </v-col>
+        </v-row>
+      </v-container>
     </div>
 
   </div>
