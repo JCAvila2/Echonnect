@@ -3,7 +3,7 @@
 		<v-text-field 
 			v-model="search" 
 			:label="$t('searchPlaceholder')" 
-			prepend-inner-icon="mdi-magnify" 
+			prepend-inner-icon="magnifying-glass" 
 			single-line hide-details class="mb-4"
 		>
 		</v-text-field>
