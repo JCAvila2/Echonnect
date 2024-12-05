@@ -540,18 +540,18 @@ export default defineComponent({
 }
 
 .cancel-bio-button {
-  background-color: #e74c3c;
+  background-color: gray;
   color: white;
 }
 
 .cancel-bio-button:hover {
-  background-color: #c0392b;
+  background-color: gray;
 }
 
 .logout-button {
   margin-top: 20px;
   padding: 10px 20px;
-  background-color: red;
+  background-color: gray;
   color: white;
   border: none;
   border-radius: 5px;
