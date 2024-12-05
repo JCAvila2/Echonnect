@@ -207,7 +207,7 @@ export default defineComponent({
         this.user = { id: docSnapshot.id, ...docSnapshot.data() } as User;
       } else {
         console.log('User not found');
-        // TODO: Redirect to 404 page
+        this.$router.push('/not-found');
       }
     },
     async fetchUserStats() {

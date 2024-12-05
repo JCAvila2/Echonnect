@@ -146,7 +146,7 @@ export default defineComponent({
         document.title = this.user.username ?? 'Profile';
       } else {
         console.log('User not found');
-        // TODO: Redirect to 404 page
+        this.$router.push('/not-found');
       }
     },
     async fetchUserStats() {

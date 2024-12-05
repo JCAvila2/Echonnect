@@ -67,5 +67,8 @@
   "theme": "Tema",
   "language": "Idioma",
   "showReplies": "Mostrar respuestas",
-  "hideReplies": "Ocultar respuestas"
+  "hideReplies": "Ocultar respuestas",
+  "404Title": "404 - Pagina no encontrada",
+  "404Message": "La página que buscas no existe",
+  "404Redirect": "Volver a la página de inicio"
 }

@@ -67,5 +67,8 @@
   "theme": "Theme",
   "language": "Language", 
   "showReplies": "Show replies",
-  "hideReplies": "Hide replies"
+  "hideReplies": "Hide replies",
+  "404Title": "404 - Page Not Found",
+  "404Message": "The page you are looking for does not exist",
+  "404Redirect": "Go back to the home page"
 }
