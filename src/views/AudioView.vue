@@ -246,6 +246,7 @@ export default defineComponent({
 
       } else {
         console.log('Audio not found');
+        this.$router.push('/not-found');
       }
     },
     toggleDescription() {

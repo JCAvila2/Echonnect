@@ -1,7 +1,7 @@
 <template>
   <div class="login_form">
     <h1>{{ t('loginLabel') }}</h1>
-    <p v-if="errorMessage" style="color: red; text-align: center;">{{ errorMessage }}</p>
+    <p v-if="errorMessage" style="color: orange; text-align: center;">{{ errorMessage }}</p>
     <form @submit.prevent="login">
       <div class="input_area">
         <div class="txt_field">
@@ -12,7 +12,11 @@
           <input v-model="password" type="password" required />
           <label> {{ t('password') }} </label>
         </div>
-        <button type="submit" class="login_button"> {{ t('login') }} </button>
+        <button type="submit" 
+          class="login_button" 
+          :class="{ 'disabled-button': !email || !password }" 
+          :disabled=" !email || !password"
+        > {{ t('login') }} </button>
       </div>
     </form>
     <div class="register">
@@ -190,6 +194,14 @@ ul {
   transition: .5s;
 }
 
+.disabled-button {
+  background-color: #adadad;
+  cursor: not-allowed;
+}
+
+.disabled-button:hover {
+  background-color: #adadad;
+}
 
 .register {
   margin: 10px 0;

@@ -76,6 +76,18 @@ const router = createRouter({
       name: 'register',
       component: RegisterView
     },
+
+    // Not found 404
+    {
+      path: '/not-found',
+      name: 'notFound',
+      component: () => import('@/views/NotFoundView.vue'),
+    },
+    {
+      path: '/:pathMatch(.*)*',
+      redirect: '/not-found',
+    }
+
   ],
 })
 

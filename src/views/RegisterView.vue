@@ -1,7 +1,7 @@
 <template>
   <div class="login_form">
     <h1>{{ t('register') }}</h1>
-    <p v-if="errorMessage" style="color: red; text-align: center" v-html="errorMessage"></p>
+    <p v-if="errorMessage" style="color: orange; text-align: center" v-html="errorMessage"></p>
     <form @submit.prevent="register">
       <div class="input_area">
         <div class="txt_field">
@@ -16,7 +16,14 @@
           <input v-model="password" type="password" required @keyup="validatePassword" />
           <label> {{ t('password') }} </label>
         </div>
-        <button type="submit" class="login_button"> {{ t('register') }} </button>
+        <button 
+          type="submit" 
+          class="login_button" 
+          :class="{ 'disabled-button': !username || !email || !password || errorMessage }" 
+          :disabled="!username || !email || !password || errorMessage != ''"
+        > 
+          {{ t('register') }} 
+        </button>
       </div>
     </form>
     <div class="register">
@@ -60,7 +67,7 @@ export default {
       const regex = /\S+@\S+\.\S+/;
       const isValid = regex.test(this.email);
       if (!isValid) {
-        this.errorMessage = 'Invalid Email';
+        this.errorMessage = this.t('invalidEmail');
       } else {
         this.errorMessage = '';
       }
@@ -80,20 +87,20 @@ export default {
       let errorMessages = [];
 
       if (!isLongEnough) {
-        errorMessages.push(`- At least ${minLength} characters long`);
+        errorMessages.push(this.t('passwordLength', { minLength }));
       }
       if (!hasLowercase) {
-        errorMessages.push(`- At least 1 lowercase letter`);
+        errorMessages.push(this.t('passwordLowercase'));
       }
       if (!hasUppercase) {
-        errorMessages.push(`- At least 1 uppercase letter`);
+        errorMessages.push(this.t('passwordUppercase'));
       }
       if (!hasDigit) {
-        errorMessages.push(`- At least 1 number`);
+        errorMessages.push(this.t('passwordNumber'));
       }
 
       if (errorMessages.length > 0) {
-        this.errorMessage = `Weak password, must have:<br>` + errorMessages.join('<br>');
+        this.errorMessage = this.t('weakPassword') + `<br>` + errorMessages.join('<br>');
         return false;
       } else {
         this.errorMessage = '';
@@ -127,13 +134,13 @@ export default {
           console.log(error.code);
           switch (error.code) {
             case 'auth/email-already-in-use':
-              this.errorMessage = 'Email already in use';
+              this.errorMessage = this.t('emailInUse');
               break;
             case 'auth/weak-password':
-              this.errorMessage = 'Weak password';
+              this.errorMessage = this.t('weakPassword');
               break;
             default:
-              this.errorMessage = 'Invalid Email or Password';
+              this.errorMessage = this.t('invalidEmailOrPassword');
               break;
           }
         });
@@ -239,6 +246,15 @@ ul {
 .login_button:hover {
   background-color: #0056b3;
   transition: .5s;
+}
+
+.disabled-button {
+  background-color: #adadad;
+  cursor: not-allowed;
+}
+
+.disabled-button:hover {
+  background-color: #adadad;
 }
 
 .register {
