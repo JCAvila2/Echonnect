@@ -70,5 +70,27 @@
   "hideReplies": "Hide replies",
   "404Title": "404 - Page Not Found",
   "404Message": "The page you are looking for does not exist",
-  "404Redirect": "Go back to the home page"
+  "404Redirect": "Go back to the home page",
+  "next": "Next",
+  "finish": "Finish",
+  "tours": {
+    "searchPage": {
+      "1": {
+        "title": "Search Page",
+        "text": "Let's explore the search page"
+      }, 
+      "2": {
+        "title": "Search Bar",
+        "text": "Use this search bar to find audios by title or key words"
+      }, 
+      "3": {
+        "title": "Audios Table",
+        "text": "In this table you can see the audios that match your search, or the most popular audios if you haven't searched for anything"
+      },
+      "4": {
+        "title": "Audio Details",
+        "text": "Each audio entry shows key information: thumbnail, title, author, duration, creation date, rating, and play count"
+      }
+    }
+  }
 }
