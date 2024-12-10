@@ -2,14 +2,21 @@
   <div class="search-container">
 
     <!-- Search bar -->
-    <v-text-field 
-      v-model="search" 
-      :label="$t('searchBookmarked')" 
-      prepend-inner-icon="magnifying-glass" 
-      single-line
-      hide-details class="mb-4" 
-    >
-    </v-text-field>
+    <div class="search-bar-container">
+      <v-text-field 
+        v-model="search" 
+        :label="$t('searchPlaceholder')" 
+        single-line
+        hide-details 
+				prepend-inner-icon="magnifying-glass" 
+				clearable
+				class="search-bar"
+      >
+      </v-text-field>
+      <button class="search-button">
+        <font-awesome-icon :icon="['fas', 'search']" /> 
+      </button>
+    </div>
 
     <!-- Table for Desktop -->
     <v-data-table 
@@ -49,7 +56,7 @@
           <td>{{ item.reproductions }}</td>
           <td>
             <div class="actions-icons-delete" @click.stop="removeBookmark(item.id)">
-              <font-awesome-icon icon="trash" />
+              <font-awesome-icon icon="trash" class="icon" />
             </div>
 					</td>
         </tr>
@@ -75,13 +82,18 @@
         </v-list-item-subtitle>
         <template v-slot:append>
 					<div @click.stop="removeBookmark(item.id)" style="padding-left: 10px;">
-						<font-awesome-icon icon="trash" />
+						<font-awesome-icon icon="trash" class="icon" />
 					</div>
         </template>
       </v-list-item>
     </v-list>
 
   </div>
+
+  <div class="tour-button" @click="showTour"> 
+    ?
+  </div>
+
 </template>
 
 <script lang="ts">
@@ -94,6 +106,7 @@ import { useAuthStore } from '@/stores/auth';
 import { BookmarksViewStatus } from '@/types/views/bookmarksView';
 import { useThemeStore } from '@/stores/theme';
 import { useI18n } from 'vue-i18n';
+import { useBookmarksTour } from '@/components/tour/BookmarksTour';
 
 export default {
   setup() {
@@ -101,6 +114,7 @@ export default {
     const uid = useAuthStore().user?.uid;
     const themeStore = useThemeStore();
     const { t, locale } = useI18n();
+    const { startTour, destroyTour } = useBookmarksTour();
     document.title = t('bookmarks');
 
     return {
@@ -109,7 +123,9 @@ export default {
       formatDate,
       themeStore,
       locale,
-      t
+      t,
+      startTour,
+      destroyTour,
     };
   },
   data(): BookmarksViewStatus {
@@ -218,6 +234,9 @@ export default {
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
     },
+    showTour() {
+      this.startTour();
+    }
   }
 };
 </script>
@@ -226,6 +245,39 @@ export default {
 .search-container {
   padding: 20px;
   color: var(--searbars-text);
+}
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  margin: 20px auto;
+}
+
+.search-bar {
+  flex: 1;
+  padding-right: 50px;
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding-inline: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background-color: #0056b3;
 }
 
 .custom-table {
@@ -277,6 +329,29 @@ export default {
 
 .mobile-list {
   background-color: transparent;
+}
+
+/* Start tour button */
+.tour-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.tour-button:hover {
+  background-color: #0056b3;
 }
 
 @media (max-width: 767px) {

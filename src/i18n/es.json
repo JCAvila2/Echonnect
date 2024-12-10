@@ -70,5 +70,80 @@
   "hideReplies": "Ocultar respuestas",
   "404Title": "404 - Pagina no encontrada",
   "404Message": "La página que buscas no existe",
-  "404Redirect": "Volver a la página de inicio"
+  "404Redirect": "Volver a la página de inicio",
+  "next": "Siguiente",
+  "back": "Atrás",
+  "finish": "Finalizar",
+  "tours": {
+    "searchPage": {
+      "1": {
+        "title": "Página de Búsqueda",
+        "text": "Exploremos la página de búsqueda"
+      },
+      "2": {
+        "title": "Barra de Búsqueda",
+        "text": "Utilice esta barra de búsqueda para encontrar audios por título o palabras clave"
+      },
+      "3": {
+        "title": "Tabla de Audios",
+        "text": "En esta tabla puedes ver los audios que coinciden con tu búsqueda, o los audios más populares si no has buscado nada"
+      },
+      "4": {
+        "title": "Detalles de Audio",
+        "text": "Cada entrada de audio muestra información clave: miniatura, título, autor, duración, fecha de creación, calificación y recuento de reproducciones."
+      }
+    },
+    "profilePage": {
+      "1": {
+        "title": "Página de Perfil",
+        "text": "Exploremos la página de perfil"
+      },
+      "2": {
+        "title": "Editar Biografía",
+        "text": "Haz clic en el botón para editar tu biografía"
+      }, 
+      "3": {
+        "title": "Foto de Perfil",
+        "text": "Haz clic en la imagen para cambiar tu foto de perfil"
+      }, 
+      "4": {
+        "title": "Barra de Búsqueda",
+        "text": "Utilice esta barra de búsqueda para encontrar tus audios por título o palabras clave"
+      },
+      "5": {
+        "title": "Tabla de Audios",
+        "text": "En esta tabla puedes ver tus audios que coinciden con la búsqueda, o tus audios más populares si no has buscado nada"
+      },
+      "6": {
+        "title": "Detalles de Audio",
+        "text": "Cada entrada de audio muestra información clave: miniatura, título, duración, fecha de creación, calificación y recuento de reproducciones."
+      },
+      "7": {
+        "title": "Gestionar Audio",
+        "text": "Haz clic en los botones de acción para editar o eliminar tus audios"
+      }
+    },
+    "bookmarksPage": {
+      "1": {
+        "title": "Página de Favoritos",
+        "text": "Exploremos la página de favoritos"
+      }, 
+      "2": {
+        "title": "Barra de Búsqueda",
+        "text": "Utilice esta barra de búsqueda para encontrar audios marcados como favoritos por título o palabras clave"
+      },
+      "3": {
+        "title": "Tabla de Audios",
+        "text": "En esta tabla puedes ver los audios marcados como favoritos que coinciden con la búsqueda, o los audios más populares si no has buscado nada"
+      },
+      "4": {
+        "title": "Detalles de Audio",
+        "text": "Cada entrada de audio muestra información clave: miniatura, título, autor, duración, fecha de creación, calificación y recuento de reproducciones"
+      },
+      "5": {
+        "title": "Gestionar Favoritos",
+        "text": "Haz clic en el boton para eliminar audios de tus favoritos"
+      }
+    }
+  }
 }

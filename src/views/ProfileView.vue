@@ -127,6 +127,11 @@
     </div>
 
   </div>
+
+  <div class="tour-button" @click="showTour"> 
+    ?
+  </div>
+
 </template>
 
 <script lang="ts">
@@ -142,6 +147,7 @@ import { formatDate } from '@/utils/formatDate';
 import defaultProfilePicture from '@/assets/default-profile.png';
 import { ProfileViewState, User } from '@/types/views/profileView';
 import { useI18n } from 'vue-i18n';
+import { useProfileTour } from '@/components/tour/ProfileTour';
 
 export default defineComponent({
   components: {
@@ -150,12 +156,16 @@ export default defineComponent({
   setup() {
     const uid = useAuthStore().user?.uid;
     const { t, locale } = useI18n();
+    const { startTour, destroyTour } = useProfileTour();
     document.title = t('profile');
+
     return { 
       uid,
       formatDate,
       locale,
       t,
+      startTour,
+      destroyTour,
     };
   },
   watch: {
@@ -377,6 +387,9 @@ export default defineComponent({
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
     },
+    showTour() {
+      this.startTour();
+    }
   },
 });
 </script>
@@ -591,6 +604,29 @@ export default defineComponent({
 
 .audios-table {
   flex-grow: 1;
+}
+
+/* Start tour button */
+.tour-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.tour-button:hover {
+  background-color: #0056b3;
 }
 
 @media (max-width: 768px) {

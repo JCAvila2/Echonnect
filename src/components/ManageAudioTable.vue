@@ -1,12 +1,21 @@
 <template>
 	<div class="search-container">
-		<v-text-field 
-			v-model="search" 
-			:label="$t('searchPlaceholder')" 
-			prepend-inner-icon="magnifying-glass" 
-			single-line hide-details class="mb-4"
-		>
-		</v-text-field>
+		<!-- Search Bar -->
+		<div class="search-bar-container">
+      <v-text-field 
+        v-model="search" 
+        :label="$t('searchPlaceholder')" 
+        single-line
+        hide-details 
+				prepend-inner-icon="magnifying-glass" 
+				clearable
+				class="search-bar"
+      >
+      </v-text-field>
+      <button class="search-button">
+        <font-awesome-icon :icon="['fas', 'search']" /> 
+      </button>
+    </div>
 
 		<!-- Table for Desktop -->
 		<v-data-table 
@@ -226,9 +235,41 @@ export default {
 
 <style scoped>
 .search-container {
-	/* color: white; */
 	color: var(--color-text);
 	padding: 0px 0px 20px 20px;
+}
+
+.search-bar-container {
+  display: flex;
+  align-items: center;
+  position: relative;
+  width: 100%;
+  margin: 20px auto;
+}
+
+.search-bar {
+  flex: 1;
+  padding-right: 50px;
+}
+
+.search-button {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  padding-inline: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 0 4px 4px 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.search-button:hover {
+  background-color: #0056b3;
 }
 
 .custom-table {

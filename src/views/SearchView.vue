@@ -76,6 +76,11 @@
     </v-list>
 
   </div>
+
+  <div class="tour-button" @click="showTour"> 
+    ?
+  </div>
+
 </template>
 
 <script lang="ts">
@@ -86,12 +91,14 @@ import { formatDate } from '@/utils/formatDate';
 import { useThemeStore } from '@/stores/theme';
 import { AudioItem, SearchViewStatus, TableHeader } from '@/types/views/searchView';
 import { useI18n } from 'vue-i18n';
+import { useSearchTour } from '@/components/tour/SearchTour';
 
 export default {
   setup() {
     const router = useRouter();
     const { t, locale } = useI18n();
     const themeStore = useThemeStore();
+    const { startTour, destroyTour } = useSearchTour();
     document.title = t('search');
 
     return {
@@ -100,6 +107,8 @@ export default {
       locale,
       t,
       themeStore,
+      startTour,
+      destroyTour,
     };
   },
   watch: {
@@ -210,6 +219,9 @@ export default {
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
     },
+    showTour() {
+      this.startTour();
+    }
   }
 };
 </script>
@@ -287,6 +299,29 @@ export default {
 
 .mobile-list {
   background-color: transparent;
+}
+
+/* Start tour button */
+.tour-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.tour-button:hover {
+  background-color: #0056b3;
 }
 
 @media (max-width: 767px) {

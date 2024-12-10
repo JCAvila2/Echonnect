@@ -30,3 +30,6 @@ coverage
 
 .env
 .env.local
+
+# Package files
+package-lock.json
