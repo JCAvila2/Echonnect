@@ -56,7 +56,7 @@
           <td>{{ item.reproductions }}</td>
           <td>
             <div class="actions-icons-delete" @click.stop="removeBookmark(item.id)">
-              <font-awesome-icon icon="trash" />
+              <font-awesome-icon icon="trash" class="icon" />
             </div>
 					</td>
         </tr>
@@ -82,7 +82,7 @@
         </v-list-item-subtitle>
         <template v-slot:append>
 					<div @click.stop="removeBookmark(item.id)" style="padding-left: 10px;">
-						<font-awesome-icon icon="trash" />
+						<font-awesome-icon icon="trash" class="icon" />
 					</div>
         </template>
       </v-list-item>
@@ -90,7 +90,7 @@
 
   </div>
 
-  <div class="tour-button" @click="console.log('test')"> 
+  <div class="tour-button" @click="showTour"> 
     ?
   </div>
 
@@ -106,6 +106,7 @@ import { useAuthStore } from '@/stores/auth';
 import { BookmarksViewStatus } from '@/types/views/bookmarksView';
 import { useThemeStore } from '@/stores/theme';
 import { useI18n } from 'vue-i18n';
+import { useBookmarksTour } from '@/components/tour/BookmarksTour';
 
 export default {
   setup() {
@@ -113,6 +114,7 @@ export default {
     const uid = useAuthStore().user?.uid;
     const themeStore = useThemeStore();
     const { t, locale } = useI18n();
+    const { startTour, destroyTour } = useBookmarksTour();
     document.title = t('bookmarks');
 
     return {
@@ -121,7 +123,9 @@ export default {
       formatDate,
       themeStore,
       locale,
-      t
+      t,
+      startTour,
+      destroyTour,
     };
   },
   data(): BookmarksViewStatus {
@@ -230,6 +234,9 @@ export default {
     checkMobile() {
       this.isMobile = window.innerWidth < 768;
     },
+    showTour() {
+      this.startTour();
+    }
   }
 };
 </script>

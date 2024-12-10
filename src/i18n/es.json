@@ -122,6 +122,28 @@
         "title": "Gestionar Audio",
         "text": "Haz clic en los botones de acción para editar o eliminar tus audios"
       }
+    },
+    "bookmarksPage": {
+      "1": {
+        "title": "Página de Favoritos",
+        "text": "Exploremos la página de favoritos"
+      }, 
+      "2": {
+        "title": "Barra de Búsqueda",
+        "text": "Utilice esta barra de búsqueda para encontrar audios marcados como favoritos por título o palabras clave"
+      },
+      "3": {
+        "title": "Tabla de Audios",
+        "text": "En esta tabla puedes ver los audios marcados como favoritos que coinciden con la búsqueda, o los audios más populares si no has buscado nada"
+      },
+      "4": {
+        "title": "Detalles de Audio",
+        "text": "Cada entrada de audio muestra información clave: miniatura, título, autor, duración, fecha de creación, calificación y recuento de reproducciones"
+      },
+      "5": {
+        "title": "Gestionar Favoritos",
+        "text": "Haz clic en el boton para eliminar audios de tus favoritos"
+      }
     }
   }
 }

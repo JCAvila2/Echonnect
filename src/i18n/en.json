@@ -72,6 +72,7 @@
   "404Message": "The page you are looking for does not exist",
   "404Redirect": "Go back to the home page",
   "next": "Next",
+  "back": "Back",
   "finish": "Finish",
   "tours": {
     "searchPage": {
@@ -120,6 +121,28 @@
       "7": {
         "title": "Manage Audio",
         "text": "Click on the action buttons to edit or delete your audios"
+      }
+    },
+    "bookmarksPage": {
+      "1": {
+        "title": "Bookmarks Page",
+        "text": "Let's explore the bookmarks page"
+      }, 
+      "2": {
+        "title": "Search Bar",
+        "text": "Use this search bar to find bookmarked audios by title or keywords"
+      },
+      "3": {
+        "title": "Audios Table",
+        "text": "In this table you can see the bookmarked audios that match your search, or the audios you have bookmarked recently if you haven't searched for anything"
+      },
+      "4": {
+        "title": "Audio Details",
+        "text": "Each audio entry shows key information: thumbnail, title, author, duration, creation date, rating, and play count"
+      },
+      "5": {
+        "title": "Manage Bookmarks",
+        "text": "Click on the button to remove audios from your bookmarks"
       }
     }
   }
