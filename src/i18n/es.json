@@ -99,18 +99,26 @@
         "text": "Exploremos la página de perfil"
       },
       "2": {
+        "title": "Editar Biografía",
+        "text": "Haz clic en el botón para editar tu biografía"
+      }, 
+      "3": {
+        "title": "Foto de Perfil",
+        "text": "Haz clic en la imagen para cambiar tu foto de perfil"
+      }, 
+      "4": {
         "title": "Barra de Búsqueda",
         "text": "Utilice esta barra de búsqueda para encontrar tus audios por título o palabras clave"
       },
-      "3": {
+      "5": {
         "title": "Tabla de Audios",
         "text": "En esta tabla puedes ver tus audios que coinciden con la búsqueda, o tus audios más populares si no has buscado nada"
       },
-      "4": {
+      "6": {
         "title": "Detalles de Audio",
         "text": "Cada entrada de audio muestra información clave: miniatura, título, duración, fecha de creación, calificación y recuento de reproducciones."
       },
-      "5": {
+      "7": {
         "title": "Gestionar Audio",
         "text": "Haz clic en los botones de acción para editar o eliminar tus audios"
       }

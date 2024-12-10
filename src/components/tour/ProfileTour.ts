@@ -37,9 +37,49 @@ export function useProfileTour() {
     });
 
     tour.value.addStep({
-      id: 'profile-bar-tour',
+      id: 'profile-description-tour',
       title: t('tours.profilePage.2.title'),
       text: t('tours.profilePage.2.text'),
+      attachTo: {
+        element: '.edit-bio-icon',
+        on: 'bottom',
+      },
+      buttons: [
+        {
+          text: t('back'),
+          action: () => tour.value?.back(),
+        },
+        {
+          text: t('next'),
+          action: () => tour.value?.next(),
+        },
+      ],
+    });
+
+    tour.value.addStep({
+      id: 'profile-description-tour',
+      title: t('tours.profilePage.3.title'),
+      text: t('tours.profilePage.3.text'),
+      attachTo: {
+        element: '.profile-picture-container',
+        on: 'bottom',
+      },
+      buttons: [
+        {
+          text: t('back'),
+          action: () => tour.value?.back(),
+        },
+        {
+          text: t('next'),
+          action: () => tour.value?.next(),
+        },
+      ],
+    });
+
+    tour.value.addStep({
+      id: 'profile-bar-tour',
+      title: t('tours.profilePage.4.title'),
+      text: t('tours.profilePage.4.text'),
       attachTo: {
         element: '.search-bar-container',
         on: 'bottom',
@@ -58,8 +98,8 @@ export function useProfileTour() {
 
     tour.value.addStep({
       id: 'results-tour',
-      title: t('tours.profilePage.3.title'),
-      text: t('tours.profilePage.3.text'),
+      title: t('tours.profilePage.5.title'),
+      text: t('tours.profilePage.5.text'),
       attachTo: {
         element: '.custom-table, .mobile-list',
         on: 'bottom',
@@ -78,8 +118,8 @@ export function useProfileTour() {
 
     tour.value.addStep({
       id: 'table-details-tour',
-      title: t('tours.profilePage.4.title'),
-      text: t('tours.profilePage.4.text'),
+      title: t('tours.profilePage.6.title'),
+      text: t('tours.profilePage.6.text'),
       attachTo: {
         element: '.item, .mobile-list',
         on: 'bottom',
@@ -98,8 +138,8 @@ export function useProfileTour() {
 
     tour.value.addStep({
       id: 'table-details-tour',
-      title: t('tours.profilePage.5.title'),
-      text: t('tours.profilePage.5.text'),
+      title: t('tours.profilePage.7.title'),
+      text: t('tours.profilePage.7.text'),
       attachTo: {
         element: '.actions-icons-container',
         on: 'left',

@@ -98,18 +98,26 @@
         "text": "Let's explore the profile page"
       }, 
       "2": {
+        "title": "Profile Description",
+        "text": "Click on the icon to edit your bio"
+      }, 
+      "3": {
+        "title": "Profile Picture",
+        "text": "Click on the image to change your profile picture"
+      }, 
+      "4": {
         "title": "Search Bar",
         "text": "Use this search bar to find your audios by title or key words"
       }, 
-      "3": {
+      "5": {
         "title": "Audios Table",
         "text": "In this table you can see your audios that match the search, or your most popular audios if you haven't searched for anything"
       },
-      "4": {
+      "6": {
         "title": "Audio Details",
         "text": "Each audio entry shows key information: thumbnail, title, duration, creation date, rating, and play count"
       },
-      "5": {
+      "7": {
         "title": "Manage Audio",
         "text": "Click on the action buttons to edit or delete your audios"
       }
