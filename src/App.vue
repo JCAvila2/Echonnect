@@ -7,11 +7,13 @@ import { useI18n } from 'vue-i18n';
 import { useAuthStore } from '@/stores/auth';
 import { doc, collection, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '@/firebase';
+import SnackbarComponent from './components/SnackbarComponent.vue';
 
 export default defineComponent({
   components: {
     Navbar,
     RouterView,
+    SnackbarComponent,
   },
   setup() {
     document.title = 'Echonnect';
@@ -96,6 +98,7 @@ export default defineComponent({
     <Navbar />
   </header>
   <RouterView />
+  <SnackbarComponent />
 </template>
 
 <style>

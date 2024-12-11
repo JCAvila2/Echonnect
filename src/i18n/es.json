@@ -74,6 +74,9 @@
   "next": "Siguiente",
   "back": "Atrás",
   "finish": "Finalizar",
+  "close": "Cerrar",
+  "audioBookmarked": "Audio agregado a favoritos",
+  "audioUnbookmarked": "Audio eliminado de favoritos",
   "tours": {
     "searchPage": {
       "1": {

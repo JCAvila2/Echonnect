@@ -74,6 +74,9 @@
   "next": "Next",
   "back": "Back",
   "finish": "Finish",
+  "close": "Close",
+  "audioBookmarked": "Audio bookmarked",
+  "audioUnbookmarked": "Audio unbookmarked",
   "tours": {
     "searchPage": {
       "1": {
