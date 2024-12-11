@@ -160,6 +160,7 @@ import { AudioItem } from '@/types/views/searchView';
 import { User } from '@/types/views/profileView';
 import { AudioViewState, Comment } from '@/types/views/audioView';
 import { useI18n } from 'vue-i18n';
+import { useSnackbarStore } from '@/stores/snackbarStore';
 
 export default defineComponent({
   props: {
@@ -174,6 +175,8 @@ export default defineComponent({
   },
   setup() {
     const { t, locale } = useI18n();
+    const snackbarStore = useSnackbarStore();
+    
     return { 
       faSortUp, 
       faSortDown, 
@@ -181,6 +184,7 @@ export default defineComponent({
       formatDate,
       locale, 
       t,
+      snackbarStore,
     };
   },
   mounted() {
@@ -513,6 +517,7 @@ export default defineComponent({
         this.isBookmarked = false;
         this.totalBookmarks--;
         await deleteDoc(bookmarkRef);
+        this.snackbarStore.showSnackbar(this.$t('audioUnbookmarked'), 'success');
       } else {
         this.isBookmarked = true;
         this.totalBookmarks++;
@@ -522,6 +527,7 @@ export default defineComponent({
           timestamp: new Date(),
           authorId: this.audio?.uid, // For querying bookmarks by author
         });
+        this.snackbarStore.showSnackbar(this.$t('audioBookmarked'), 'success');
       }
     }
   }
