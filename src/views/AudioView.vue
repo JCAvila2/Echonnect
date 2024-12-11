@@ -142,6 +142,11 @@
       </v-row>
     </v-container>
   </div>
+
+  <div class="tour-button" @click="showTour"> 
+    ?
+  </div>
+
 </template>
 
 <script lang="ts">
@@ -160,6 +165,7 @@ import { AudioItem } from '@/types/views/searchView';
 import { User } from '@/types/views/profileView';
 import { AudioViewState, Comment } from '@/types/views/audioView';
 import { useI18n } from 'vue-i18n';
+import { useAudioTour } from '@/components/tour/AudioTour';
 
 export default defineComponent({
   props: {
@@ -174,6 +180,8 @@ export default defineComponent({
   },
   setup() {
     const { t, locale } = useI18n();
+    const { startTour, destroyTour } = useAudioTour();
+
     return { 
       faSortUp, 
       faSortDown, 
@@ -181,6 +189,8 @@ export default defineComponent({
       formatDate,
       locale, 
       t,
+      startTour,
+      destroyTour,
     };
   },
   mounted() {
@@ -523,6 +533,9 @@ export default defineComponent({
           authorId: this.audio?.uid, // For querying bookmarks by author
         });
       }
+    },
+    showTour() {
+      this.startTour();
     }
   }
 });
@@ -841,6 +854,28 @@ export default defineComponent({
   color: #0056b3;
 }
 
+/* Start tour button */
+.tour-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  z-index: 1000;
+  cursor: pointer;
+}
+
+.tour-button:hover {
+  background-color: #0056b3;
+}
 
 @media (max-width: 768px) {
   .audio-section {

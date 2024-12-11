@@ -93,6 +93,44 @@
         "text": "Cada entrada de audio muestra información clave: miniatura, título, autor, duración, fecha de creación, calificación y recuento de reproducciones."
       }
     },
+    "audioPage": {
+      "1": {
+        "title": "Página de Audio",
+        "text": "Exploremos la página de audio"
+      },
+      "2": {
+        "title": "Reproductor de Audio",
+        "text": "Utilice este reproductor para iniciar/pausar el audio"
+      },
+      "3": {
+        "title": "Barra de Progreso",
+        "text": "La barra de progreso muestra cuánto tiempo ha pasado y cuánto queda del audio, y te permite saltar a una parte específica del audio"
+      },
+      "4": {
+        "title": "Control de Volumen",
+        "text": "Haga clic en el icono para silenciar/desilenciar el audio, o arrastre la barra para ajustar el volumen"
+      },
+      "5": {
+        "title": "Perfil del Autor",
+        "text": "Haz clic en el nombre del autor para visitar su perfil y ver más audios suyos"
+      },
+      "6": {
+        "title": "Comunidad",
+        "text": "En esta sección encontrarás estadísticas sobre el audio y comentarios de otros usuarios"
+      },
+      "7": {
+        "title": "Calificar Audio",
+        "text": "Haz clic en las estrellas para calificar el audio"
+      },
+      "8": {
+        "title": "Marcar como Favorito",
+        "text": "Haz clic en el botón para marcar o desmarcar el audio como favorito"
+      },
+      "9": {
+        "title": "Sección de comentarios",
+        "text": "Desplácese hacia abajo para ver los comentarios de otros usuarios, y deje su propio comentario o respuesta"
+      }
+    },
     "profilePage": {
       "1": {
         "title": "Página de Perfil",

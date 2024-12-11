@@ -93,6 +93,44 @@
         "text": "Each audio entry shows key information: thumbnail, title, author, duration, creation date, rating, and play count"
       }
     },
+    "audioPage": {
+      "1": {
+        "title": "Audio Page",
+        "text": "Let's explore the audio page"
+      }, 
+      "2": {
+        "title": "Audio Player",
+        "text": "Use the audio player to play/pause the audio"
+      }, 
+      "3": {
+        "title": "Progress Bar",
+        "text": "The progress bar shows the current time and duration of the audio, click on it to skip to a specific time"
+      }, 
+      "4": {
+        "title": "Volume Control",
+        "text": "Click on the icon to mute/unmute the audio, and drag the slider to adjust the volume"
+      }, 
+      "5": {
+        "title": "Author Profile",
+        "text": "Click on the author's name to visit their profile and see more audios by them"
+      }, 
+      "6": {
+        "title": "Community",
+        "text": "In this section you will find statistics about the audio and comments from other users"
+      },
+      "7": {
+        "title": "Rate Audio",
+        "text": "Click on the stars to rate the audio"
+      },
+      "8": {
+        "title": "Bookmark Audio",
+        "text": "Click on the bookmark icon to save/remove the audio from your bookmarks"
+      },
+      "9": {
+        "title": "Comment Section",
+        "text": "Scroll down to see comments from other users, and leave your own comment or reply"
+      }
+    },
     "profilePage": {
       "1": {
         "title": "Profile Page",
