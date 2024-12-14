@@ -1,9 +1,9 @@
 <template>
   <div v-if="showNotice" class="cookie-notice">
     <p>
-      Esta aplicación utiliza cookies esenciales para garantizar su correcto funcionamiento.
+      {{ $t('cookies') }}
     </p>
-    <button @click="closeNotice">Entendido</button>
+    <button @click="closeNotice">{{ $t('gotIt') }}</button>
   </div>
 </template>
 
@@ -46,4 +46,9 @@ export default defineComponent({
   padding: 0.5rem 1rem;
   cursor: pointer;
 }
+
+.cookie-notice button:hover {
+  background: #45a049;
+}
+
 </style>
